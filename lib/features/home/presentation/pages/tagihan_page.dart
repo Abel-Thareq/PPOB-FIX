@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/asuransi/presentation/pages/asuransi_page.dart';
 import 'package:ppob_app/features/bpjs/presentation/pages/bpjs_page.dart';
 import 'package:ppob_app/features/cicilan/presentation/pages/cicilan_page.dart';
+import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_page.dart';
 import 'package:ppob_app/features/kabelinternet/presentation/pages/internet_page.dart';
 import 'package:ppob_app/features/kai/presentation/pages/kai_page.dart';
 import 'package:ppob_app/features/kartukredit/presentation/pages/kredit_page.dart';
@@ -261,6 +262,11 @@ class TagihanPage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const KaiPage()),
+      );
+    } else if (title == 'E-Invoicing') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const EinvoicingPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
