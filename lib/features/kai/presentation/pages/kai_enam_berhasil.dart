@@ -152,7 +152,7 @@ class _KaiEnamBerhasilState extends State<KaiEnamBerhasil> {
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
                         _DetailRow("Sumber Dana", widget.namaPelanggan),
-                        _DetailRow("Jenis Transaksi", "Bayar PGN"),
+                        _DetailRow("Jenis Transaksi", "Bayar KAI"),
                         _DetailRow("Nama Pelanggan", widget.namaPelanggan),
                         _DetailRow("Nomor Pelanggan", widget.kodeBayar),
                         const SizedBox(height: 16),
