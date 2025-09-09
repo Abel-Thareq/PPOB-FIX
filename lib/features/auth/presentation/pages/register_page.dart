@@ -3,7 +3,6 @@ import 'package:ppob_app/core/widgets/custom_button.dart';
 import 'package:ppob_app/core/widgets/custom_text_field.dart';
 import 'package:ppob_app/shared/constants/app_constants.dart';
 import 'package:ppob_app/features/auth/presentation/pages/login_page.dart';
-import 'package:ppob_app/services/api_service.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
 
 // 🔹 Import CreatePinPage
@@ -20,7 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController(); 
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
@@ -70,8 +69,8 @@ class _RegisterPageState extends State<RegisterPage> {
     if (value == null || value.isEmpty) {
       return 'Kata sandi tidak boleh kosong';
     }
-    if (value.length < 6) {
-      return 'Kata sandi minimal 6 karakter';
+    if (value.length < 8) {
+      return 'Kata sandi minimal 8 karakter';
     }
     return null;
   }
@@ -93,31 +92,24 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       try {
-        final response = await ApiService.registerUser(
-          name: _fullNameController.text.trim(),
-          email: _emailController.text.trim(),
-          phone: _phoneController.text.trim(),
-          password: _passwordController.text.trim(),
-          passwordConfirmation: _confirmPasswordController.text.trim(),
-        );
+        // 🔹 Simpan data sementara ke SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("reg_full_name", _fullNameController.text.trim());
+        await prefs.setString("reg_email", _emailController.text.trim());
+        await prefs.setString("reg_phone", _phoneController.text.trim());
+        await prefs.setString("reg_password", _passwordController.text.trim());
+        await prefs.setString("reg_password_confirm", _confirmPasswordController.text.trim());
 
-        if (response["success"] == true) {
-          final token = response["data"]["token"];
-
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString("auth_token", token);
-
-          if (mounted) {
-            // 🔹 Setelah daftar, langsung ke halaman buat PIN
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreatePinPage(),
+        if (mounted) {
+          // 🔹 Arahkan user ke halaman buat PIN
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreatePinPage(
+                fullName: _fullNameController.text.trim(),
               ),
-            );
-          }
-        } else {
-          _showError(response["message"] ?? "Registrasi gagal");
+            ),
+          );
         }
       } catch (e) {
         _showError("Terjadi kesalahan: $e");
@@ -150,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       body: Column(
         children: [
-          // Header with back button
+          // Header
           Stack(
             children: [
               Container(

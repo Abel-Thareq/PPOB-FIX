@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ppob_app/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class ChangePINPage extends StatefulWidget {
   const ChangePINPage({super.key});
@@ -213,17 +217,16 @@ class _ChangePINPageState extends State<ChangePINPage> {
   }
 
   void _validatePin() {
-    String pin = _pinControllers.map((c) => c.text).join();
-    if (pin.length != 6) {
+    String oldPin = _pinControllers.map((c) => c.text).join();
+    if (oldPin.length != 6) {
       _showErrorDialog('PIN harus 6 digit');
       return;
     }
 
-    // TODO: Validate PIN with backend
-    // For now, navigate to the next step
+    // lanjut ke halaman ubah PIN baru
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const NewPINPage()),
+      MaterialPageRoute(builder: (context) => NewPINPage(oldPin: oldPin)),
     );
   }
 
@@ -245,7 +248,8 @@ class _ChangePINPageState extends State<ChangePINPage> {
 }
 
 class NewPINPage extends StatefulWidget {
-  const NewPINPage({super.key});
+  final String oldPin;
+  const NewPINPage({super.key, required this.oldPin});
 
   @override
   State<NewPINPage> createState() => _NewPINPageState();
@@ -270,6 +274,8 @@ class _NewPINPageState extends State<NewPINPage> {
     (index) => FocusNode(),
   );
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     for (var controller in [..._newPinControllers, ..._confirmPinControllers]) {
@@ -281,11 +287,155 @@ class _NewPINPageState extends State<NewPINPage> {
     super.dispose();
   }
 
+  Future<void> _handleChangePIN() async {
+    String newPin = _newPinControllers.map((c) => c.text).join();
+    String confirmPin = _confirmPinControllers.map((c) => c.text).join();
+
+    if (newPin.length != 6 || confirmPin.length != 6) {
+      _showErrorDialog('PIN harus 6 digit');
+      return;
+    }
+    if (newPin != confirmPin) {
+      _showErrorDialog('PIN Baru dan Konfirmasi PIN tidak cocok');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("auth_token");
+      if (token == null) {
+        _showErrorDialog("Token tidak ditemukan, silakan login kembali");
+        return;
+      }
+
+      final base = ApiService.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final uri = Uri.parse("$base/auth/pin");
+
+      final resp = await http.post(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: jsonEncode({
+          "pin": newPin,
+          "pin_confirmation": confirmPin,
+        }),
+      );
+
+      final data = jsonDecode(resp.body);
+
+      if (resp.statusCode == 200 && data["success"] == true) {
+        _showSuccessDialog();
+      } else {
+        _showErrorDialog(data["message"] ?? "Gagal mengubah PIN");
+      }
+    } catch (e) {
+      _showErrorDialog("Terjadi kesalahan: $e");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Widget _buildPinInput(
+    List<TextEditingController> controllers,
+    List<FocusNode> focusNodes,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(
+          6,
+          (index) => SizedBox(
+            width: 45,
+            height: 45,
+            child: TextField(
+              controller: controllers[index],
+              focusNode: focusNodes[index],
+              keyboardType: TextInputType.number,
+              maxLength: 1,
+              obscureText: true,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24),
+              decoration: InputDecoration(
+                counterText: "",
+                contentPadding: EdgeInsets.zero,
+                fillColor: Colors.white,
+                filled: true,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF6C4DF4)),
+                ),
+              ),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                if (value.isNotEmpty && index < 5) {
+                  focusNodes[index + 1].requestFocus();
+                } else if (value.isEmpty && index > 0) {
+                  focusNodes[index - 1].requestFocus();
+                }
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sukses'),
+        content: const Text('PIN berhasil diubah'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // close dialog
+              Navigator.pop(context); // close NewPINPage
+              Navigator.pop(context); // close ChangePINPage
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8FF),
-      body: Stack(children: [_buildHeader(), _buildContent()]),
+      body: Stack(
+        children: [
+          _buildHeader(),
+          _buildContent(),
+        ],
+      ),
     );
   }
 
@@ -387,8 +537,9 @@ class _NewPINPageState extends State<NewPINPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: _handleChangePIN,
+                  onPressed: _isLoading ? null : _handleChangePIN,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6C4DF4),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -396,123 +547,21 @@ class _NewPINPageState extends State<NewPINPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Simpan',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Simpan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPinInput(
-    List<TextEditingController> controllers,
-    List<FocusNode> focusNodes,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(
-          6,
-          (index) => SizedBox(
-            width: 45,
-            height: 45,
-            child: TextField(
-              controller: controllers[index],
-              focusNode: focusNodes[index],
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              obscureText: true,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24),
-              decoration: InputDecoration(
-                counterText: "",
-                contentPadding: EdgeInsets.zero,
-                fillColor: Colors.white,
-                filled: true,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF6C4DF4)),
-                ),
-              ),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (value) {
-                if (value.isNotEmpty && index < 5) {
-                  focusNodes[index + 1].requestFocus();
-                } else if (value.isEmpty && index > 0) {
-                  focusNodes[index - 1].requestFocus();
-                }
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleChangePIN() {
-    String newPin = _newPinControllers.map((c) => c.text).join();
-    String confirmPin = _confirmPinControllers.map((c) => c.text).join();
-
-    if (newPin.length != 6 || confirmPin.length != 6) {
-      _showErrorDialog('PIN harus 6 digit');
-      return;
-    }
-
-    if (newPin != confirmPin) {
-      _showErrorDialog('PIN Baru dan Konfirmasi PIN tidak cocok');
-      return;
-    }
-
-    // TODO: Implement PIN change logic here
-    _showSuccessDialog();
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sukses'),
-        content: const Text('PIN berhasil diubah'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Return to old PIN page
-              Navigator.pop(context); // Return to account page
-            },
-            child: const Text('OK'),
-          ),
-        ],
       ),
     );
   }

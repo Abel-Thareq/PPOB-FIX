@@ -22,86 +22,149 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _lokasiAktif = true;
   bool _perangkatAktif = true;
 
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
     _loadTokenAndProfile();
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadTokenAndProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('auth_token');
+    setState(() {
+    token = prefs.getString('auth_token')?.trim();
+  });
 
-    if (token != null) {
+    debugPrint("🔑 Token dari SharedPreferences (load): $token");
+
+    if (token != null && token!.isNotEmpty) {
       await _fetchProfile();
+    } else {
+      debugPrint("⚠️ Token tidak ada saat load profile");
     }
   }
 
   Future<void> _fetchProfile() async {
     try {
       final response = await http.get(
-        Uri.parse("${ApiService.baseUrl}/user"),
-        headers: {"Authorization": "Bearer $token"},
+        Uri.parse("${ApiService.baseUrl}/auth/profile"),
+        headers: {
+          "Authorization": "Bearer ${token?.trim()}",
+          "Accept": "application/json",
+        },
       );
 
-      debugPrint("Fetch profile status: ${response.statusCode}");
-      debugPrint("Fetch profile body: ${response.body}");
+      debugPrint("📡 Fetch profile status: ${response.statusCode}");
+      debugPrint("📡 Fetch profile body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final user = data['data'];
+        final user = data['data']?['user'];
 
-        setState(() {
-          userId = user['id'];
-          _nameController.text = user['name'] ?? '';
-          _emailController.text = user['email'] ?? '';
-          _phoneController.text = user['phone'] ?? '';
-        });
+        if (user != null) {
+          setState(() {
+            userId = user['id'];
+            _nameController.text = user['name'] ?? user['name'] ?? '';
+            _emailController.text = user['email'] ?? '';
+            _phoneController.text = user['phone'] ?? '';
+          });
+        }
       } else {
-        debugPrint("Gagal fetch profile: ${response.body}");
+        debugPrint("⚠️ Gagal fetch profile: ${response.body}");
       }
     } catch (e) {
-      debugPrint("Error fetch profile: $e");
+      debugPrint("❌ Error fetch profile: $e");
     }
   }
 
   Future<void> _updateProfile() async {
+    if (_isSubmitting) return;
+
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Nama dan Email wajib diisi")),
+      );
+      return;
+    }
+
+    // 🔄 Ambil ulang token terbaru dari prefs
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('auth_token')?.trim();
+
+    debugPrint("🔑 Token dari SharedPreferences (update): $token");
+
+    if (token == null || token!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Token tidak ditemukan. Silakan login ulang.")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
     try {
+      final url = "${ApiService.baseUrl}/auth/updateProfile";
+      debugPrint("➡️ PUT $url");
+      debugPrint("➡️ Authorization: Bearer $token");
+
       final response = await http.put(
-        Uri.parse("${ApiService.baseUrl}/user"),
+        Uri.parse(url),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: jsonEncode({
-          "name": _nameController.text,
-          "email": _emailController.text,
-          "phone": _phoneController.text, // ✅ kirim phone ke API
-          "lokasi": _lokasiAktif,
-          "perangkat": _perangkatAktif,
+          "name": _nameController.text.trim(),
+          "email": _emailController.text.trim(),
         }),
       );
 
-      debugPrint("Update profile status: ${response.statusCode}");
-      debugPrint("Update profile body: ${response.body}");
+      debugPrint("📡 Update profile status: ${response.statusCode}");
+      debugPrint("📡 Update profile body: ${response.body}");
+      debugPrint("📡 Headers dikirim: ${{
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      }}");
+
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profil berhasil diperbarui")),
         );
+        await _fetchProfile();
       } else {
-        if (!mounted) return;
+        final body = jsonDecode(response.body);
+        final message = body['message'] ?? "Gagal memperbarui profil. Coba lagi.";
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Gagal memperbarui profil")),
+          SnackBar(content: Text(message)),
         );
       }
     } catch (e) {
-      debugPrint("Error update profile: $e");
+      debugPrint("❌ Error update profile: $e");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Terjadi kesalahan, coba lagi")),
+        const SnackBar(content: Text("Terjadi kesalahan jaringan")),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -110,7 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Konfirmasi"),
-        content: const Text("Apakah Anda yakin ingin menghapus akun ini?"),
+        content: const Text("Apakah Anda yakin ingin keluar dari akun ini?"),
         actions: [
           TextButton(
             child: const Text("Batal"),
@@ -118,7 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           TextButton(
             child: const Text(
-              "Hapus",
+              "Keluar",
               style: TextStyle(color: Colors.red),
             ),
             onPressed: () => Navigator.pop(context, true),
@@ -129,41 +192,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (confirm != true) return;
 
-    try {
-      final response = await http.delete(
-        Uri.parse("${ApiService.baseUrl}/user"),
-        headers: {"Authorization": "Bearer $token"},
-      );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
 
-      debugPrint("Delete account status: ${response.statusCode}");
-      debugPrint("Delete account body: ${response.body}");
-
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('auth_token');
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Akun berhasil dihapus")),
-        );
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const WelcomePage()),
-          (route) => false,
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Gagal menghapus akun")),
-        );
-      }
-    } catch (e) {
-      debugPrint("Error hapus akun: $e");
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Terjadi kesalahan, coba lagi")),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Berhasil keluar")),
+    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const WelcomePage()),
+      (route) => false,
+    );
   }
 
   @override
@@ -236,7 +276,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Data Pribadi
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -251,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   _buildTextField("Nama Lengkap", _nameController, false),
                   const SizedBox(height: 12),
-                  _buildTextField("Nomor HP", _phoneController, true), // ✅ tampilkan phone
+                  _buildTextField("Nomor HP", _phoneController, true),
                   const SizedBox(height: 12),
                   _buildTextField("Email", _emailController, false),
 
@@ -268,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _updateProfile,
+                      onPressed: _isSubmitting ? null : _updateProfile,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF5938FB),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -276,10 +315,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        "Update",
-                        style: TextStyle(color: Colors.white, fontSize: 15),
-                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text(
+                              "Update",
+                              style: TextStyle(color: Colors.white, fontSize: 15),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -291,7 +336,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: TextStyle(color: Colors.grey, fontSize: 13),
                         children: [
                           TextSpan(
-                            text: "Hapus",
+                            text: "Keluar",
                             style: TextStyle(color: Colors.red),
                           ),
                         ],

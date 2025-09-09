@@ -19,7 +19,6 @@ class _PanduanKeamananPageState extends State<PanduanKeamananPage> {
       backgroundColor: const Color(0xFFF8F8FF),
       body: Stack(
         children: [
-          // 🔹 Header Section with Background
           Stack(
             children: [
               // Background wave SVG

@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://192.168.1.91:8000/api";
-
+  static const String baseUrl = "http://192.168.1.80:8000/api";
   // ---------------- Register ----------------
   static Future<Map<String, dynamic>> registerUser({
     required String name,
@@ -12,6 +11,7 @@ class ApiService {
     required String password,
     required String passwordConfirmation,
     String? phone,
+    String? fullName, required String pin, required String pinConfirmation,
   }) async {
     final url = Uri.parse("$baseUrl/auth/register");
 
@@ -20,6 +20,7 @@ class ApiService {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "name": name,
+        "full_name": fullName ?? name, // sesuai backend
         "email": email,
         "password": password,
         "password_confirmation": passwordConfirmation,
@@ -29,9 +30,12 @@ class ApiService {
 
     final result = jsonDecode(response.body);
 
-    if (response.statusCode == 200 && result['token'] != null) {
+    // backend balikin status 201 kalau sukses
+    if ((response.statusCode == 200 || response.statusCode == 201) &&
+        result['success'] == true &&
+        result['data']?['token'] != null) {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', result['token']);
+      await prefs.setString('auth_token', result['data']['token']);
     }
 
     return result;

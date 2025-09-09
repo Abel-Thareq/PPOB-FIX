@@ -1,114 +1,78 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ppob_app/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-
-// ✅ Import halaman sukses
 import 'package:ppob_app/features/auth/presentation/pages/RegistrationSuccessPage.dart';
 
 class CreatePinPage extends StatefulWidget {
-  const CreatePinPage({super.key});
+  final String? fullName;
+
+  const CreatePinPage({super.key, this.fullName});
 
   @override
   State<CreatePinPage> createState() => _CreatePinPageState();
 }
 
 class _CreatePinPageState extends State<CreatePinPage> {
-  final _pinController = TextEditingController();
-  final _confirmPinController = TextEditingController();
+  final List<TextEditingController> _pinControllers =
+      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _confirmControllers =
+      List.generate(6, (_) => TextEditingController());
+
   bool _isLoading = false;
 
-  String? _fullName; // nama lengkap user
-  String? _initials; // inisial nama
+  String? _fullName;
+  String? _initials;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserProfile();
+    if (widget.fullName != null && widget.fullName!.isNotEmpty) {
+      _setFullName(widget.fullName!);
+    } else {
+      _loadNameFromPrefs();
+    }
   }
 
   @override
   void dispose() {
-    _pinController.dispose();
-    _confirmPinController.dispose();
+    for (final c in _pinControllers) {
+      c.dispose();
+    }
+    for (final c in _confirmControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  /// Ambil profil user dari API
-  Future<void> _fetchUserProfile() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("auth_token");
-      if (token == null) return;
+  void _setFullName(String name) {
+    setState(() {
+      _fullName = name;
+      final parts = name.trim().split(" ").where((e) => e.isNotEmpty).toList();
+      _initials = parts.isNotEmpty
+          ? parts.map((e) => e[0]).take(2).join().toUpperCase()
+          : "U";
+    });
+  }
 
-      final base = ApiService.baseUrl.replaceAll(RegExp(r'/+$'), '');
-
-      // 🔹 Pertama coba /auth/profile
-      Uri uri = Uri.parse("$base/auth/profile");
-      var resp = await http.get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-
-      if (resp.statusCode != 200) {
-        // 🔹 Jika gagal, coba /user
-        uri = Uri.parse("$base/user");
-        resp = await http.get(
-          uri,
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        );
-      }
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body);
-
-        // Cek kemungkinan struktur API berbeda
-        String? name;
-        if (data is Map) {
-          if (data.containsKey("data")) {
-            name = data["data"]["name"];
-          } else if (data.containsKey("user")) {
-            name = data["user"]["name"];
-          } else if (data.containsKey("name")) {
-            name = data["name"];
-          }
-        }
-
-        if (name != null && name.trim().isNotEmpty) {
-          setState(() {
-            _fullName = name;
-            final parts = name?.trim().split(" ").where((e) => e.isNotEmpty).toList();
-            if (parts!.isNotEmpty) {
-              _initials = parts.map((e) => e[0]).take(2).join().toUpperCase();
-            } else {
-              _initials = "U";
-            }
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint("Gagal fetch profil: $e");
+  Future<void> _loadNameFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString("reg_full_name");
+    if (name != null && name.isNotEmpty) {
+      _setFullName(name);
     }
   }
 
-  Future<void> _savePin() async {
-    final pin = _pinController.text;
-    final confirm = _confirmPinController.text;
+  String get _pin => _pinControllers.map((c) => c.text).join();
+  String get _confirmPin => _confirmControllers.map((c) => c.text).join();
 
-    if (pin.length != 6) {
+  Future<void> _savePin() async {
+    if (_pin.length != 6) {
       _showError("PIN harus 6 digit");
       return;
     }
-    if (pin != confirm) {
+    if (_pin != _confirmPin) {
       _showError("Konfirmasi PIN tidak sesuai");
       return;
     }
@@ -117,24 +81,50 @@ class _CreatePinPageState extends State<CreatePinPage> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("auth_token");
 
-      if (token == null || token.isEmpty) {
-        _showError("Token tidak ditemukan, silakan login kembali");
+      // 🔹 Ambil data registrasi dari prefs
+      final name = prefs.getString("reg_full_name");
+      final email = prefs.getString("reg_email");
+      final phone = prefs.getString("reg_phone");
+      final password = prefs.getString("reg_password");
+      final passwordConfirm = prefs.getString("reg_password_confirm");
+
+      if (name == null || email == null || phone == null || password == null) {
+        _showError("Data registrasi tidak ditemukan, silakan daftar ulang.");
         return;
       }
 
-      final result = await _requestSetPin(token: token, pin: pin);
+      // 🔹 Panggil API register (sekarang termasuk PIN)
+      final response = await ApiService.registerUser(
+        name: name,
+        fullName: name,
+        email: email,
+        phone: phone,
+        password: password,
+        passwordConfirmation: passwordConfirm ?? password,
+        pin: _pin,
+        pinConfirmation: _confirmPin,
+      );
 
       if (!mounted) return;
 
-      if (result["success"] == true) {
+      if (response["success"] == true && response["data"]?["token"] != null) {
+        final token = response["data"]["token"];
+        await prefs.setString("auth_token", token);
+
+        // Bersihkan data sementara
+        prefs.remove("reg_full_name");
+        prefs.remove("reg_email");
+        prefs.remove("reg_phone");
+        prefs.remove("reg_password");
+        prefs.remove("reg_password_confirm");
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const RegistrationSuccessPage()),
         );
       } else {
-        _showError(result["message"] ?? "Gagal menyimpan PIN");
+        _showError(response["message"] ?? "Gagal menyimpan PIN");
       }
     } catch (e) {
       _showError("Terjadi kesalahan: $e");
@@ -143,121 +133,69 @@ class _CreatePinPageState extends State<CreatePinPage> {
     }
   }
 
-  /// Request set PIN
-  Future<Map<String, dynamic>> _requestSetPin({
-    required String token,
-    required String pin,
-  }) async {
-    final base = ApiService.baseUrl.replaceAll(RegExp(r'/+$'), '');
-    final uri = Uri.parse("$base/user/pin");
-
-    http.Response resp;
-
-    try {
-      resp = await http
-          .post(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({
-              'pin': pin,
-              'pin_confirmation': pin,
-            }),
-          )
-          .timeout(const Duration(seconds: 20));
-    } on TimeoutException {
-      return {
-        'success': false,
-        'message': 'Permintaan timeout. Coba lagi beberapa saat.',
-        'status': 408,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal terhubung ke server: $e',
-      };
-    }
-
-    final status = resp.statusCode;
-    final contentType = (resp.headers['content-type'] ?? '').toLowerCase();
-    final bodyText = utf8.decode(resp.bodyBytes);
-
-    final looksJson = contentType.contains('application/json') || contentType.contains('json');
-
-    if (looksJson) {
-      try {
-        final parsed = jsonDecode(bodyText);
-        final successFlag = (parsed is Map &&
-                (parsed['success'] == true || (status >= 200 && status < 300))) ||
-            (status >= 200 && status < 300);
-
-        return {
-          'success': successFlag,
-          'message': parsed is Map
-              ? (parsed['message'] ?? parsed['msg'] ?? parsed['error'])
-              : null,
-          'raw': parsed,
-          'status': status,
-        };
-      } catch (_) {
-        return {
-          'success': status >= 200 && status < 300,
-          'message': 'Respons server tidak dapat diproses (JSON tidak valid).',
-          'raw': bodyText,
-          'status': status,
-        };
-      }
-    } else {
-      return {
-        'success': status >= 200 && status < 300,
-        'message': status >= 200 && status < 300
-            ? 'Berhasil, namun server mengembalikan non-JSON.'
-            : 'Server mengembalikan non-JSON (status $status).',
-        'raw': bodyText.length > 400 ? bodyText.substring(0, 400) : bodyText,
-        'status': status,
-      };
-    }
-  }
-
-  void _showError(String message) {
+  void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(content: Text(msg), backgroundColor: Colors.red),
     );
   }
 
-  Widget _buildPinField(TextEditingController controller, String hint) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(6),
-      ],
-      obscureText: true,
-      maxLength: 6,
-      textAlign: TextAlign.center,
-      decoration: InputDecoration(
-        counterText: "",
-        hintText: hint,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
+  Widget _buildPinBoxes(List<TextEditingController> controllers) {
+    return Row(
+      children: List.generate(6, (i) {
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: TextFormField(
+                controller: controllers[i],
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center,
+                obscureText: true,
+                obscuringCharacter: "•",
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  height: 1.0,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(1),
+                ],
+                onChanged: (val) {
+                  if (val.isNotEmpty && i < 5) {
+                    FocusScope.of(context).nextFocus();
+                  } else if (val.isEmpty && i > 0) {
+                    FocusScope.of(context).previousFocus();
+                  }
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  counterText: "",
+                  contentPadding: EdgeInsets.zero,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
+      body: Column(
+        children: [
+          // Header
+          Stack(
             children: [
-              // Header
               Container(
                 width: double.infinity,
                 height: 120,
@@ -267,74 +205,90 @@ class _CreatePinPageState extends State<CreatePinPage> {
                   fit: BoxFit.cover,
                 ),
               ),
-
-              const SizedBox(height: 30),
-
-              // Avatar + Nama (dinamis)
-              CircleAvatar(
-                radius: 36,
-                backgroundColor: const Color(0xFFE0E7FF),
-                child: Text(
-                  _initials ?? "U",
-                  style: const TextStyle(
-                    color: Color(0xFF5B5B5B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.black,
+                    iconSize: 28,
+                    onPressed: () => Navigator.pop(context),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _fullName ?? "Memuat...",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-
-              // Input PIN
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Masukkan PIN Anda"),
-                    const SizedBox(height: 8),
-                    _buildPinField(_pinController, "••••••"),
-                    const SizedBox(height: 20),
-                    const Text("Konfirmasi PIN Anda"),
-                    const SizedBox(height: 8),
-                    _buildPinField(_confirmPinController, "••••••"),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Button Simpan
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5938FB),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: _isLoading ? null : _savePin,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Simpan",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
                 ),
               ),
             ],
           ),
-        ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundColor: const Color(0xFFE0E7FF),
+                    child: Text(
+                      _initials ?? "U",
+                      style: const TextStyle(
+                        color: Color(0xFF5B5B5B),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _fullName ?? "Memuat...",
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(height: 24),
+
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Masukan PIN Anda"),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPinBoxes(_pinControllers),
+
+                  const SizedBox(height: 24),
+
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Konfirmasi PIN Anda"),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPinBoxes(_confirmControllers),
+
+                  const SizedBox(height: 32),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5938FB),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _isLoading ? null : _savePin,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Simpan",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

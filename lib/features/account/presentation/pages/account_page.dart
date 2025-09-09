@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ppob_app/features/account/bantuan/pilihpusatbantuan_page.dart';
-import 'package:ppob_app/features/account/profile/presentation/pages/profile_page.dart';
-import 'package:ppob_app/features/account/profile/presentation/pages/change_password.dart';
+import 'package:ppob_app/features/account/preferensi/preferensi_page.dart';
+import 'package:ppob_app/features/account/presentation/pages/profile_page.dart';
+import 'package:ppob_app/features/account/presentation/pages/change_password.dart';
 import 'package:ppob_app/features/account/presentation/pages/change_pin.dart';
 import 'package:ppob_app/features/account/presentation/pages/my_devices.dart';
 import 'package:ppob_app/services/api_service.dart';
@@ -39,37 +39,61 @@ class _AccountPageState extends State<AccountPage> {
       if (token == null) return;
 
       final response = await http.get(
-        Uri.parse("${ApiService.baseUrl}/user"),
+        Uri.parse("${ApiService.baseUrl}/auth/profile"),
         headers: {
           "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
+          "Accept": "application/json",
         },
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (mounted) {
+        final user = data["data"]?["user"];
+
+        if (user != null && mounted) {
           setState(() {
-            _name = data["data"]["name"] ?? "User";
-            _imageUrl = data["data"]["avatar"]; // kalau backend ada avatar
+            _name = user["name"] ?? user["full_name"] ?? "User";
+            _imageUrl = null; // backend belum ada field avatar
           });
         }
       }
     } catch (e) {
-      // bisa ditambahkan error handling
+      debugPrint("❌ Error fetch profile: $e");
     }
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("auth_token"); // hapus token
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("auth_token");
 
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomePage()),
-        (route) => false,
-      );
+      if (token != null) {
+        final response = await http.post(
+          Uri.parse("${ApiService.baseUrl}/auth/logout"),
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        );
+
+        if (response.statusCode == 200) {
+          debugPrint("✅ Logout sukses di backend");
+        } else {
+          debugPrint("⚠️ Gagal logout di backend: ${response.body}");
+        }
+      }
+
+      await prefs.remove("auth_token");
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomePage()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Error logout: $e");
     }
   }
 
@@ -94,44 +118,49 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
+  /// 🔹 Header tanpa icon notifikasi & headset
   Widget _buildHeader() {
-    return Container(
-      height: 150,
+    return SizedBox(
+      height: 140,
       width: double.infinity,
-      color: Colors.transparent,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: SvgPicture.asset(
-              "assets/images/backgroundtop.svg",
-              fit: BoxFit.cover,
-            ),
+          SvgPicture.asset(
+            "assets/images/backgroundtop.svg",
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: 140,
           ),
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: const [
-                Text(
-                  "modipay",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+          Column(
+            children: [
+              const SizedBox(height: 46),
+              SizedBox(
+                height: 80,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text(
+                        'modipay',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 21,
+                        ),
+                      ),
+                      Text(
+                        'SATU PINTU SEMUA PEMBAYARAN',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 2),
-                Text(
-                  "SATU PINTU SEMUA PEMBAYARAN",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -224,8 +253,11 @@ class _AccountPageState extends State<AccountPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ProfilePage()),
-                    );
+                      MaterialPageRoute(
+                          builder: (context) => const ProfilePage()),
+                    ).then((_) {
+                      _fetchUserProfile();
+                    });
                   },
                 ),
                 _buildDivider(),
@@ -235,7 +267,8 @@ class _AccountPageState extends State<AccountPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const ChangePasswordPage()),
                     );
                   },
                 ),
@@ -246,7 +279,8 @@ class _AccountPageState extends State<AccountPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ChangePINPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const ChangePINPage()),
                     );
                   },
                 ),
@@ -281,30 +315,47 @@ class _AccountPageState extends State<AccountPage> {
                   },
                 ),
                 _buildDivider(),
-                _buildMenuItem(icon: Icons.tune, label: 'Preferensi'),
-                _buildDivider(),
-                _buildMenuItem(icon: Icons.receipt_long, label: 'Pengaturan Struk'),
-                _buildDivider(),
-                _buildMenuItem(icon: Icons.favorite_border,
-                  label: 'Kontak Favorit',
+                // 🔹 Modifikasi bagian Preferensi
+                _buildMenuItem(
+                  icon: Icons.tune,
+                  label: 'Preferensi',
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const KontakFavouritePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const PreferensiPage()),
                     );
-                  }
+                  },
                 ),
                 _buildDivider(),
-                _buildMenuItem(icon: Icons.file_upload_outlined, label: 'Ekspor Laporan'),
+                _buildMenuItem(
+                    icon: Icons.receipt_long, label: 'Pengaturan Struk'),
                 _buildDivider(),
-                _buildMenuItem(icon: Icons.email_outlined, label: 'Notifikasi Email'),
+                _buildMenuItem(
+                    icon: Icons.favorite_border,
+                    label: 'Kontak Favorit',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const KontakFavouritePage()),
+                      );
+                    }),
+                _buildDivider(),
+                _buildMenuItem(
+                    icon: Icons.file_upload_outlined, label: 'Ekspor Laporan'),
+                _buildDivider(),
+                _buildMenuItem(
+                    icon: Icons.email_outlined, label: 'Notifikasi Email'),
               ],
             ),
           ),
 
           // Section Harga Inject Voucher
           const Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
+            padding:
+                EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
             child: Text(
               'Harga Inject Voucher',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -318,14 +369,17 @@ class _AccountPageState extends State<AccountPage> {
             ),
             child: Column(
               children: [
-                _buildMenuItemWithImage(imagePath: 'assets/images/injectvoucher.png', label: 'Voucher Indosat'),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/injectvoucher.png',
+                    label: 'Voucher Indosat'),
               ],
             ),
           ),
 
           // Section Tentang Kami
           const Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
+            padding:
+                EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
             child: Text(
               'Tentang Kami',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -339,18 +393,25 @@ class _AccountPageState extends State<AccountPage> {
             ),
             child: Column(
               children: [
-                _buildMenuItemWithImage(imagePath: 'assets/images/groupmodipay.png', label: 'Group Modipay'),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/groupmodipay.png',
+                    label: 'Group Modipay'),
                 _buildDivider(),
-                _buildMenuItemWithImage(imagePath: 'assets/images/whatsapp.png', label: 'Whatsapp Admin'),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/whatsapp.png',
+                    label: 'Whatsapp Admin'),
                 _buildDivider(),
-                _buildMenuItemWithImage(imagePath: 'assets/images/instagramlogo.png', label: 'Instagram'),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/instagramlogo.png',
+                    label: 'Instagram'),
               ],
             ),
           ),
 
           // Section Informasi
           const Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
+            padding:
+                EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 20),
             child: Text(
               'Informasi',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -364,31 +425,29 @@ class _AccountPageState extends State<AccountPage> {
             ),
             child: Column(
               children: [
-                _buildMenuItemWithImage(imagePath: 'assets/images/daftarharga.png', label: 'Daftar Harga'),
-                _buildDivider(),
-                _buildMenuItemWithImage(imagePath: 'assets/images/gambardaftarharga.png', label: 'Gambar Daftar Harga'),
-                _buildDivider(),
-                _buildMenuItemWithImage(imagePath: 'assets/images/developerapi.png', label: 'Developer API'),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/daftarharga.png',
+                    label: 'Daftar Harga'),
                 _buildDivider(),
                 _buildMenuItemWithImage(
-                  imagePath: 'assets/images/bantuan.png',
-                  label: 'Bantuan',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PilihPusatBantuanPage(),
-                      ),
-                    );
-                  },
-                ),
+                    imagePath: 'assets/images/gambardaftarharga.png',
+                    label: 'Gambar Daftar Harga'),
+                _buildDivider(),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/developerapi.png',
+                    label: 'Developer API'),
+                _buildDivider(),
+                _buildMenuItemWithImage(
+                    imagePath: 'assets/images/bantuan.png',
+                    label: 'Bantuan'),
               ],
             ),
           ),
 
           Card(
             color: Colors.white,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            margin:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -430,8 +489,9 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   String _getInitials(String name) {
-    List<String> nameParts = name.split(' ');
-    if (nameParts.length > 1) {
+    if (name.isEmpty || name == "Loading...") return "?";
+    List<String> nameParts = name.trim().split(' ');
+    if (nameParts.length > 1 && nameParts[1].isNotEmpty) {
       return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
     }
     return nameParts[0][0].toUpperCase();

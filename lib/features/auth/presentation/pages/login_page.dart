@@ -99,6 +99,7 @@ class _LoginPageState extends State<LoginPage> {
         Uri.parse("${ApiService.baseUrl}/auth/login"),
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           if (_osVersion != null) 'X-Device-OS': _osVersion!,
         },
         body: json.encode({
@@ -111,11 +112,24 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = json.decode(response.body);
+      debugPrint("Login response: $data");
 
       if (response.statusCode == 200 && data["success"] == true) {
-        final token = data["data"]["token"];
+        final token = data["data"]?["token"];
+
+        if (token == null || token.toString().isEmpty) {
+          _showError("Token tidak diterima dari server");
+          setState(() => _isLoading = false);
+          return;
+        }
+
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("auth_token", token);
+        await prefs.setString("auth_token", token.trim());
+
+        // 🔥 Cek token setelah disimpan
+        final savedToken = prefs.getString("auth_token");
+        debugPrint("TOKEN dari API: $token");
+        debugPrint("TOKEN tersimpan di SharedPreferences: $savedToken");
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -134,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of( context).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
@@ -209,6 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Password
                     CustomTextField(
                       label: 'Password',
                       hint: 'Masukkan Password',

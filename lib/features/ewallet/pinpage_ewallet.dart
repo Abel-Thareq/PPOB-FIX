@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'struk_ewallet_page.dart'; // pastikan file ini sudah sesuai Opsi 2
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:ppob_app/services/api_service.dart';
+import 'struk_ewallet_page.dart';
 
 class PinEWalletPage extends StatefulWidget {
   final String ewalletName; // contoh: "LinkAja" / "Gopay"
@@ -24,20 +28,82 @@ class PinEWalletPage extends StatefulWidget {
 
 class _PinPageState extends State<PinEWalletPage> {
   String _pin = "";
+  bool _isLoading = false;
 
   String _generateNoRef() {
     final ts = DateTime.now().millisecondsSinceEpoch;
     return "REF$ts";
   }
 
-  void _onKeyboardTap(String value) {
+  Future<bool> _verifyPinWithBackend(String pin) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("auth_token");
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Token tidak ditemukan, silakan login ulang")),
+        );
+        return false;
+      }
+
+      final base = ApiService.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final uri = Uri.parse("$base/auth/verify-pin");
+
+      final resp = await http.post(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: jsonEncode({"pin": pin}),
+      );
+
+      debugPrint("🔑 Request ke: $uri");
+      debugPrint("📤 Body: ${jsonEncode({"pin": pin})}");
+      debugPrint("📥 StatusCode: ${resp.statusCode}");
+      debugPrint("📥 Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+
+        // tangani berbagai kemungkinan format response
+        if (data["success"] == true || data["status"] == true) {
+          return true;
+        } else {
+          final msg = data["message"] ?? "PIN salah";
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
+          return false;
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Server error: ${resp.statusCode}")),
+        );
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error verifikasi PIN: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Terjadi kesalahan: $e")),
+      );
+      return false;
+    }
+  }
+
+  void _onKeyboardTap(String value) async {
     if (value == "back") {
       if (_pin.isNotEmpty) {
         setState(() => _pin = _pin.substring(0, _pin.length - 1));
       }
     } else if (value == "ok") {
       if (_pin.length == 6) {
-        if (_pin == "123456") {
+        setState(() => _isLoading = true);
+        final isValid = await _verifyPinWithBackend(_pin);
+        setState(() => _isLoading = false);
+
+        if (isValid) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -56,9 +122,6 @@ class _PinPageState extends State<PinEWalletPage> {
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("PIN salah, coba lagi")),
-          );
           setState(() => _pin = "");
         }
       }
@@ -71,15 +134,24 @@ class _PinPageState extends State<PinEWalletPage> {
 
   Widget _buildKeypadContent(String val) {
     if (val == "ok") {
-      return Container(
-        width: 50.w,
-        height: 50.w,
-        decoration: const BoxDecoration(
-          color: Color(0xFF5938FB),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.check, color: Colors.white),
-      );
+      return _isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : Container(
+              width: 50.w,
+              height: 50.w,
+              decoration: const BoxDecoration(
+                color: Color(0xFF5938FB),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check, color: Colors.white),
+            );
     } else if (val == "back") {
       return const Icon(Icons.backspace_outlined,
           size: 28, color: Colors.black);
@@ -192,7 +264,7 @@ class _PinPageState extends State<PinEWalletPage> {
                             borderRadius: BorderRadius.circular(50),
                             onTap: () => _onKeyboardTap(val),
                             child: Container(
-                              width: 60.w, // 🔹 hitbox besar
+                              width: 60.w,
                               height: 60.w,
                               alignment: Alignment.center,
                               color: Colors.transparent,

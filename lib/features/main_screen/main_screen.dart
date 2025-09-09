@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
+import 'package:flutter/services.dart';
 import 'package:ppob_app/core/widgets/custom_navbar.dart';
 import 'package:ppob_app/features/home/presentation/pages/home_page.dart';
 import 'package:ppob_app/features/account/presentation/pages/account_page.dart';
@@ -32,13 +34,29 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    // ✅ Kalau bukan di HomePage, pindahkan ke HomePage
+    if (_selectedIndex != 2) {
+      setState(() {
+        _selectedIndex = 2;
+      });
+      return false; // cegah keluar
+    }
+
+    // ✅ Kalau sudah di HomePage, blok tombol back (tidak keluar app)
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: CustomNavBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: CustomNavBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ),
       ),
     );
   }
