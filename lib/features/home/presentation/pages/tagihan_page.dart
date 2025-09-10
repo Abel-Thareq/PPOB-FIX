@@ -7,11 +7,13 @@ import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_page.
 import 'package:ppob_app/features/kabelinternet/presentation/pages/internet_page.dart';
 import 'package:ppob_app/features/kai/presentation/pages/kai_page.dart';
 import 'package:ppob_app/features/kartukredit/presentation/pages/kredit_page.dart';
+import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
 import 'package:ppob_app/features/pbb/presentation/pages/pbb_page.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 import 'package:ppob_app/features/pgn/presentation/pages/pgn_page.dart';
 import 'package:ppob_app/features/samsat/presentation/pages/samsat_page.dart';
 import 'package:ppob_app/features/snpmb/presentation/pages/snpmb_page.dart';
+import 'package:ppob_app/features/telkom/presentation/pages/telkom_page.dart';
 
 class TagihanPage extends StatelessWidget {
   const TagihanPage({super.key});
@@ -267,6 +269,16 @@ class TagihanPage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const EinvoicingPage()),
+      );
+    } else if (title == 'Telkom') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TelkomPage()),
+      );
+    } else if (title == 'Penerimaan Negara') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MpnPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

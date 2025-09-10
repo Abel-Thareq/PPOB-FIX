@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_empat_berhasil.dart';
-import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_empat_gagal.dart';
+import 'package:ppob_app/features/telkom/presentation/pages/telkom_enam_berhasil.dart'; // Import halaman berhasil
+import 'package:ppob_app/features/telkom/presentation/pages/telkom_enam_gagal.dart'; // Import halaman gagal
 
-class EinvoicingTigaPage extends StatefulWidget {
-  final String publisher;
-  final String paymentCode;
+class TelkomLimaPage extends StatefulWidget {
+  final int nominalTagihan;
+  final int biayaAdmin;
+  final String namaPelanggan;
+  final String nomorPelanggan;
 
-  const EinvoicingTigaPage({
+  const TelkomLimaPage({
     super.key,
-    required this.publisher,
-    required this.paymentCode,
+    required this.nominalTagihan,
+    required this.biayaAdmin,
+    required this.namaPelanggan,
+    required this.nomorPelanggan,
   });
 
   @override
-  State<EinvoicingTigaPage> createState() => _EinvoicingTigaPageState();
+  State<TelkomLimaPage> createState() => _TelkomLimaPageState();
 }
 
-class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
+class _TelkomLimaPageState extends State<TelkomLimaPage> {
+  // State untuk menyimpan PIN yang dimasukkan.
   String enteredPin = '';
+  // Panjang PIN yang dibutuhkan.
   final int pinLength = 6;
 
-  // Fungsi saat tombol angka ditekan
+  // Fungsi saat tombol angka ditekan.
   void _onNumberPressed(String number) {
     if (enteredPin.length < pinLength) {
       setState(() {
@@ -30,7 +36,7 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
     }
   }
 
-  // Fungsi saat tombol hapus ditekan
+  // Fungsi saat tombol hapus ditekan.
   void _onDeletePressed() {
     if (enteredPin.isNotEmpty) {
       setState(() {
@@ -39,29 +45,56 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
     }
   }
 
-  // Fungsi saat tombol konfirmasi ditekan
+  // Fungsi saat tombol konfirmasi ditekan.
   void _onSubmitPressed() {
     if (enteredPin.length == pinLength) {
       // Simulasikan validasi PIN
       // PIN "555555" dianggap berhasil
+      // PIN "111111" dianggap gagal karena jaringan
+      // PIN lainnya dianggap salah
       if (enteredPin == '555555') {
+        // Navigasi ke halaman berhasil
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EinvoicingEmpatBerhasil(
-              publisher: widget.publisher,
-              paymentCode: widget.paymentCode,
+            builder: (context) => TelkomEnamBerhasil(
+              nominalTagihan: widget.nominalTagihan,
+              biayaAdmin: widget.biayaAdmin,
+              namaPelanggan: widget.namaPelanggan,
+              nomorPelanggan: widget.nomorPelanggan,
             ),
           ),
         );
-      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Berhasil!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (enteredPin == '111111') {
+        // Navigasi ke halaman gagal
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EinvoicingEmpatGagal(
-              publisher: widget.publisher,
-              paymentCode: widget.paymentCode,
+            builder: (context) => TelkomEnamGagal(
+              nominalTagihan: widget.nominalTagihan,
+              biayaAdmin: widget.biayaAdmin,
+              namaPelanggan: widget.namaPelanggan,
+              nomorPelanggan: widget.nomorPelanggan,
             ),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Gagal! Jaringan bermasalah."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Pin yang Anda Masukkan Salah. Silahkan Coba lagi"),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -93,7 +126,6 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
         ),
         child: Column(
           children: [
-            // Header
             Stack(
               children: [
                 SizedBox(
@@ -106,11 +138,10 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.all(16.r),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: Icon(Icons.arrow_back, size: 28.r),
                       color: Colors.white,
-                      iconSize: 28.r,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -148,24 +179,20 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
                       ),
                     ),
                     child: index < enteredPin.length
-                        ? Icon(
-                            Icons.circle,
-                            size: 12.r,
-                            color: const Color(0xFF5938FB),
-                          )
+                        ? Icon(Icons.circle,
+                            size: 12.r, color: const Color(0xFF5938FB))
                         : null,
                   ),
                 ),
               ),
             ),
             const Spacer(),
-            // Keypad
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 children: [
@@ -206,17 +233,9 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
       child: Container(
         width: 64.w,
         height: 64.h,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Center(
           child: Text(
@@ -239,17 +258,9 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
       child: Container(
         width: 64.w,
         height: 64.h,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Center(
           child: Icon(
@@ -264,7 +275,7 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
 
   Widget _buildSubmitButton() {
     return InkWell(
-      onTap: enteredPin.length == pinLength ? _onSubmitPressed : null,
+      onTap: _onSubmitPressed,
       borderRadius: BorderRadius.circular(32.r),
       child: Container(
         width: 64.w,
@@ -274,14 +285,6 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
           color: enteredPin.length == pinLength
               ? const Color(0xFF5938FB)
               : Colors.grey,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Center(
           child: Icon(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_dua.dart';
+import 'package:ppob_app/features/main_screen/main_screen.dart';
 
 // Placeholder untuk CustomButton dan EinvoicingDuaPage agar kode ini dapat dijalankan.
 class CustomButton extends StatelessWidget {
@@ -66,6 +67,15 @@ class _EinvoicingPageState extends State<EinvoicingPage> {
     return _selectedPublisher != null && _paymentCodeController.text.isNotEmpty;
   }
 
+  // Fungsi untuk navigasi ke MainScreen
+  void _navigateToMainScreen() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const MainScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   void _showPublisherDialog() {
     showModalBottomSheet(
       context: context,
@@ -118,10 +128,10 @@ class _EinvoicingPageState extends State<EinvoicingPage> {
     final Color buttonColor = formIsValid ? const Color(0xFF6C4EFF) : Colors.grey[400]!;
 
     return PopScope(
-      canPop: false,
+      canPop: false, // Mencegah pop bawaan
       onPopInvoked: (didPop) {
         if (didPop) return;
-        Navigator.pop(context);
+        _navigateToMainScreen(); // Navigasi ke MainScreen saat back ditekan
       },
       child: Scaffold(
         body: Column(
@@ -144,9 +154,7 @@ class _EinvoicingPageState extends State<EinvoicingPage> {
                       icon: const Icon(Icons.arrow_back),
                       color: Colors.white,
                       iconSize: 28,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: _navigateToMainScreen, // Navigasi ke MainScreen
                     ),
                   ),
                 ),
@@ -291,10 +299,10 @@ class _EinvoicingPageState extends State<EinvoicingPage> {
                                   const Text(
                                     'Informasi',
                                     style: TextStyle(
-                                      color: Color(0xFF6C4EFF),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
+                                    color: Color(0xFF6C4EFF),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                   ),
                                   const SizedBox(height: 8),
                                   const Text(

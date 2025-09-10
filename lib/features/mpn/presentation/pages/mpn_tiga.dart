@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_empat_berhasil.dart';
-import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_empat_gagal.dart';
+import 'package:ppob_app/features/mpn/presentation/pages/mpn_empat_berhasil.dart';
+import 'package:ppob_app/features/mpn/presentation/pages/mpn_empat_gagal.dart';
+// Import halaman hasil transaksi sesuai kebutuhan
+// import 'package:ppob_app/features/mpn/presentation/pages/mpn_berhasil.dart';
+// import 'package:ppob_app/features/mpn/presentation/pages/mpn_gagal.dart';
 
-class EinvoicingTigaPage extends StatefulWidget {
-  final String publisher;
-  final String paymentCode;
+class MpnTigaPage extends StatefulWidget {
+  final String billingCode;
+  final String totalTagihan;
 
-  const EinvoicingTigaPage({
+  const MpnTigaPage({
     super.key,
-    required this.publisher,
-    required this.paymentCode,
+    required this.billingCode,
+    required this.totalTagihan,
   });
 
   @override
-  State<EinvoicingTigaPage> createState() => _EinvoicingTigaPageState();
+  State<MpnTigaPage> createState() => _MpnTigaPageState();
 }
 
-class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
+class _MpnTigaPageState extends State<MpnTigaPage> {
+  // State untuk menyimpan PIN yang dimasukkan.
   String enteredPin = '';
+  // Panjang PIN yang dibutuhkan.
   final int pinLength = 6;
 
-  // Fungsi saat tombol angka ditekan
+  // Fungsi saat tombol angka ditekan.
   void _onNumberPressed(String number) {
     if (enteredPin.length < pinLength) {
       setState(() {
@@ -30,7 +34,7 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
     }
   }
 
-  // Fungsi saat tombol hapus ditekan
+  // Fungsi saat tombol hapus ditekan.
   void _onDeletePressed() {
     if (enteredPin.isNotEmpty) {
       setState(() {
@@ -39,29 +43,46 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
     }
   }
 
-  // Fungsi saat tombol konfirmasi ditekan
+  // Fungsi saat tombol konfirmasi ditekan.
   void _onSubmitPressed() {
     if (enteredPin.length == pinLength) {
-      // Simulasikan validasi PIN
-      // PIN "555555" dianggap berhasil
       if (enteredPin == '555555') {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EinvoicingEmpatBerhasil(
-              publisher: widget.publisher,
-              paymentCode: widget.paymentCode,
+            builder: (context) => MpnEmpatBerhasil(
+              billingCode: widget.billingCode,
+              totalTagihan: widget.totalTagihan,
             ),
           ),
         );
-      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Berhasil!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (enteredPin == '111111') {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EinvoicingEmpatGagal(
-              publisher: widget.publisher,
-              paymentCode: widget.paymentCode,
+            builder: (context) => MpnEmpatGagal(
+              billingCode: widget.billingCode,
+              totalTagihan: widget.totalTagihan,
             ),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Gagal! Jaringan bermasalah."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Pin yang Anda Masukkan Salah. Silahkan Coba lagi"),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -77,8 +98,6 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(360, 690));
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -93,12 +112,11 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
         ),
         child: Column(
           children: [
-            // Header
             Stack(
               children: [
                 SizedBox(
                   width: double.infinity,
-                  height: 120.h,
+                  height: 120,
                   child: Image.asset(
                     'assets/images/header.png',
                     fit: BoxFit.cover,
@@ -106,75 +124,71 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.all(16.w),
+                    padding: const EdgeInsets.all(16.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       color: Colors.white,
-                      iconSize: 28.r,
+                      iconSize: 28,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 30.h),
-            Text(
+            const SizedBox(height: 40),
+            const Text(
               "Masukan PIN Anda",
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 30.h),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 pinLength,
                 (index) => Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: Container(
-                    width: 40.w,
-                    height: 50.h,
+                    width: 40,
+                    height: 50,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                       border: Border.all(
                         color: index < enteredPin.length
                             ? const Color(0xFF5938FB)
                             : Colors.grey.shade300,
-                        width: 2.w,
+                        width: 2,
                       ),
                     ),
                     child: index < enteredPin.length
-                        ? Icon(
-                            Icons.circle,
-                            size: 12.r,
-                            color: const Color(0xFF5938FB),
-                          )
+                        ? const Icon(Icons.circle,
+                            size: 12, color: Color(0xFF5938FB))
                         : null,
                   ),
                 ),
               ),
             ),
             const Spacer(),
-            // Keypad
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 children: [
                   _buildKeypadRow(['1', '2', '3']),
-                  SizedBox(height: 20.h),
+                  const SizedBox(height: 20),
                   _buildKeypadRow(['4', '5', '6']),
-                  SizedBox(height: 20.h),
+                  const SizedBox(height: 20),
                   _buildKeypadRow(['7', '8', '9']),
-                  SizedBox(height: 20.h),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -202,27 +216,19 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
   Widget _buildNumberButton(String number) {
     return InkWell(
       onTap: () => _onNumberPressed(number),
-      borderRadius: BorderRadius.circular(32.r),
+      borderRadius: BorderRadius.circular(32),
       child: Container(
-        width: 64.w,
-        height: 64.h,
-        decoration: BoxDecoration(
+        width: 64,
+        height: 64,
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Center(
           child: Text(
             number,
-            style: TextStyle(
-              fontSize: 24.sp,
+            style: const TextStyle(
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -235,27 +241,19 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
   Widget _buildDeleteButton() {
     return InkWell(
       onTap: _onDeletePressed,
-      borderRadius: BorderRadius.circular(32.r),
+      borderRadius: BorderRadius.circular(32),
       child: Container(
-        width: 64.w,
-        height: 64.h,
-        decoration: BoxDecoration(
+        width: 64,
+        height: 64,
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
-        child: Center(
+        child: const Center(
           child: Icon(
             Icons.backspace_outlined,
-            size: 28.r,
-            color: const Color(0xFF5938FB),
+            size: 28,
+            color: Color(0xFF5938FB),
           ),
         ),
       ),
@@ -264,29 +262,21 @@ class _EinvoicingTigaPageState extends State<EinvoicingTigaPage> {
 
   Widget _buildSubmitButton() {
     return InkWell(
-      onTap: enteredPin.length == pinLength ? _onSubmitPressed : null,
-      borderRadius: BorderRadius.circular(32.r),
+      onTap: _onSubmitPressed,
+      borderRadius: BorderRadius.circular(32),
       child: Container(
-        width: 64.w,
-        height: 64.h,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: enteredPin.length == pinLength
               ? const Color(0xFF5938FB)
               : Colors.grey,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
-        child: Center(
+        child: const Center(
           child: Icon(
             Icons.check,
-            size: 28.r,
+            size: 28,
             color: Colors.white,
           ),
         ),
