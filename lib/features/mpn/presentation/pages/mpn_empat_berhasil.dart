@@ -60,9 +60,14 @@ class _MpnEmpatBerhasilState extends State<MpnEmpatBerhasil> {
     ----------------------------------------
     Tanggal: $formattedDate
     No. Ref: $noRef
-    Jenis Transaksi: Bayar MPN
+    Sumber Dana: BPN
+    Jenis Transaksi: Penerimaan Negara
+    Nama: ABEL THAREC
     Kode Billing: ${widget.billingCode}
-    Total Tagihan: ${(widget.totalTagihan)}
+    Harga: ${formatCurrency(16000)}
+    Denda: ${formatCurrency(0)}
+    Biaya Admin: ${formatCurrency(0)}
+    Total Pembelian: ${(widget.totalTagihan)}
     ----------------------------------------
       """;
 
@@ -79,7 +84,7 @@ class _MpnEmpatBerhasilState extends State<MpnEmpatBerhasil> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
+    final formattedDate = DateFormat('dd MMM yyyy HH:mm').format(now) + ' WIB';
     final noRef = _generateRandomString(20);
 
     return PopScope(
@@ -148,17 +153,60 @@ class _MpnEmpatBerhasilState extends State<MpnEmpatBerhasil> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Bagian Tanggal dan No. Ref
                         _DetailRow("Tanggal", formattedDate),
                         _DetailRow("No. Ref", noRef),
                         const SizedBox(height: 16),
-                        Divider(height: 1, color: Colors.grey.shade300),
+                        const Divider(height: 1, color: Colors.grey),
                         const SizedBox(height: 16),
-                        _DetailRow("Jenis Transaksi", "Bayar MPN"),
+                        
+                        // Bagian Sumber Dana, Jenis Transaksi, dan Kode Billing
+                        _DetailRow("Sumber Dana", "BPN"),
+                        _DetailRow("Jenis Transaksi", "Penerimaan Negara"),
+                        _DetailRow("Nama", "ABEL THAREC"),
                         _DetailRow("Kode Billing", widget.billingCode),
                         const SizedBox(height: 16),
-                        Divider(height: 1, color: Colors.grey.shade300),
+                        const Divider(height: 1, color: Colors.grey),
                         const SizedBox(height: 16),
-                        _DetailRow("Total Tagihan", (widget.totalTagihan)),
+                        
+                        // Bagian Harga, Denda, dan Biaya Admin
+                        _DetailRow("Harga", formatCurrency(16000)),
+                        _DetailRow("Denda", formatCurrency(0)),
+                        _DetailRow("Biaya Admin", formatCurrency(0)),
+                        const SizedBox(height: 16),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        
+                        // Bagian Total Pembelian
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Total Pembelian",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  widget.totalTagihan,
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

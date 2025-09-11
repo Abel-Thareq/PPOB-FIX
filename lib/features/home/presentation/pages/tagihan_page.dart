@@ -4,10 +4,13 @@ import 'package:ppob_app/features/asuransi/presentation/pages/asuransi_page.dart
 import 'package:ppob_app/features/bpjs/presentation/pages/bpjs_page.dart';
 import 'package:ppob_app/features/cicilan/presentation/pages/cicilan_page.dart';
 import 'package:ppob_app/features/einvoicing/presentation/pages/einvoicing_page.dart';
+import 'package:ppob_app/features/etilang/presentation/pages/etilang_page.dart';
 import 'package:ppob_app/features/kabelinternet/presentation/pages/internet_page.dart';
 import 'package:ppob_app/features/kai/presentation/pages/kai_page.dart';
 import 'package:ppob_app/features/kartukredit/presentation/pages/kredit_page.dart';
+import 'package:ppob_app/features/kua/presentation/pages/kua_page.dart';
 import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
+import 'package:ppob_app/features/pascabayar/presentation/pages/pascabayar_page.dart';
 import 'package:ppob_app/features/pbb/presentation/pages/pbb_page.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 import 'package:ppob_app/features/pgn/presentation/pages/pgn_page.dart';
@@ -279,6 +282,21 @@ class TagihanPage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const MpnPage()),
+      );
+    } else if (title == 'E-Tilang') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const EtilangPage()),
+      );
+    } else if (title == 'Bayar KUA') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const KuaPage()),
+      );
+    } else if (title == 'Pascabayar') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PascabayarPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

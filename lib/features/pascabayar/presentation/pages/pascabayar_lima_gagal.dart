@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'package:ppob_app/features/pascabayar/presentation/pages/pascabayar_dua.dart';
+import 'package:ppob_app/features/pascabayar/presentation/pages/pascabayar_page.dart';
 
-// Import halaman utama dan halaman MPN lainnya
-import 'package:ppob_app/features/main_screen/main_screen.dart';
-// Import halaman MPN utama
-import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
+class PascabayarLimaGagal extends StatefulWidget {
+  final int nominalTagihan;
+  final int biayaAdmin;
+  final String namaPelanggan;
+  final String nomorHp;
 
-// Definisi kelas untuk halaman transaksi MPN gagal
-class MpnEmpatGagal extends StatefulWidget {
-  final String billingCode;
-  final String totalTagihan;
-
-  const MpnEmpatGagal({
+  const PascabayarLimaGagal({
     super.key,
-    required this.billingCode,
-    required this.totalTagihan,
+    required this.nominalTagihan,
+    required this.biayaAdmin,
+    required this.namaPelanggan,
+    required this.nomorHp,
   });
 
   @override
-  State<MpnEmpatGagal> createState() => _MpnEmpatGagalState();
+  State<PascabayarLimaGagal> createState() => _PascabayarLimaGagalState();
 }
 
-class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
-  // Format mata uang
+class _PascabayarLimaGagalState extends State<PascabayarLimaGagal> {
+  // Fungsi untuk memformat mata uang
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
       locale: 'id_ID',
@@ -33,18 +33,18 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
     return format.format(amount);
   }
 
-  // Generate string acak untuk nomor referensi
+  // Fungsi untuk menghasilkan string acak
   String _generateRandomString(int length) {
     final random = Random();
     const chars = "0123456789";
     return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
-  // Fungsi untuk kembali ke halaman utama
+  // Fungsi saat tombol kembali ditekan
   void _onBackPressed() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
+      MaterialPageRoute(builder: (context) => const PascabayarPage()),
       (Route<dynamic> route) => false,
     );
   }
@@ -53,12 +53,13 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
   void _onTryAgainPressed() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MpnPage()),
+      MaterialPageRoute(builder: (context) => const PascabayarDuaPage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalPembelian = widget.nominalTagihan + widget.biayaAdmin;
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
     final noRef = _generateRandomString(20);
@@ -84,6 +85,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                 ),
               ),
             ),
+
             // Konten utama
             SingleChildScrollView(
               padding: const EdgeInsets.only(top: 140, bottom: 20, left: 24, right: 24),
@@ -126,53 +128,39 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Data dummy untuk informasi tambahan
-                        _DetailRow("Sumber Dana", "BNI"),
-                        _DetailRow("Jenis Transaksi", "Pembayaran Pajak"),
-                        _DetailRow("Nama", "ALFIN CHIPMUNK"),
-                        _DetailRow("Kode Billing", widget.billingCode),
+                        _DetailRow("Sumber Dana", widget.namaPelanggan),
+                        _DetailRow("Jenis Transaksi", "Bayar Telkom"),
+                        _DetailRow("Nama Pelanggan", widget.namaPelanggan),
+                        _DetailRow("Nomor Pelanggan", widget.nomorHp),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Informasi harga, denda, dan biaya admin
-                        _DetailRow("Harga", formatCurrency(16000)),
-                        _DetailRow("Denda", formatCurrency(500)),
-                        _DetailRow("Biaya Admin", formatCurrency(2500)),
+                        _DetailRow("Harga", formatCurrency(widget.nominalTagihan)),
+                        _DetailRow("Denda", formatCurrency(0)), // Asumsi denda 0
+                        _DetailRow("Biaya Admin", formatCurrency(widget.biayaAdmin)),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Total tagihan
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Total Tagihan",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Total Pembelian",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  widget.totalTagihan,
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                            ),
+                            Text(
+                              formatCurrency(totalPembelian),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF6C4EFF),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -226,6 +214,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                 ],
               ),
             ),
+
             // Tombol back
             Positioned(
               top: 10,

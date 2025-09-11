@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ppob_app/features/kua/presentation/pages/kua_page.dart';
 import 'dart:math';
 
-// Import halaman utama dan halaman MPN lainnya
+// Import halaman utama dan halaman E-tilang
 import 'package:ppob_app/features/main_screen/main_screen.dart';
-// Import halaman MPN utama
-import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
+import 'package:ppob_app/features/etilang/presentation/pages/etilang_page.dart';
 
-// Definisi kelas untuk halaman transaksi MPN gagal
-class MpnEmpatGagal extends StatefulWidget {
+// Definisi kelas untuk halaman transaksi Etilang gagal
+class KuaEmpatGagal extends StatefulWidget {
   final String billingCode;
   final String totalTagihan;
 
-  const MpnEmpatGagal({
+  const KuaEmpatGagal({
     super.key,
     required this.billingCode,
     required this.totalTagihan,
   });
 
   @override
-  State<MpnEmpatGagal> createState() => _MpnEmpatGagalState();
+  State<KuaEmpatGagal> createState() => _KuaEmpatGagalState();
 }
 
-class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
-  // Format mata uang
+class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
+  // Fungsi untuk memformat angka menjadi format mata uang Rupiah
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
       locale: 'id_ID',
@@ -33,14 +33,14 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
     return format.format(amount);
   }
 
-  // Generate string acak untuk nomor referensi
+  // Fungsi untuk menghasilkan string acak sebagai nomor referensi
   String _generateRandomString(int length) {
     final random = Random();
     const chars = "0123456789";
     return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
-  // Fungsi untuk kembali ke halaman utama
+  // Fungsi untuk kembali ke halaman utama aplikasi
   void _onBackPressed() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -49,11 +49,11 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
     );
   }
 
-  // Fungsi saat tombol coba lagi ditekan
+  // Fungsi saat tombol "Coba Lagi" ditekan, akan mengarahkan ke halaman Etilang
   void _onTryAgainPressed() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MpnPage()),
+      MaterialPageRoute(builder: (context) => const KuaPage()),
     );
   }
 
@@ -84,7 +84,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                 ),
               ),
             ),
-            // Konten utama
+            // Konten utama yang dapat digulir
             SingleChildScrollView(
               padding: const EdgeInsets.only(top: 140, bottom: 20, left: 24, right: 24),
               child: Column(
@@ -97,7 +97,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                   ),
                   const SizedBox(height: 13),
                   const Text(
-                    "Transaksi Gagal",
+                    "Transaksi E-tilang Gagal",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -105,6 +105,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                     ),
                   ),
                   const SizedBox(height: 25),
+                  // Kotak detail transaksi
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -127,19 +128,20 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
                         
-                        // Data dummy untuk informasi tambahan
-                        _DetailRow("Sumber Dana", "BNI"),
-                        _DetailRow("Jenis Transaksi", "Pembayaran Pajak"),
-                        _DetailRow("Nama", "ALFIN CHIPMUNK"),
+                        // Informasi detail
+                        _DetailRow("Sumber Dana", "ABEL THAREQ"),
+                        _DetailRow("", "081215553183"),
+                        _DetailRow("Jenis Transaksi", "Pembayaran KUA"),
                         _DetailRow("Kode Billing", widget.billingCode),
+                        _DetailRow("Nama Pemohon", "ALFIN CHIPMUNK"),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
                         
-                        // Informasi harga, denda, dan biaya admin
-                        _DetailRow("Harga", formatCurrency(16000)),
-                        _DetailRow("Denda", formatCurrency(500)),
-                        _DetailRow("Biaya Admin", formatCurrency(2500)),
+                        // Informasi harga dan biaya
+                        _DetailRow("Harga", widget.totalTagihan),
+                        _DetailRow("Denda", formatCurrency(0)),
+                        _DetailRow("Biaya Admin", formatCurrency(0)),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
@@ -178,6 +180,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // Baris tombol
                   Row(
                     children: [
                       Expanded(
@@ -251,6 +254,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
   }
 }
 
+// Widget bantu untuk menampilkan baris detail
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;

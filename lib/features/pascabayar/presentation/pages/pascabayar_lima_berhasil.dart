@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 
-// Import halaman utama dan halaman MPN lainnya
 import 'package:ppob_app/features/main_screen/main_screen.dart';
-// Import halaman MPN utama
-import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
 
-// Definisi kelas untuk halaman transaksi MPN gagal
-class MpnEmpatGagal extends StatefulWidget {
-  final String billingCode;
-  final String totalTagihan;
+class PascabayarLimaBerhasil extends StatefulWidget {
+  final int nominalTagihan;
+  final int biayaAdmin;
+  final String namaPelanggan;
+  final String nomorHp;
 
-  const MpnEmpatGagal({
+  const PascabayarLimaBerhasil({
     super.key,
-    required this.billingCode,
-    required this.totalTagihan,
+    required this.nominalTagihan,
+    required this.biayaAdmin,
+    required this.namaPelanggan,
+    required this.nomorHp,
   });
 
   @override
-  State<MpnEmpatGagal> createState() => _MpnEmpatGagalState();
+  State<PascabayarLimaBerhasil> createState() => _PascabayarLimaBerhasilState();
 }
 
-class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
+class _PascabayarLimaBerhasilState extends State<PascabayarLimaBerhasil> {
   // Format mata uang
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
@@ -33,32 +34,58 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
     return format.format(amount);
   }
 
-  // Generate string acak untuk nomor referensi
+  // Generate string acak
   String _generateRandomString(int length) {
     final random = Random();
     const chars = "0123456789";
     return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
-  // Fungsi untuk kembali ke halaman utama
   void _onBackPressed() {
-    Navigator.pushAndRemoveUntil(
-      context,
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const MainScreen()),
-      (Route<dynamic> route) => false,
+      (route) => false,
     );
   }
 
-  // Fungsi saat tombol coba lagi ditekan
-  void _onTryAgainPressed() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MpnPage()),
-    );
+  // Bagikan detail transaksi
+  void _shareTransactionDetails() {
+    final now = DateTime.now();
+    final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
+    final noRef = _generateRandomString(20);
+    final totalPembelian = widget.nominalTagihan + widget.biayaAdmin;
+
+    final details = """
+    Transaksi Berhasil!
+
+    Detail Pembayaran Telkom:
+    ----------------------------------------
+    Tanggal: $formattedDate
+    No. Ref: $noRef
+    Sumber Dana: ${widget.namaPelanggan}
+    Jenis Transaksi: Bayar Telkom
+    Nama Pelanggan: ${widget.namaPelanggan}
+    Nomor Pelanggan: ${widget.nomorHp}
+    Harga: ${formatCurrency(widget.nominalTagihan)}
+    Denda: ${formatCurrency(0)}
+    Biaya Admin: ${formatCurrency(widget.biayaAdmin)}
+    Total Pembelian: ${formatCurrency(totalPembelian)}
+    ----------------------------------------
+      """;
+
+    Clipboard.setData(ClipboardData(text: details)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Detail Transaksi berhasil di copy"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalPembelian = widget.nominalTagihan + widget.biayaAdmin;
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
     final noRef = _generateRandomString(20);
@@ -73,31 +100,28 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
         backgroundColor: const Color(0xFFF8F8FF),
         body: Stack(
           children: [
-            // Header dengan gambar latar belakang
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/header.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
             // Konten utama
             SingleChildScrollView(
               padding: const EdgeInsets.only(top: 140, bottom: 20, left: 24, right: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/error.png',
+                  Container(
                     width: 60,
                     height: 60,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 35,
+                    ),
                   ),
                   const SizedBox(height: 13),
                   const Text(
-                    "Transaksi Gagal",
+                    "Transaksi Berhasil",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -126,53 +150,39 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Data dummy untuk informasi tambahan
-                        _DetailRow("Sumber Dana", "BNI"),
-                        _DetailRow("Jenis Transaksi", "Pembayaran Pajak"),
-                        _DetailRow("Nama", "ALFIN CHIPMUNK"),
-                        _DetailRow("Kode Billing", widget.billingCode),
+                        _DetailRow("Sumber Dana", widget.namaPelanggan),
+                        _DetailRow("Jenis Transaksi", "Bayar Telkom"),
+                        _DetailRow("Nama Pelanggan", widget.namaPelanggan),
+                        _DetailRow("Nomor Pelanggan", widget.nomorHp),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Informasi harga, denda, dan biaya admin
-                        _DetailRow("Harga", formatCurrency(16000)),
-                        _DetailRow("Denda", formatCurrency(500)),
-                        _DetailRow("Biaya Admin", formatCurrency(2500)),
+                        _DetailRow("Harga", formatCurrency(widget.nominalTagihan)),
+                        _DetailRow("Denda", formatCurrency(0)), 
+                        _DetailRow("Biaya Admin", formatCurrency(widget.biayaAdmin)),
                         const SizedBox(height: 16),
                         Divider(height: 1, color: Colors.grey.shade300),
                         const SizedBox(height: 16),
-                        
-                        // Total tagihan
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Total Tagihan",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Total Pembelian",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  widget.totalTagihan,
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                            ),
+                            Text(
+                              formatCurrency(totalPembelian),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF6C4EFF),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -182,17 +192,17 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _onBackPressed,
+                          onPressed: _shareTransactionDetails,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
+                            foregroundColor: const Color(0xFF6C4EFF),
+                            side: const BorderSide(color: Color(0xFF6C4EFF)),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: const Text(
-                            'Kembali',
+                            'Bagikan',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -203,9 +213,9 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _onTryAgainPressed,
+                          onPressed: _onBackPressed,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: const Color(0xFF6C4EFF),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -213,7 +223,7 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                             ),
                           ),
                           child: const Text(
-                            'Coba Lagi',
+                            'Selesai',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -226,21 +236,31 @@ class _MpnEmpatGagalState extends State<MpnEmpatGagal> {
                 ],
               ),
             ),
+            // Header dengan gambar latar belakang
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/header.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
             // Tombol back
             Positioned(
-              top: 10,
-              left: 20,
-              child: SafeArea(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    color: Colors.white,
-                    iconSize: 24,
-                    onPressed: _onBackPressed,
-                  ),
+              top: 43,
+              left: 19,
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  color: Colors.white,
+                  iconSize: 28,
+                  padding: const EdgeInsets.all(12),
+                  onPressed: _onBackPressed,
                 ),
               ),
             ),
