@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ppob_app/features/kua/presentation/pages/kua_page.dart';
 import 'dart:math';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
+import 'package:ppob_app/features/paspor/presentation/pages/paspor_page.dart';
 
 // Definisi kelas untuk halaman transaksi Etilang gagal
-class KuaEmpatGagal extends StatefulWidget {
+class PasporEmpatGagal extends StatefulWidget {
   final String billingCode;
   final String totalTagihan;
 
-  const KuaEmpatGagal({
+  const PasporEmpatGagal({
     super.key,
     required this.billingCode,
     required this.totalTagihan,
   });
 
   @override
-  State<KuaEmpatGagal> createState() => _KuaEmpatGagalState();
+  State<PasporEmpatGagal> createState() => _PasporEmpatGagalState();
 }
 
-class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
+class _PasporEmpatGagalState extends State<PasporEmpatGagal> {
   // Fungsi untuk memformat angka menjadi format mata uang Rupiah
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
@@ -50,7 +50,7 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
   void _onTryAgainPressed() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const KuaPage()),
+      MaterialPageRoute(builder: (context) => const PasporPage()),
     );
   }
 
@@ -94,7 +94,7 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                   ),
                   const SizedBox(height: 13),
                   const Text(
-                    "Transaksi E-tilang Gagal",
+                    "Transaksi Gagal",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -128,7 +128,7 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                         // Informasi detail
                         _DetailRow("Sumber Dana", "ABEL THAREQ"),
                         _DetailRow("", "081215553183"),
-                        _DetailRow("Jenis Transaksi", "Pembayaran KUA"),
+                        _DetailRow("Jenis Transaksi", "Bayar Paspor"),
                         _DetailRow("Kode Billing", widget.billingCode),
                         _DetailRow("Nama Pemohon", "ALFIN CHIPMUNK"),
                         const SizedBox(height: 16),

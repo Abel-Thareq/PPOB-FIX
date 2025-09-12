@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:ppob_app/features/kua/presentation/pages/kua_page.dart';
 import 'dart:math';
+
+// Import halaman utama
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 
-// Definisi kelas untuk halaman transaksi Etilang gagal
-class KuaEmpatGagal extends StatefulWidget {
+// Definisi kelas untuk halaman transaksi E-Tilang berhasil
+class PasporEmpatBerhasil extends StatefulWidget {
   final String billingCode;
   final String totalTagihan;
 
-  const KuaEmpatGagal({
+  const PasporEmpatBerhasil({
     super.key,
     required this.billingCode,
     required this.totalTagihan,
   });
 
   @override
-  State<KuaEmpatGagal> createState() => _KuaEmpatGagalState();
+  State<PasporEmpatBerhasil> createState() => _PasporEmpatBerhasilState();
 }
 
-class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
-  // Fungsi untuk memformat angka menjadi format mata uang Rupiah
+class _PasporEmpatBerhasilState extends State<PasporEmpatBerhasil> {
+  // Format mata uang
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
       locale: 'id_ID',
@@ -30,34 +32,60 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
     return format.format(amount);
   }
 
-  // Fungsi untuk menghasilkan string acak sebagai nomor referensi
+  // Generate string acak untuk nomor referensi
   String _generateRandomString(int length) {
     final random = Random();
     const chars = "0123456789";
     return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
-  // Fungsi untuk kembali ke halaman utama aplikasi
+  // Fungsi untuk kembali ke halaman utama
   void _onBackPressed() {
-    Navigator.pushAndRemoveUntil(
-      context,
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const MainScreen()),
-      (Route<dynamic> route) => false,
+      (route) => false,
     );
   }
 
-  // Fungsi saat tombol "Coba Lagi" ditekan, akan mengarahkan ke halaman Etilang
-  void _onTryAgainPressed() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const KuaPage()),
-    );
+  // Fungsi untuk membagikan detail transaksi
+  void _shareTransactionDetails() {
+    final now = DateTime.now();
+    final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
+    final noRef = _generateRandomString(20);
+
+    final details = """
+    Transaksi Berhasil!
+
+    Detail Pembayaran E-Tilang:
+    ----------------------------------------
+    Tanggal: $formattedDate
+    No. Ref: $noRef
+    Sumber Dana: ABEL THAREO (081215553183)
+    Jenis Transaksi: Bayar E-Tilang
+    Kode Billing: ${widget.billingCode}
+    Nama Pelanggar: ALFIN CHIPMUNK
+    Harga: ${formatCurrency(500000)}
+    Denda: ${formatCurrency(0)}
+    Biaya Admin: ${formatCurrency(0)}
+    Total Pembelian: ${widget.totalTagihan}
+    ----------------------------------------
+      """;
+
+    Clipboard.setData(ClipboardData(text: details)).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Detail Transaksi berhasil di copy"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now) + ' WIB';
+    final formattedDate = DateFormat('dd MMM yyyy HH:mm').format(now) + ' WIB';
+    // ignore: unused_local_variable
     final noRef = _generateRandomString(20);
 
     return PopScope(
@@ -81,20 +109,28 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                 ),
               ),
             ),
-            // Konten utama yang dapat digulir
+            // Konten utama
             SingleChildScrollView(
               padding: const EdgeInsets.only(top: 140, bottom: 20, left: 24, right: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/error.png',
+                  Container(
                     width: 60,
                     height: 60,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 35,
+                    ),
                   ),
                   const SizedBox(height: 13),
                   const Text(
-                    "Transaksi E-tilang Gagal",
+                    "Transaksi Berhasil",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -102,7 +138,6 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                     ),
                   ),
                   const SizedBox(height: 25),
-                  // Kotak detail transaksi
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -119,39 +154,50 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Bagian Tanggal dan No. Ref
                         _DetailRow("Tanggal", formattedDate),
-                        _DetailRow("No. Ref", noRef),
-                        const SizedBox(height: 16),
-                        Divider(height: 1, color: Colors.grey.shade300),
-                        const SizedBox(height: 16),
+                        _DetailRow("No. Ref", "I1829203871637617632"),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
                         
-                        // Informasi detail
+                        // Bagian Sumber Dana
                         _DetailRow("Sumber Dana", "ABEL THAREQ"),
                         _DetailRow("", "081215553183"),
-                        _DetailRow("Jenis Transaksi", "Pembayaran KUA"),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
+                        
+                        // Bagian Jenis Transaksi
+                        _DetailRow("Jenis Transaksi", "Bayar Paspor"),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
+                        
+                        // Bagian Kode Billing dan Nama Pelanggar
                         _DetailRow("Kode Billing", widget.billingCode),
                         _DetailRow("Nama Pemohon", "ALFIN CHIPMUNK"),
-                        const SizedBox(height: 16),
-                        Divider(height: 1, color: Colors.grey.shade300),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
                         
-                        // Informasi harga dan biaya
+                        // Bagian Harga, Denda, dan Biaya Admin
                         _DetailRow("Harga", widget.totalTagihan),
                         _DetailRow("Denda", formatCurrency(0)),
                         _DetailRow("Biaya Admin", formatCurrency(0)),
-                        const SizedBox(height: 16),
-                        Divider(height: 1, color: Colors.grey.shade300),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
                         
-                        // Total tagihan
+                        // Bagian Total Pembelian
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                "Total Tagihan",
+                                "Total Pembelian",
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -177,22 +223,21 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Baris tombol
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _onBackPressed,
+                          onPressed: _shareTransactionDetails,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
+                            foregroundColor: const Color(0xFF6C4EFF),
+                            side: const BorderSide(color: Color(0xFF6C4EFF)),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: const Text(
-                            'Kembali',
+                            'Bagikan',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -203,9 +248,9 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _onTryAgainPressed,
+                          onPressed: _onBackPressed,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: const Color(0xFF6C4EFF),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -213,7 +258,7 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
                             ),
                           ),
                           child: const Text(
-                            'Coba Lagi',
+                            'Selesai',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -228,19 +273,18 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
             ),
             // Tombol back
             Positioned(
-              top: 10,
-              left: 20,
-              child: SafeArea(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    color: Colors.white,
-                    iconSize: 24,
-                    onPressed: _onBackPressed,
-                  ),
+              top: 43,
+              left: 19,
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  color: Colors.white,
+                  iconSize: 28,
+                  padding: const EdgeInsets.all(12),
+                  onPressed: _onBackPressed,
                 ),
               ),
             ),
@@ -251,7 +295,6 @@ class _KuaEmpatGagalState extends State<KuaEmpatGagal> {
   }
 }
 
-// Widget bantu untuk menampilkan baris detail
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
@@ -261,7 +304,7 @@ class _DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,

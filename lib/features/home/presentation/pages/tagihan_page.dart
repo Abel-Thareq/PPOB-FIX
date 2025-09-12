@@ -10,7 +10,9 @@ import 'package:ppob_app/features/kai/presentation/pages/kai_page.dart';
 import 'package:ppob_app/features/kartukredit/presentation/pages/kredit_page.dart';
 import 'package:ppob_app/features/kua/presentation/pages/kua_page.dart';
 import 'package:ppob_app/features/mpn/presentation/pages/mpn_page.dart';
+import 'package:ppob_app/features/pajak%20daerah/presentation/pages/pajakdaerah_page.dart';
 import 'package:ppob_app/features/pascabayar/presentation/pages/pascabayar_page.dart';
+import 'package:ppob_app/features/paspor/presentation/pages/paspor_page.dart';
 import 'package:ppob_app/features/pbb/presentation/pages/pbb_page.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 import 'package:ppob_app/features/pgn/presentation/pages/pgn_page.dart';
@@ -297,6 +299,16 @@ class TagihanPage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PascabayarPage()),
+      );
+    } else if (title == 'Bayar Paspor') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PasporPage()),
+      );
+    } else if (title == 'Pajak Daerah') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PajakDaerahPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

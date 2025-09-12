@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ppob_app/features/donasi/presentation/pages/donasi_page.dart';
 
 class LainnyaPage extends StatelessWidget {
   const LainnyaPage({super.key});
@@ -15,10 +16,33 @@ class LainnyaPage extends StatelessWidget {
     {'title': 'Wakaf', 'icon': 'assets/images/wakaf.png'},
     {'title': 'Fidyah', 'icon': 'assets/images/fidyah.png'},
     {'title': 'Bayar Ecommerce', 'icon': 'assets/images/ecommerce.png'},
-    {'title': 'Investasi Pintar', 'icon': 'assets/images/investment.png'},
+    {'title': 'Investasi Pintar', 'icon': 'assets/images/investation.png'},
     {'title': 'Reksa Dana', 'icon': 'assets/images/mutual_fund.png'},
     {'title': 'Sedekah Santuni Anak Yatim', 'icon': 'assets/images/charity.png'},
   ];
+
+  // Fungsi untuk menangani tap pada menu
+  void _handleMenuTap(BuildContext context, String title) {
+    switch (title) {
+      case 'Donasi':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DonasiPage()),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Selected: $title'),
+            duration: const Duration(milliseconds: 300),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +124,7 @@ class LainnyaPage extends StatelessWidget {
                       crossAxisCount: 4,
                       crossAxisSpacing: 8.w,
                       mainAxisSpacing: 16.h,
-                      childAspectRatio: 0.75, // ✅ dibuat lebih tinggi
+                      childAspectRatio: 0.75,
                     ),
                     itemCount: menuItems.length,
                     itemBuilder: (context, index) {
@@ -153,7 +177,7 @@ class LainnyaPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8.h),
-            Expanded( // ✅ supaya teks tidak overflow
+            Expanded(
               child: Text(
                 item['title']!,
                 textAlign: TextAlign.center,
@@ -167,19 +191,6 @@ class LainnyaPage extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _handleMenuTap(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Selected: $title'),
-        duration: const Duration(milliseconds: 300),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.r),
         ),
       ),
     );
