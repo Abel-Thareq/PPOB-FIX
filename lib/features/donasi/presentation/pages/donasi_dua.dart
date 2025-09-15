@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ppob_app/features/donasi/presentation/pages/donasi_tiga.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 
 class DonasiDuaPage extends StatefulWidget {
@@ -54,16 +55,15 @@ class _DonasiDuaPageState extends State<DonasiDuaPage> {
 
   // Fungsi navigasi ke halaman berikutnya (bisa disesuaikan)
   void _navigateToNextPage(BuildContext context, String institutionName, String imagePath) {
-    // TODO: Implementasi navigasi ke halaman berikutnya
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => NextPage(
-    //       institutionName: institutionName,
-    //       institutionImage: imagePath,
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DonasiTigaPage(
+          institutionName: institutionName,
+          institutionImage: imagePath,
+        ),
+      ),
+    );
   }
 
   @override
