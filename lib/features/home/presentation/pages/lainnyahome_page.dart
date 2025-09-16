@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/donasi/presentation/pages/donasi_page.dart';
+import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_page.dart';
 
 class LainnyaPage extends StatelessWidget {
   const LainnyaPage({super.key});
@@ -28,6 +29,12 @@ class LainnyaPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const DonasiPage()),
+        );
+        break;
+      case 'Reksa Dana':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ReksaPage()),
         );
         break;
       default:
