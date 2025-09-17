@@ -27,9 +27,9 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
       child: Scaffold(
         body: Column(
           children: [
-            // HEADER - PAKAI IMAGE ASSET
+            // HEADER - PAKAI IMAGE ASSET DAN DUA BOX YANG MELAYANG
             SizedBox(
-              height: 140.h,
+              height: 200.h, // Menambah tinggi header untuk mengakomodasi box yang melayang
               child: Stack(
                 children: [
                   // Gambar header
@@ -59,126 +59,160 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
 
-            // BOX TOTAL INVESTASI yang melayang seperti di ReksaDuaPage
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 24.w),
-              transform: Matrix4.translationValues(0, -20.h, 0), // Membuat box melayang ke atas
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 4.h),
-                  ),
-                ],
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Column(
-                children: [
-                  // Bagian atas ungu
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12.r),
-                        topRight: Radius.circular(12.r),
+                  // BOX "SATU PINTU SEMUA PEMBAYARAN" melayang di bawah header
+                  Positioned(
+                    bottom: 70.h, // Posisi di atas box Total Investasi
+                    left: 24.w,
+                    right: 24.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple,
+                        borderRadius: BorderRadius.circular(6.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6.r,
+                            offset: Offset(0, 3.h),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Total Investasi",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              "Rp0",
-                              style: TextStyle(
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                      child: Center(
+                        child: Text(
+                          'SATU PINTU SEMUA PEMBAYARAN',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                        Icon(Icons.visibility_off, color: Colors.white, size: 24.r),
-                      ],
+                      ),
                     ),
                   ),
 
-                  // Bagian bawah abu-abu
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(12.r),
-                        bottomRight: Radius.circular(12.r),
+                  // BOX TOTAL INVESTASI yang melayang
+                  Positioned(
+                    bottom: 0, // Diletakkan di bagian bawah Stack
+                    left: 24.w,
+                    right: 24.w,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8.r,
+                            offset: Offset(0, 4.h),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Total Keuntungan",
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey[700],
+                      child: Column(
+                        children: [
+                          // Bagian atas ungu
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12.r),
+                                topRight: Radius.circular(12.r),
                               ),
                             ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              "Rp0",
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Investasi",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      "Rp0",
+                                      style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Icon(Icons.visibility_off, color: Colors.white, size: 24.r),
+                              ],
+                            ),
+                          ),
+
+                          // Bagian bawah abu-abu
+                          Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(12.r),
+                                bottomRight: Radius.circular(12.r),
                               ),
                             ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Total Kenaikan",
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey[700],
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Keuntungan",
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      "Rp0",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Kenaikan",
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      "0%",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              "0%",
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -189,7 +223,7 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(
-                  top: 16.h, // Mengurangi padding top karena box sudah melayang
+                  top: 16.h,
                   left: 24.w,
                   right: 24.w,
                   bottom: 24.h,
@@ -340,11 +374,11 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
             ],
           ),
           SizedBox(height: 12.h),
-          
+
           // Garis pemisah
           Divider(color: Colors.grey[300], height: 1.h),
           SizedBox(height: 12.h),
-          
+
           // Periode Rekomendasi
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -367,7 +401,7 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
             ],
           ),
           SizedBox(height: 8.h),
-          
+
           // Kinerja Historis
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -390,7 +424,7 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
+
           // Tombol Beli
           Align(
             alignment: Alignment.centerRight,
