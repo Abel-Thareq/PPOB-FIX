@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/home/presentation/pages/tagihan_page.dart';
+import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_tiga.dart';
 
 class ReksaDuaPage extends StatefulWidget {
   const ReksaDuaPage({super.key});
@@ -12,7 +13,18 @@ class ReksaDuaPage extends StatefulWidget {
 class _ReksaDuaPageState extends State<ReksaDuaPage> {
   String selectedIncomeSource = "Gaji";
   String selectedIncomeRange = "Rp50–99 Juta";
-  String selectedRiskProfile = "Agresif";
+  String selectedRiskProfile = "Moderat";
+  
+  // Variabel untuk kuesioner profil risiko
+  String selectedInvestmentPeriod = "1–5 Tahun";
+  String selectedInvestmentGoal = "Pertumbuhan Laba (Jangka Panjang)";
+  String selectedFundAllocation = "25–50%";
+  String selectedMaxAssetDecline = "25–50%";
+  String selectedFundKnowledge = "Tinggi";
+  String selectedProductKnowledge = "Tinggi";
+
+  // Variabel untuk checkbox
+  bool isAgreeToTerms = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,91 +43,61 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
       child: Scaffold(
         body: Column(
           children: [
-            // HEADER
-            Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF6A1B9A), Color(0xFF7E57C2)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+            // HEADER - PAKAI IMAGE ASSET (sesuai permintaan)
+            SizedBox(
+              height: 140.h,
+              child: Stack(
+                children: [
+                  // Ganti gradient dengan gambar header.png
+                  SizedBox(
+                    width: double.infinity,
+                    height: 120.h,
+                    child: Image.asset(
+                      "assets/images/header.png",
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      color: Colors.white,
-                      iconSize: 28,
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (_) => const TagihanPage()),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'modipay',
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'SATU PINTU SEMUA PEMBAYARAN',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
 
-            // KONTEN
-            Expanded(
-              child: SingleChildScrollView(
-                // Hapus padding horizontal agar konten bisa full width
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Tombol Formulir Data (seperti tab)
-                    Center(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 16.h),
-                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
+                  // Tombol back di atas gambar
+                  SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.r),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, size: 28.r),
+                        color: Colors.white,
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TagihanPage()),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // BOX "Formulir Data" melayang di bawah header (sama seperti desain)
+                  Positioned(
+                    bottom: 0.w,
+                    left: 24.w,
+                    right: 24.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: Colors.grey[300]!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6.r,
+                            offset: Offset(0, 3.h),
+                          ),
+                        ],
+                      ),
+                      child: Center(
                         child: Text(
-                          "Formulir Data",
+                          'Formulir Data',
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
@@ -124,10 +106,22 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
                         ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+            ),
 
-                    SizedBox(height: 24.h),
-
-                    // Email - tambahkan padding horizontal hanya untuk bagian ini
+            // KONTEN
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: 24.h,
+                  bottom: 24.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Email
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: Column(
@@ -143,7 +137,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
                             width: double.infinity,
                             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                             decoration: BoxDecoration(
-                              color: Color(0xFFF3E5F5), // Warna ungu muda
+                              color: Color(0xFFF3E5F5),
                               borderRadius: BorderRadius.circular(8.r),
                               border: Border.all(color: Color(0xFF7B1FA2), width: 1),
                             ),
@@ -175,20 +169,18 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
 
                     SizedBox(height: 24.h),
 
-                    // Informasi Pribadi - dalam kotak abu-abu (FULL WIDTH)
+                    // Informasi Pribadi - DIPERBAIKI: Section box full width
                     _buildSectionBoxFullWidth("INFORMASI PRIBADI"),
                     SizedBox(height: 16.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: Column(
                         children: [
-                          // Sumber Penghasilan - bisa diklik
                           GestureDetector(
                             onTap: () => _showIncomeSourceBottomSheet(context),
                             child: _buildListTile("Sumber Penghasilan", selectedIncomeSource),
                           ),
                           SizedBox(height: 12.h),
-                          // Penghasilan per Tahun - bisa diklik
                           GestureDetector(
                             onTap: () => _showIncomeRangeBottomSheet(context),
                             child: _buildListTile("Penghasilan per Tahun", selectedIncomeRange),
@@ -199,7 +191,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
 
                     SizedBox(height: 24.h),
 
-                    // Profil Resiko - dalam kotak abu-abu (FULL WIDTH)
+                    // Profil Resiko - DIPERBAIKI: Section box full width
                     _buildSectionBoxFullWidth("PROFIL RESIKO"),
                     SizedBox(height: 16.h),
                     Padding(
@@ -207,9 +199,8 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Profil Resiko - bisa diklik
                           GestureDetector(
-                            onTap: () => _showRiskProfileBottomSheet(context),
+                            onTap: () => _showRiskProfileQuestionnaire(context),
                             child: _buildListTile("Profil Resiko", selectedRiskProfile),
                           ),
                           SizedBox(height: 8.h),
@@ -226,7 +217,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
 
                     SizedBox(height: 24.h),
 
-                    // Data Pribadi - dalam kotak abu-abu (FULL WIDTH)
+                    // Data Pribadi - DIPERBAIKI: Section box full width
                     _buildSectionBoxFullWidth("DATA PRIBADI"),
                     SizedBox(height: 16.h),
                     Padding(
@@ -248,15 +239,19 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
 
                     SizedBox(height: 24.h),
 
-                    // Checkbox
+                    // Checkbox - DIPERBAIKI
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Checkbox(
-                            value: true,
-                            onChanged: (value) {},
+                            value: isAgreeToTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                isAgreeToTerms = value ?? false;
+                              });
+                            },
                             activeColor: Colors.deepPurple,
                           ),
                           SizedBox(width: 8.w),
@@ -274,7 +269,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
 
                     SizedBox(height: 24.h),
 
-                    // Tombol Kirim
+                    // Tombol Kirim - DIPERBAIKI (dinonaktifkan jika belum setuju)
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: SizedBox(
@@ -282,14 +277,21 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
                         height: 48.h,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6A1B9A),
+                            backgroundColor: isAgreeToTerms 
+                                ? const Color(0xFF6A1B9A) 
+                                : Colors.grey,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                           ),
-                          onPressed: () {
-                            // TODO: aksi kirim formulir
-                          },
+                          onPressed: isAgreeToTerms
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ReksaTigaPage()),
+                              );
+                            }
+                          : null,
                           child: Text(
                             "Kirim",
                             style: TextStyle(
@@ -310,6 +312,308 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
           ],
         ),
       ),
+    );
+  }
+
+  // Widget untuk membuat section title dalam kotak abu-abu FULL WIDTH - DIPERBAIKI
+  Widget _buildSectionBoxFullWidth(String title) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.zero,
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  // Method untuk menampilkan kuesioner profil risiko
+  void _showRiskProfileQuestionnaire(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              padding: EdgeInsets.all(16.w),
+              height: MediaQuery.of(context).size.height * 0.9,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Center(
+                    child: Text(
+                      "Profil Risiko Saya",
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  
+                  // Hasil Profil Risiko
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple[50],
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          selectedRiskProfile,
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          _getRiskProfileDescription(selectedRiskProfile),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.deepPurple[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Periode Investasi
+                          _buildQuestionnaireItem(
+                            "Periode investasi yang diinginkan",
+                            selectedInvestmentPeriod,
+                            ["< 1 Tahun", "1–5 Tahun", "> 5 Tahun"],
+                            (value) {
+                              setModalState(() {
+                                selectedInvestmentPeriod = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                          
+                          // Tujuan Investasi
+                          _buildQuestionnaireItem(
+                            "Tujuan Investasi Reksa Dana",
+                            selectedInvestmentGoal,
+                            [
+                              "Pendapatan Tetap (Jangka Pendek)",
+                              "Pertumbuhan Laba (Jangka Panjang)",
+                              "Spekulasi (High Risk High Return)"
+                            ],
+                            (value) {
+                              setModalState(() {
+                                selectedInvestmentGoal = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                          
+                          // Alokasi Reksa Dana
+                          _buildQuestionnaireItem(
+                            "Alokasi Reksa Dana dari Total Aset",
+                            selectedFundAllocation,
+                            ["< 25%", "25–50%", "> 50%"],
+                            (value) {
+                              setModalState(() {
+                                selectedFundAllocation = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                          
+                          // Maksimum Penurunan Aset
+                          _buildQuestionnaireItem(
+                            "Maksimum Penurunan Aset",
+                            selectedMaxAssetDecline,
+                            ["< 25%", "25–50%", "> 50%"],
+                            (value) {
+                              setModalState(() {
+                                selectedMaxAssetDecline = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                          
+                          // Pengetahuan Reksa Dana
+                          _buildQuestionnaireItem(
+                            "Pengetahuan Reksa Dana",
+                            selectedFundKnowledge,
+                            ["Rendah", "Sedang", "Tinggi"],
+                            (value) {
+                              setModalState(() {
+                                selectedFundKnowledge = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                          
+                          // Pengetahuan Produk
+                          _buildQuestionnaireItem(
+                            "Pengetahuan Produk Ingin Dibeli",
+                            selectedProductKnowledge,
+                            ["Rendah", "Sedang", "Tinggi"],
+                            (value) {
+                              setModalState(() {
+                                selectedProductKnowledge = value;
+                              });
+                              _calculateRiskProfile();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 16.h),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48.h,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _calculateRiskProfile();
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "Simpan Profil Risiko",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Method untuk mendapatkan deskripsi profil risiko
+  String _getRiskProfileDescription(String profile) {
+    switch (profile) {
+      case "Konservatif":
+        return "Lebih memilih investasi aman dengan risiko rendah dan return yang stabil.";
+      case "Moderat":
+        return "Seimbang antara risiko dan return, mau mengambil risiko sedang untuk return yang lebih baik.";
+      case "Agresif":
+        return "Cukup siap jika jumlah modal investasi awal berkurang drastis asal punya peluang dapat untung tinggi.";
+      default:
+        return "";
+    }
+  }
+
+  // Method untuk menghitung profil risiko berdasarkan jawaban
+  void _calculateRiskProfile() {
+    int score = 0;
+    
+    // Scoring berdasarkan jawaban
+    if (selectedInvestmentPeriod == "1–5 Tahun") score += 1;
+    if (selectedInvestmentPeriod == "> 5 Tahun") score += 2;
+    
+    if (selectedInvestmentGoal == "Pertumbuhan Laba (Jangka Panjang)") score += 1;
+    if (selectedInvestmentGoal == "Spekulasi (High Risk High Return)") score += 2;
+    
+    if (selectedFundAllocation == "25–50%") score += 1;
+    if (selectedFundAllocation == "> 50%") score += 2;
+    
+    if (selectedMaxAssetDecline == "25–50%") score += 1;
+    if (selectedMaxAssetDecline == "> 50%") score += 2;
+    
+    if (selectedFundKnowledge == "Sedang") score += 1;
+    if (selectedFundKnowledge == "Tinggi") score += 2;
+    
+    if (selectedProductKnowledge == "Sedang") score += 1;
+    if (selectedProductKnowledge == "Tinggi") score += 2;
+    
+    // Tentukan profil risiko berdasarkan score
+    if (score <= 6) {
+      selectedRiskProfile = "Konservatif";
+    } else if (score <= 11) {
+      selectedRiskProfile = "Moderat";
+    } else {
+      selectedRiskProfile = "Agresif";
+    }
+  }
+
+  // Widget untuk item kuesioner
+  Widget _buildQuestionnaireItem(String question, String selectedValue, List<String> options, Function(String) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 16.h),
+        Text(
+          question,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: options.map((option) {
+            final isSelected = option == selectedValue;
+            return ChoiceChip(
+              label: Text(option),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  onChanged(option);
+                }
+              },
+              selectedColor: Colors.deepPurple,
+              backgroundColor: Colors.grey[200],
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 12.sp,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -449,62 +753,6 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
     );
   }
 
-  // Method untuk menampilkan bottom sheet Profil Resiko
-  void _showRiskProfileBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                "Profil Resiko",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              _buildOptionItem("Konservatif", selectedRiskProfile == "Konservatif", () {
-                setState(() {
-                  selectedRiskProfile = "Konservatif";
-                });
-                Navigator.pop(context);
-              }),
-              _buildOptionItem("Moderat", selectedRiskProfile == "Moderat", () {
-                setState(() {
-                  selectedRiskProfile = "Moderat";
-                });
-                Navigator.pop(context);
-              }),
-              _buildOptionItem("Agresif", selectedRiskProfile == "Agresif", () {
-                setState(() {
-                  selectedRiskProfile = "Agresif";
-                });
-                Navigator.pop(context);
-              }),
-              SizedBox(height: 16.h),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   // Widget untuk membuat item opsi dalam bottom sheet
   Widget _buildOptionItem(String title, bool isSelected, VoidCallback onTap) {
     return ListTile(
@@ -524,26 +772,6 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
             )
           : null,
       onTap: onTap,
-    );
-  }
-
-  // Widget untuk membuat section title dalam kotak abu-abu FULL WIDTH
-  Widget _buildSectionBoxFullWidth(String title) {
-    return Container(
-      width: double.infinity, // Memastikan lebar penuh
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h), // Kurangi vertical padding
-      decoration: BoxDecoration(
-        color: Colors.grey[300], // Warna abu yang lebih gelap
-        borderRadius: BorderRadius.zero, // Hapus border radius untuk full width
-      ),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 11.sp, // Perkecil font size
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
     );
   }
 
@@ -580,7 +808,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
   Widget _buildListTile(String title, String value) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h), // Kurangi vertical padding
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.r),
@@ -592,7 +820,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 12.sp, // Perkecil font size
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -601,7 +829,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 12.sp, // Perkecil font size
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple,
                 ),
@@ -626,14 +854,14 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11.sp, // Perkecil font size
+            fontSize: 11.sp,
             color: Colors.grey[600],
           ),
         ),
         SizedBox(height: 4.h),
         Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h), // Kurangi vertical padding
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: Colors.grey[100],
             borderRadius: BorderRadius.circular(8.r),
@@ -642,10 +870,12 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 13.sp, // Perkecil font size
+              fontSize: 13.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
