@@ -17,7 +17,6 @@ class LainnyaPage extends StatelessWidget {
     {'title': 'Wakaf', 'icon': 'assets/images/wakaf.png'},
     {'title': 'Fidyah', 'icon': 'assets/images/fidyah.png'},
     {'title': 'Bayar Ecommerce', 'icon': 'assets/images/ecommerce.png'},
-    {'title': 'Investasi Pintar', 'icon': 'assets/images/investation.png'},
     {'title': 'Reksa Dana', 'icon': 'assets/images/mutual_fund.png'},
     {'title': 'Sedekah Santuni Anak Yatim', 'icon': 'assets/images/charity.png'},
   ];
