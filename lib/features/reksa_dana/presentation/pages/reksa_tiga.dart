@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ppob_app/features/home/presentation/pages/tagihan_page.dart';
+import 'package:ppob_app/features/home/presentation/pages/lainnyahome_page.dart';
 import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_empat.dart';
 
 class ReksaTigaPage extends StatefulWidget {
@@ -11,6 +11,15 @@ class ReksaTigaPage extends StatefulWidget {
 }
 
 class _ReksaTigaPageState extends State<ReksaTigaPage> {
+  // Function untuk handle back button
+  void _onBackPressed() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LainnyaPage()), // Ganti ke LainnyaPage
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(360, 690));
@@ -19,11 +28,7 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
       canPop: false,
       onPopInvoked: (didPop) {
         if (didPop) return;
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const TagihanPage()),
-          (route) => false,
-        );
+        _onBackPressed(); // Panggil function back button
       },
       child: Scaffold(
         body: Column(
@@ -50,14 +55,7 @@ class _ReksaTigaPageState extends State<ReksaTigaPage> {
                       child: IconButton(
                         icon: Icon(Icons.arrow_back, size: 28.r),
                         color: Colors.white,
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const TagihanPage()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _onBackPressed, // Gunakan function yang sama
                       ),
                     ),
                   ),
