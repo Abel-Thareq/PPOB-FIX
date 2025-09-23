@@ -280,18 +280,24 @@ class _ReksaEmpatPageState extends State<ReksaEmpatPage> {
                           ),
                           onPressed: jumlahPembelian >= minimumPembelian
                               ? () {
-                                  // Navigasi ke ReksaLimaPage dengan data
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ReksaLimaPage(
-                                        productName: data['title'],
-                                        productImage: data['image'],
-                                        nominal: jumlahPembelian.toInt(), // Kirim nominal sebagai integer
-                                        perkiraanUnit: perkiraanUnit,
+                                  // Tutup keyboard terlebih dahulu
+                                  FocusScope.of(context).unfocus();
+                                  
+                                  // Tunggu sebentar agar keyboard benar-benar tertutup
+                                  Future.delayed(const Duration(milliseconds: 100), () {
+                                    // Navigasi ke ReksaLimaPage dengan data
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ReksaLimaPage(
+                                          productName: data['title'],
+                                          productImage: data['image'],
+                                          nominal: jumlahPembelian.toInt(), // Kirim nominal sebagai integer
+                                          perkiraanUnit: perkiraanUnit,
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  });
                                 }
                               : null,
                           child: Text(
@@ -1008,7 +1014,7 @@ class _ReksaEmpatPageState extends State<ReksaEmpatPage> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                                                                Text(
+                                          Text(
                                           "Pasar Uang",
                                           style: TextStyle(
                                             fontSize: 12.sp,
