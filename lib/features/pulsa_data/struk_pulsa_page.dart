@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:ppob_app/features/account/preferensi/preferences_provider.dart';
 
 class StrukPulsaPage extends StatelessWidget {
   final String noRef;
@@ -30,177 +32,196 @@ class StrukPulsaPage extends StatelessWidget {
     ScreenUtil.init(context, designSize: const Size(360, 690));
     final NumberFormat formatter = NumberFormat("#,###", "id_ID");
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // 🔹 Header
-          SizedBox(
-            height: 135.h,
-            child: Stack(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 120.h,
-                  child: Image.asset(
-                    'assets/images/header.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.r),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back,
-                          size: 28.r, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MainScreen()),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // 🔹 Icon centang & judul
-          const Icon(Icons.check_circle, color: Colors.green, size: 48),
-          SizedBox(height: 8.h),
-          const Text(
-            "Transaksi Berhasil",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16.h),
-
-          // 🔹 Box Struk
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.grey[300]!),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4), // posisi shadow
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRow(
-                  "Tanggal",
-                  "${DateFormat("dd MMM yyyy HH:mm:ss", "id_ID").format(tanggal)} WIB",
-                ),
-                _buildRow("No. Ref", noRef),
-                const Divider(),
-
-                _buildRow("Sumber Dana", sumberDana),
-                _buildRow("Tujuan", tujuan),
-                _buildRow("Nomor Serial", nomorSerial),
-                const Divider(),
-
-                _buildRow("Harga", "Rp${formatter.format(harga)}"),
-                _buildRow("Biaya Admin", "Rp${formatter.format(biayaAdmin)}"),
-                const Divider(),
-
-                // 🔹 Total Pembelian (sekarang masuk ke dalam Box Struk)
-                Container(
-                  margin: EdgeInsets.only(top: 8.h),
-                  padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8F8F8),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Total Pembelian",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+    return Consumer<PreferencesProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Column(
+            children: [
+              // 🔹 Header
+              SizedBox(
+                height: 135.h,
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 120.h,
+                      child: Image.asset(
+                        'assets/images/header.png',
+                        fit: BoxFit.cover,
                       ),
-                      Text(
-                        "Rp${formatter.format(total)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color(0xFF5938FB),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.r),
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back,
+                              size: 28.r, color: Colors.white),
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const MainScreen()),
+                              (route) => false,
+                            );
+                          },
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          const Spacer(),
+              // 🔹 Logo Operator (opsional)
+              if (provider.showLogo)
+                Padding(
+                  padding: EdgeInsets.only(top: 12.h, bottom: 8.h),
+                  child: Image.asset(
+                    "assets/images/pulsa.png",
+                    height: 48.h,
+                  ),
+                ),
 
-          // 🔹 Button Bagikan + Selesai
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: const Color(0xFF5938FB)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+              // 🔹 Icon centang & judul
+              const Icon(Icons.check_circle, color: Colors.green, size: 48),
+              SizedBox(height: 8.h),
+              const Text(
+                "Transaksi Berhasil",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16.h),
+
+              // 🔹 Box Struk
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey[300]!),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4), // posisi shadow
                     ),
-                    onPressed: () {
-                      // TODO: implement share
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Bagikan ditekan")),
-                      );
-                    },
-                    icon: const Icon(Icons.share, color: Color(0xFF5938FB)),
-                    label: const Text(
-                      "Bagikan",
-                      style: TextStyle(color: Color(0xFF5938FB)),
-                    ),
-                  ),
+                  ],
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5938FB),
-                      shape: RoundedRectangleBorder(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRow(
+                      "Tanggal",
+                      "${DateFormat("dd MMM yyyy HH:mm:ss", "id_ID").format(tanggal)} WIB",
+                    ),
+                    _buildRow("No. Ref", noRef),
+                    const Divider(),
+
+                    _buildRow("Sumber Dana", sumberDana),
+
+                    if (provider.showPhone) _buildRow("Tujuan", tujuan),
+                    _buildRow("Nomor Serial", nomorSerial),
+
+                    if (provider.showAddress)
+                      _buildRow("Alamat", "Jl. Contoh Alamat 123"),
+
+                    const Divider(),
+                    _buildRow("Harga", "Rp${formatter.format(harga)}"),
+                    _buildRow("Biaya Admin", "Rp${formatter.format(biayaAdmin)}"),
+                    const Divider(),
+
+                    // 🔹 Total Pembelian (masuk ke dalam Box Struk)
+                    Container(
+                      margin: EdgeInsets.only(top: 8.h),
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F8F8),
                         borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Total Pembelian",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          Text(
+                            "Rp${formatter.format(total)}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF5938FB),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MainScreen()),
-                        (route) => false,
-                      );
-                    },
-                    child: const Text(
-                      "Selesai",
-                      style: TextStyle(fontSize: 15, color: Colors.white),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              const Spacer(),
+
+              // 🔹 Button Bagikan + Selesai
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF5938FB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                        ),
+                        onPressed: () {
+                          // TODO: implement share
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Bagikan ditekan")),
+                          );
+                        },
+                        icon: const Icon(Icons.share, color: Color(0xFF5938FB)),
+                        label: const Text(
+                          "Bagikan",
+                          style: TextStyle(color: Color(0xFF5938FB)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5938FB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                        ),
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MainScreen()),
+                            (route) => false,
+                          );
+                        },
+                        child: const Text(
+                          "Selesai",
+                          style: TextStyle(fontSize: 15, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

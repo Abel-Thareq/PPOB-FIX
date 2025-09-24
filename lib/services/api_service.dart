@@ -30,7 +30,7 @@ class ApiService {
     };
 
     print("📤 Register request ke $url");
-    print("➡ Body: ${jsonEncode(body)}");
+    print("➡️ Body: ${jsonEncode(body)}");
 
     final response = await http.post(
       url,

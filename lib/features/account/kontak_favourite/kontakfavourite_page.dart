@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_contact_picker/model/contact.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KontakFavouritePage extends StatefulWidget {
   const KontakFavouritePage({super.key});
@@ -27,6 +31,9 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
   late AnimationController _expandController;
   late Animation<double> _expandAnimation;
 
+  final FlutterNativeContactPicker _contactPicker =
+      FlutterNativeContactPicker(); // instance picker
+
   @override
   void initState() {
     super.initState();
@@ -38,12 +45,46 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
       parent: _expandController,
       curve: Curves.easeInOut,
     );
+
+    // 🔹 Load data tersimpan saat halaman pertama kali dibuka
+    _loadKontak();
   }
 
   @override
   void dispose() {
     _expandController.dispose();
     super.dispose();
+  }
+
+  // 🔹 Simpan ke SharedPreferences (pastikan semua value String)
+  Future<void> _saveKontak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sanitized = kontakList
+        .map((m) => m.map((k, v) => MapEntry(k.toString(), v.toString())))
+        .toList();
+    await prefs.setString('kontakList', jsonEncode(sanitized));
+  }
+
+  // 🔹 Load dari SharedPreferences (konversi dynamic ke String)
+  Future<void> _loadKontak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final kontakJson = prefs.getString('kontakList');
+    if (kontakJson != null) {
+      try {
+        final List decoded = jsonDecode(kontakJson);
+        final loaded = decoded.map<Map<String, String>>((item) {
+          final Map raw = item as Map;
+          return raw.map((k, v) =>
+              MapEntry(k.toString(), v == null ? '' : v.toString()));
+        }).toList();
+
+        setState(() {
+          kontakList = loaded;
+        });
+      } catch (e) {
+        debugPrint("Gagal parse kontak: $e");
+      }
+    }
   }
 
   void toggleExpand(StateSetter setStateDialog) {
@@ -65,6 +106,34 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
         "jenis": jenis,
       });
     });
+    _saveKontak();
+  }
+
+  void _hapusKontak(int index) {
+    setState(() {
+      kontakList.removeAt(index);
+    });
+    _saveKontak();
+  }
+
+  /// Fungsi pilih kontak & isi otomatis ke TextField
+  Future<void> _pickContact(TextEditingController nomorController,
+      TextEditingController namaController) async {
+    try {
+      final Contact? contact = await _contactPicker.selectPhoneNumber();
+      if (contact == null) return;
+
+      final String nomor = contact.selectedPhoneNumber ??
+          (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty
+              ? contact.phoneNumbers!.first
+              : "");
+      final String nama = contact.fullName ?? "";
+
+      if (nomor.isNotEmpty) nomorController.text = nomor;
+      if (nama.isNotEmpty) namaController.text = nama;
+    } catch (e) {
+      debugPrint("Gagal memilih kontak: $e");
+    }
   }
 
   @override
@@ -101,7 +170,8 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                   left: 24.w,
                   right: 24.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8.r),
@@ -130,29 +200,61 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
             ),
           ),
 
+          /// 🔹 Tambahan teks sesuai gambar
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                hintText: "Cari",
-                hintStyle: TextStyle(
-                  fontSize: 13.sp,
-                  color: Colors.grey,
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Pilih Kontak Favorit Anda",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 0.5),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 0.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: Color(0xFF5938FB), width: 1.2),
+              ),
+            ),
+          ),
+
+          /// 🔹 TextField dengan shadow
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  hintText: "Cari",
+                  hintStyle: TextStyle(
+                    fontSize: 13.sp,
+                    color: Colors.grey,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300, width: 0.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide:
+                        BorderSide(color: Colors.grey.shade300, width: 0.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF5938FB), width: 1.2),
+                  ),
                 ),
               ),
             ),
@@ -227,13 +329,11 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                             trailing: PopupMenuButton<String>(
                               onSelected: (value) {
                                 if (value == "hapus") {
-                                  setState(() {
-                                    kontakList.removeAt(index);
-                                  });
+                                  _hapusKontak(index);
                                 }
                               },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
+                              itemBuilder: (context) => const [
+                                PopupMenuItem(
                                   value: "hapus",
                                   child: Text("Hapus"),
                                 ),
@@ -276,7 +376,9 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                       return StatefulBuilder(
                         builder: (context, setStateDialog) {
                           return Dialog(
-                            insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+                            backgroundColor: Colors.white,
+                            insetPadding: EdgeInsets.symmetric(
+                                horizontal: 16.w, vertical: 24.h),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -287,7 +389,8 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                   child: SingleChildScrollView(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Center(
                                           child: Text(
@@ -309,18 +412,22 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                           controller: nomorController,
                                           decoration: InputDecoration(
                                             hintText: "Masukkan Nomor",
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12.r),
+                                            hintStyle: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Colors.grey,
                                             ),
-                                            suffixIcon: Padding(
-                                              padding: EdgeInsets.all(6.w),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(color: Colors.grey.shade300),
-                                                  borderRadius: BorderRadius.circular(8.r),
-                                                ),
-                                                child: const Icon(Icons.contact_page_outlined),
-                                              ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                            ),
+                                            suffixIcon: IconButton(
+                                              icon: const Icon(
+                                                  Icons.contact_page_outlined),
+                                              onPressed: () {
+                                                _pickContact(
+                                                    nomorController,
+                                                    namaController); // pilih kontak & isi otomatis
+                                              },
                                             ),
                                           ),
                                         ),
@@ -335,8 +442,13 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                           controller: namaController,
                                           decoration: InputDecoration(
                                             hintText: "Masukkan Nama",
+                                            hintStyle: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Colors.grey,
+                                            ),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
                                             ),
                                           ),
                                         ),
@@ -352,25 +464,38 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                             toggleExpand(setStateDialog);
                                           },
                                           child: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 12.w,
+                                                vertical: 14.h),
                                             decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.grey.shade300, width: 2),
-                                              borderRadius: BorderRadius.circular(12.r),
+                                              border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                  width: 2),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
                                             ),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Text(
-                                                  selectedJenisKontak ?? "Jenis Kontak",
+                                                  selectedJenisKontak ??
+                                                      "Jenis Kontak",
                                                   style: TextStyle(
                                                     fontSize: 14.sp,
-                                                    color: selectedJenisKontak == null ? Colors.grey : Colors.black,
+                                                    color:
+                                                        selectedJenisKontak ==
+                                                                null
+                                                            ? Colors.grey
+                                                            : Colors.black,
                                                   ),
                                                 ),
                                                 Icon(
                                                   isExpanded
                                                       ? Icons.keyboard_arrow_up
-                                                      : Icons.keyboard_arrow_down,
+                                                      : Icons
+                                                          .keyboard_arrow_down,
                                                   color: Colors.grey[700],
                                                 )
                                               ],
@@ -384,22 +509,30 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                           child: Container(
                                             margin: EdgeInsets.only(top: 6.h),
                                             decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                                              borderRadius: BorderRadius.circular(12.r),
+                                              border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                  width: 0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
                                             ),
                                             child: Column(
-                                              children: jenisKontakList.map((item) {
+                                              children:
+                                                  jenisKontakList.map((item) {
                                                 return InkWell(
                                                   onTap: () {
                                                     setStateDialog(() {
-                                                      selectedJenisKontak = item;
-                                                      toggleExpand(setStateDialog);
+                                                      selectedJenisKontak =
+                                                          item;
+                                                      toggleExpand(
+                                                          setStateDialog);
                                                     });
                                                   },
                                                   child: Padding(
-                                                    padding: EdgeInsets.all(12.w),
+                                                    padding:
+                                                        EdgeInsets.all(12.w),
                                                     child: Align(
-                                                      alignment: Alignment.centerLeft,
+                                                      alignment:
+                                                          Alignment.centerLeft,
                                                       child: Text(item),
                                                     ),
                                                   ),
@@ -414,8 +547,10 @@ class _KontakFavouritePageState extends State<KontakFavouritePage>
                                           alignment: Alignment.centerRight,
                                           child: TextButton(
                                             onPressed: () {
-                                              if (nomorController.text.isNotEmpty &&
-                                                  namaController.text.isNotEmpty &&
+                                              if (nomorController
+                                                      .text.isNotEmpty &&
+                                                  namaController
+                                                      .text.isNotEmpty &&
                                                   selectedJenisKontak != null) {
                                                 _tambahKontak(
                                                   nomorController.text,

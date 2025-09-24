@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ppob_app/features/home/presentation/pages/tagihan_page.dart';
+import 'package:ppob_app/features/home/presentation/pages/lainnyahome_page.dart';
+
 import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_tiga.dart';
 
 class ReksaDuaPage extends StatefulWidget {
@@ -36,7 +37,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
         if (didPop) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const TagihanPage()),
+          MaterialPageRoute(builder: (_) => const LainnyaPage()),
           (route) => false,
         );
       },
@@ -68,7 +69,7 @@ class _ReksaDuaPageState extends State<ReksaDuaPage> {
                         onPressed: () {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => const TagihanPage()),
+                            MaterialPageRoute(builder: (_) => const LainnyaPage()),
                             (route) => false,
                           );
                         },

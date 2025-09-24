@@ -68,7 +68,7 @@ class _CreatePinPageState extends State<CreatePinPage> {
   String get _confirmPin => _confirmControllers.map((c) => c.text).join();
 
   Future<void> _savePin() async {
-    print("➡ _savePin DIPANGGIL");
+    print("➡️ _savePin DIPANGGIL");
     print("📌 PIN: $_pin | Confirm: $_confirmPin");
 
     if (_pin.length != 6) {
