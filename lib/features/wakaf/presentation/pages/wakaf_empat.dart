@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/wakaf/presentation/pages/wakaf_tiga.dart';
+import 'package:ppob_app/features/wakaf/presentation/pages/wakaf_lima.dart'; // IMPORT HALAMAN BARU
 import 'wakaf_model.dart';
 
 class WakafEmpatPage extends StatefulWidget {
@@ -125,10 +126,10 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // DIUBAH DARI 3 MENJADI 2
+                        crossAxisCount: 2,
                         crossAxisSpacing: 12.w,
                         mainAxisSpacing: 12.h,
-                        childAspectRatio: 2.5, // DIUBAH DARI 1.8 MENJADI 2.5 UNTUK BOX LEBIH BESAR
+                        childAspectRatio: 2.5,
                       ),
                       itemCount: _donationAmounts.length,
                       itemBuilder: (context, index) {
@@ -143,9 +144,9 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
                         );
                       },
                     ),
-                    SizedBox(height: 40.h), // DIUBAH DARI 24.h MENJADI 40.h UNTUK TOMBOL LEBIH KEBAWAH
+                    SizedBox(height: 40.h),
 
-                    // Tombol "Lanjutkan" - DITAMBAH SPACING LEBIH BANYAK
+                    // Tombol "Lanjutkan"
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -174,7 +175,7 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 40.h), // DIUBAH DARI 24.h MENJADI 40.h
+                    SizedBox(height: 40.h),
                   ],
                 ),
               ),
@@ -214,16 +215,16 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14.sp, // DIUBAH DARI 12.sp MENJADI 14.sp UNTUK TEKS LEBIH BESAR
+                fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : Colors.black87,
               ),
             ),
-            SizedBox(height: 6.h), // DIUBAH DARI 4.h MENJADI 6.h
+            SizedBox(height: 6.h),
             Text(
               _formatCurrency(amount),
               style: TextStyle(
-                fontSize: 13.sp, // DIUBAH DARI 11.sp MENJADI 13.sp UNTUK TEKS LEBIH BESAR
+                fontSize: 13.sp,
                 color: isSelected ? Colors.white : Colors.grey[700],
               ),
             ),
@@ -286,8 +287,19 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
-                _showSuccessDialog(context, amount);
+                Navigator.pop(context); // Tutup dialog konfirmasi
+                
+                // Navigasi ke WakafLimaPage dengan membawa data
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WakafLimaPage(
+                      wakaf: widget.wakaf,
+                      selectedAmount: amount,
+                      selectedLabel: _getSelectedLabel(amount),
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF5938FB),
@@ -299,6 +311,18 @@ class _WakafEmpatPageState extends State<WakafEmpatPage> {
         );
       },
     );
+  }
+
+  // Method untuk mendapatkan label dari amount yang dipilih
+  String _getSelectedLabel(int amount) {
+    try {
+      final selectedDonation = _donationAmounts.firstWhere(
+        (donation) => donation['amount'] == amount,
+      );
+      return selectedDonation['label'];
+    } catch (e) {
+      return 'Donasi Custom';
+    }
   }
 
   void _showSuccessDialog(BuildContext context, int amount) {

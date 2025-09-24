@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/donasi/presentation/pages/donasi_page.dart';
 import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_page.dart';
 import 'package:ppob_app/features/wakaf/presentation/pages/wakaf_page.dart';
+import 'package:ppob_app/features/main_screen/main_screen.dart';
 
 class LainnyaPage extends StatelessWidget {
   const LainnyaPage({super.key});
@@ -22,7 +23,14 @@ class LainnyaPage extends StatelessWidget {
     {'title': 'Sedekah Santuni Anak Yatim', 'icon': 'assets/images/charity.png'},
   ];
 
-  // Fungsi untuk menangani tap pada menu
+  void _handleBackPressed(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const MainScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   void _handleMenuTap(BuildContext context, String title) {
     switch (title) {
       case 'Donasi':
@@ -61,94 +69,101 @@ class LainnyaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(360, 690));
 
-    return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: 140.h,
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 120.h,
-                  color: Colors.white,
-                  child: Image.asset(
-                    'assets/images/header.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.r),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back, size: 28.r),
-                      color: Colors.black,
-                      onPressed: () => Navigator.pop(context),
+    return PopScope(
+      canPop: false, // Mencegah pop default
+      onPopInvoked: (bool didPop) {
+        if (didPop) return;
+        _handleBackPressed(context);
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            SizedBox(
+              height: 140.h,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 120.h,
+                    color: Colors.white,
+                    child: Image.asset(
+                      'assets/images/header.png',
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: 0.w,
-                  left: 24.w,
-                  right: 24.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: Colors.grey[300]!),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 6.r,
-                          offset: Offset(0, 3.h),
-                        ),
-                      ],
+                  SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.r),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, size: 28.r),
+                        color: Colors.black,
+                        onPressed: () => _handleBackPressed(context),
+                      ),
                     ),
-                    child: Center(
-                      child: Text(
-                        'Daftar Hiburan & Keuangan',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF5938FB),
+                  ),
+                  Positioned(
+                    bottom: 0.w,
+                    left: 24.w,
+                    right: 24.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: Colors.grey[300]!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6.r,
+                            offset: Offset(0, 3.h),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Daftar Hiburan & Keuangan',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF5938FB),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                top: 12.h,
-                left: 16.w,
-                right: 16.w,
-                bottom: 24.h,
-              ),
-              child: Column(
-                children: [
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 8.w,
-                      mainAxisSpacing: 16.h,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: menuItems.length,
-                    itemBuilder: (context, index) {
-                      return _buildMenuItem(context, menuItems[index]);
-                    },
-                  ),
                 ],
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: 12.h,
+                  left: 16.w,
+                  right: 16.w,
+                  bottom: 24.h,
+                ),
+                child: Column(
+                  children: [
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 8.w,
+                        mainAxisSpacing: 16.h,
+                        childAspectRatio: 0.75,
+                      ),
+                      itemCount: menuItems.length,
+                      itemBuilder: (context, index) {
+                        return _buildMenuItem(context, menuItems[index]);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

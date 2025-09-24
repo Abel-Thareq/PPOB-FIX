@@ -68,12 +68,17 @@ class _CreatePinPageState extends State<CreatePinPage> {
   String get _confirmPin => _confirmControllers.map((c) => c.text).join();
 
   Future<void> _savePin() async {
+    print("➡ _savePin DIPANGGIL");
+    print("📌 PIN: $_pin | Confirm: $_confirmPin");
+
     if (_pin.length != 6) {
       _showError("PIN harus 6 digit");
+      print("❌ PIN kurang dari 6 digit");
       return;
     }
     if (_pin != _confirmPin) {
       _showError("Konfirmasi PIN tidak sesuai");
+      print("❌ Konfirmasi PIN tidak cocok");
       return;
     }
 
@@ -89,10 +94,31 @@ class _CreatePinPageState extends State<CreatePinPage> {
       final password = prefs.getString("reg_password");
       final passwordConfirm = prefs.getString("reg_password_confirm");
 
+      print("📤 Data dari SharedPreferences:");
+      print(" - Name: $name");
+      print(" - Email: $email");
+      print(" - Phone: $phone");
+      print(" - Password: ${password != null ? "ADA" : "null"}");
+      print(" - PasswordConfirm: $passwordConfirm");
+
       if (name == null || email == null || phone == null || password == null) {
         _showError("Data registrasi tidak ditemukan, silakan daftar ulang.");
+        print("❌ Data registrasi tidak lengkap di prefs");
         return;
       }
+
+      // 🔹 Log request yang akan dikirim
+      final requestData = {
+        "name": name,
+        "full_name": name,
+        "email": email,
+        "phone": phone,
+        "password": password,
+        "password_confirmation": passwordConfirm ?? password,
+        "pin": _pin,
+        "pin_confirmation": _confirmPin,
+      };
+      print("📤 Request ke API: $requestData");
 
       // 🔹 Panggil API register (sekarang termasuk PIN)
       final response = await ApiService.registerUser(
@@ -105,6 +131,8 @@ class _CreatePinPageState extends State<CreatePinPage> {
         pin: _pin,
         pinConfirmation: _confirmPin,
       );
+
+      print("🔑 Register Response dari API: $response");
 
       if (!mounted) return;
 
@@ -119,15 +147,22 @@ class _CreatePinPageState extends State<CreatePinPage> {
         prefs.remove("reg_password");
         prefs.remove("reg_password_confirm");
 
+        print("✅ Registrasi + Simpan PIN berhasil, navigasi ke success page");
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const RegistrationSuccessPage()),
+          MaterialPageRoute(
+              builder: (context) => const RegistrationSuccessPage()),
         );
       } else {
         _showError(response["message"] ?? "Gagal menyimpan PIN");
+        print("❌ Response gagal: ${response["message"]}");
+        if (response["errors"] != null) {
+          print("🛑 Detail Errors: ${response["errors"]}");
+        }
       }
     } catch (e) {
       _showError("Terjadi kesalahan: $e");
+      print("🔥 Exception di _savePin: $e");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -221,7 +256,8 @@ class _CreatePinPageState extends State<CreatePinPage> {
 
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
                 children: [
                   CircleAvatar(
