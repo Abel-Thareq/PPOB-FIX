@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'checkout_page.dart'; // Pastikan import file CheckoutPage
 
 class DetailShopPage extends StatefulWidget {
   final String title;
@@ -325,10 +326,23 @@ class _DetailShopPageState extends State<DetailShopPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Beli Sekarang Button
+              // Beli Sekarang Button - Updated untuk navigasi ke CheckoutPage
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Navigasi ke CheckoutPage dengan membawa data produk
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutPage(
+                          productTitle: widget.title,
+                          productPrice: widget.price.replaceAll('Rp. ', 'Rp'),
+                          productSize: 'S',
+                          productColor: 'Hiram',
+                        ),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5938FB),
                     elevation: 0,
