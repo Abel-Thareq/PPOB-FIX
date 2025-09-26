@@ -1,5 +1,486 @@
 import 'package:flutter/material.dart';
 
+// Model untuk metode pembayaran
+class MetodePembayaran {
+  final String nama;
+  final String icon;
+  final bool isSelected;
+
+  MetodePembayaran({
+    required this.nama,
+    required this.icon,
+    this.isSelected = false,
+  });
+
+  MetodePembayaran copyWith({
+    String? nama,
+    String? icon,
+    bool? isSelected,
+  }) {
+    return MetodePembayaran(
+      nama: nama ?? this.nama,
+      icon: icon ?? this.icon,
+      isSelected: isSelected ?? this.isSelected,
+    );
+  }
+}
+
+// Model untuk opsi bank
+class OpsiBank {
+  final String nama;
+  final String icon;
+
+  OpsiBank({
+    required this.nama,
+    required this.icon,
+  });
+}
+
+// Halaman Metode Pembayaran
+class MetodePembayaranPage extends StatefulWidget {
+  final Function(MetodePembayaran, OpsiBank?) onMetodeSelected;
+  final MetodePembayaran? metodeTerpilih;
+  final OpsiBank? bankTerpilih;
+
+  const MetodePembayaranPage({
+    Key? key,
+    required this.onMetodeSelected,
+    this.metodeTerpilih,
+    this.bankTerpilih,
+  }) : super(key: key);
+
+  @override
+  State<MetodePembayaranPage> createState() => _MetodePembayaranPageState();
+}
+
+class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
+  late List<MetodePembayaran> _metodePembayaranList;
+  MetodePembayaran? _selectedMetode;
+  bool _transferBankExpanded = false;
+  OpsiBank? _selectedBank;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Data dummy metode pembayaran
+    _metodePembayaranList = [
+      MetodePembayaran(
+        nama: 'COD',
+        icon: 'assets/images/cod.png',
+        isSelected: widget.metodeTerpilih?.nama == 'COD',
+      ),
+      MetodePembayaran(
+        nama: 'Transfer Bank',
+        icon: 'assets/images/transferbank.png',
+        isSelected: widget.metodeTerpilih?.nama == 'Transfer Bank',
+      ),
+      MetodePembayaran(
+        nama: 'Saldo Modipay',
+        icon: 'assets/images/iconmodipay.png',
+        isSelected: widget.metodeTerpilih?.nama == 'Saldo Modipay',
+      ),
+    ];
+
+    _selectedMetode = widget.metodeTerpilih;
+    _selectedBank = widget.bankTerpilih;
+    if (_selectedMetode?.nama == 'Transfer Bank') {
+      _transferBankExpanded = true;
+    }
+  }
+
+  void _selectMetode(MetodePembayaran metode) {
+    setState(() {
+      _selectedMetode = metode;
+      _selectedBank = null;
+      if (metode.nama != 'Transfer Bank') {
+        _transferBankExpanded = false;
+      }
+    });
+  }
+
+  void _selectBank(OpsiBank bank) {
+    setState(() {
+      _selectedBank = bank;
+      _selectedMetode = _metodePembayaranList.firstWhere((element) => element.nama == 'Transfer Bank');
+      _transferBankExpanded = false;
+    });
+  }
+
+  void _konfirmasiPilihan() {
+    if (_selectedMetode != null) {
+      widget.onMetodeSelected(_selectedMetode!, _selectedBank);
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5938FB),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Metode Pembayaran',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: [
+                // COD
+                _buildMetodeItem(
+                  metode: _metodePembayaranList[0],
+                  isSelected: _selectedMetode?.nama == 'COD',
+                  onTap: () {
+                    _selectMetode(_metodePembayaranList[0]);
+                  },
+                ),
+
+                // Transfer Bank
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _transferBankExpanded ? Colors.white : Colors.grey[100], // Warna beda
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Header Transfer Bank
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _transferBankExpanded = !_transferBankExpanded;
+                            if (_selectedMetode?.nama != 'Transfer Bank' && _transferBankExpanded) {
+                              _selectMetode(_metodePembayaranList[1]);
+                            }
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/transferbank.png',
+                                    width: 24,
+                                    height: 24,
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Transfer Bank',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: _selectedMetode?.nama == 'Transfer Bank'
+                                          ? const Color(0xFF5938FB)
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(
+                                _transferBankExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: Colors.grey[600],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Tampilan Bank yang dipilih
+                       if (_selectedBank != null && _selectedMetode?.nama == 'Transfer Bank')
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                _selectedBank!.icon,
+                                width: 24,
+                                height: 24,
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                _selectedBank!.nama,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Daftar Bank (Expanded)
+                      if (_transferBankExpanded && _selectedMetode?.nama == 'Transfer Bank')
+                        Column(
+                          children: [
+                            _buildBankItem(
+                              'Bank BRI',
+                              'assets/images/bankbri.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank BRI',
+                                    icon: 'assets/images/bankbri.png'));
+                              },
+                              isSelected: _selectedBank?.nama == 'Bank BRI',
+                            ),
+                            _buildBankItem(
+                              'Bank BCA',
+                              'assets/images/bankbca.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank BCA',
+                                    icon: 'assets/images/bankbca.png'));
+                              },
+                              isSelected: _selectedBank?.nama == 'Bank BCA',
+                            ),
+                            _buildBankItem(
+                              'Bank Mandiri',
+                              'assets/images/bankmandiri.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank Mandiri',
+                                    icon: 'assets/images/bankmandiri.png'));
+                              },
+                              isSelected: _selectedBank?.nama == 'Bank Mandiri',
+                            ),
+                            _buildBankItem(
+                              'Bank BNI',
+                              'assets/images/bankbni.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank BNI',
+                                    icon: 'assets/images/bankbni.png'));
+                              },
+                              isSelected: _selectedBank?.nama == 'Bank BNI',
+                            ),
+                            _buildBankItem(
+                              'Bank Syariah Indonesia',
+                              'assets/images/bankbsi.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank Syariah Indonesia',
+                                    icon: 'assets/images/bankbsi.png'));
+                              },
+                              isSelected: _selectedBank?.nama ==
+                                  'Bank Syariah Indonesia',
+                            ),
+                            _buildBankItem(
+                              'Bank Lainnya',
+                              'assets/images/transferbank.png',
+                              () {
+                                _selectBank(OpsiBank(
+                                    nama: 'Bank Lainnya',
+                                    icon: 'assets/images/transferbank.png'));
+                              },
+                              isSelected: _selectedBank?.nama == 'Bank Lainnya',
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Saldo Modipay
+                _buildMetodeItem(
+                  metode: _metodePembayaranList[2],
+                  isSelected: _selectedMetode?.nama == 'Saldo Modipay',
+                  onTap: () {
+                    _selectMetode(_metodePembayaranList[2]);
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Tombol Konfirmasi
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(color: Colors.grey[300]!),
+              ),
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _selectedMetode != null ? _konfirmasiPilihan : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5938FB),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Konfirmasi',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetodeItem({
+    required MetodePembayaran metode,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF5938FB) : Colors.grey[300]!,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Icon/Emoji
+              Image.asset(
+                metode.icon,
+                width: 40,
+                height: 40,
+              ),
+              const SizedBox(width: 16),
+
+              // Nama Metode
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      metode.nama,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? const Color(0xFF5938FB) : Colors.black,
+                      ),
+                    ),
+                    // Informasi Gratis Ongkir
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF5938FB).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Gratis Ongkir',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF5938FB),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Checkmark jika dipilih
+              if (isSelected && metode.nama != 'Transfer Bank')
+                Icon(
+                  Icons.check_circle,
+                  color: const Color(0xFF5938FB),
+                  size: 24,
+                ),
+               if (isSelected && metode.nama == 'Transfer Bank' && _selectedBank != null)
+                Icon(
+                  Icons.check_circle,
+                  color: const Color(0xFF5938FB),
+                  size: 24,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBankItem(String namaBank, String assetImage, VoidCallback onTap, {bool isSelected = false}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        color: isSelected ? Colors.blue[50] : null, // Highlight warna ketika dipilih
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    assetImage,
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    namaBank,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+               if (isSelected)
+                Icon(
+                  Icons.check_circle,
+                  color: const Color(0xFF5938FB),
+                  size: 24,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Model untuk opsi pengiriman
 class OpsiPengiriman {
   final String nama;
@@ -27,8 +508,8 @@ class OpsiPengiriman {
       nama: nama ?? this.nama,
       harga: harga ?? this.harga,
       diskon: diskon ?? this.diskon,
-      estimasi: estimasi ?? this.estimasi,
       isSelected: isSelected ?? this.isSelected,
+      estimasi: estimasi ?? this.estimasi,
     );
   }
 }
@@ -55,7 +536,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // Data dummy opsi pengiriman
     _opsiPengirimanList = [
       OpsiPengiriman(
@@ -70,7 +551,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
         harga: 5000,
         diskon: 0,
         estimasi: 'Garansi tiba 17-18 Oktober',
-        isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
+                isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
       ),
       OpsiPengiriman(
         nama: 'Instant',
@@ -94,7 +575,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
     if (_selectedOpsi != null) {
       widget.onOpsiSelected(_selectedOpsi!);
       Navigator.pop(context);
-    }
+          }
   }
 
   @override
@@ -153,7 +634,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                                Row(
                   children: [
                     Icon(Icons.timer, color: Colors.green[600], size: 16),
                     const SizedBox(width: 4),
@@ -228,7 +709,6 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
       ),
     );
   }
-
   Widget _buildOpsiItem(OpsiPengiriman opsi, bool isSelected) {
     return Card(
       margin: const EdgeInsets.all(16),
@@ -323,6 +803,7 @@ class CheckoutPage extends StatefulWidget {
   final String productPrice;
   final String productSize;
   final String productColor;
+  final OpsiBank? bankTerpilih;
 
   const CheckoutPage({
     Key? key,
@@ -330,6 +811,7 @@ class CheckoutPage extends StatefulWidget {
     required this.productPrice,
     this.productSize = 'S',
     this.productColor = 'Hitam',
+    this.bankTerpilih,
   }) : super(key: key);
 
   @override
@@ -339,6 +821,8 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   String _pesanUntukPenjual = '';
   OpsiPengiriman? _opsiPengirimanTerpilih;
+  MetodePembayaran? _metodePembayaranTerpilih;
+  OpsiBank? _selectedBank;
   int _subtotalPengiriman = 5000; // Default harga pengiriman
   int _totalDiskonPengiriman = 5000; // Default diskon pengiriman
 
@@ -347,8 +831,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final subtotalPesanan = 15900;
     final biayaLayanan = 1900;
     final voucherDiskon = 3000;
-    
+
     return subtotalPesanan + _subtotalPengiriman + biayaLayanan - _totalDiskonPengiriman - voucherDiskon;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedBank = widget.bankTerpilih;
   }
 
   void _handleOpsiPengirimanSelected(OpsiPengiriman opsi) {
@@ -356,6 +846,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
       _opsiPengirimanTerpilih = opsi;
       _subtotalPengiriman = opsi.harga;
       _totalDiskonPengiriman = opsi.diskon;
+    });
+  }
+
+  void _handleMetodePembayaranSelected(MetodePembayaran metode, OpsiBank? bank) {
+    setState(() {
+      _metodePembayaranTerpilih = metode;
+      _selectedBank = bank;
     });
   }
 
@@ -679,6 +1176,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                             Row(
                               children: [
+                                if (_opsiPengirimanTerpilih != null)
+                                  Text(
+                                    _opsiPengirimanTerpilih!.nama,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
                                 const SizedBox(width: 8),
                                 Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
                               ],
@@ -734,7 +1239,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                                                  Text(
                             'Voucher s/d Rp10.000 jika pesanan belum tiba 18 Sep 2025',
                             style: TextStyle(
                               fontSize: 12,
@@ -776,7 +1281,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
 
-              // Box Metode Pembayaran
+              // Box Metode Pembayaran - REVISI dengan navigasi ke halaman baru
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -791,34 +1296,75 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Metode Pembayaran',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MetodePembayaranPage(
+                          onMetodeSelected: _handleMetodePembayaranSelected,
+                          metodeTerpilih: _metodePembayaranTerpilih,
+                          bankTerpilih: _selectedBank,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            'Saldo Modipay',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(  // Mengubah Padding menjadi Column
+                      crossAxisAlignment: CrossAxisAlignment.start, // Align kiri
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Metode Pembayaran',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  _metodePembayaranTerpilih?.nama ?? 'Saldo Modipay',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Tampilan Bank yang dipilih (Jika ada)
+                        if (_selectedBank != null && _metodePembayaranTerpilih?.nama == 'Transfer Bank')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  _selectedBank!.icon,
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _selectedBank!.nama,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
