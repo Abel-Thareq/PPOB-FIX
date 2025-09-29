@@ -249,7 +249,7 @@ class _ShopPageState extends State<ShopPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar Produk (placeholder)
+            // Gambar Produk dari assets
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -257,6 +257,22 @@ class _ShopPageState extends State<ShopPage>
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(8),
                   ),
+                ),
+                child: Image.asset(
+                  'assets/images/Cooling_Pad_Laptop.png', // Ganti dengan path yang sesuai
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Fallback jika gambar tidak ditemukan
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                        size: 40,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 // Model untuk metode pembayaran
 class MetodePembayaran {
@@ -224,7 +225,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                       // Tampilan Bank yang dipilih
                        if (_selectedBank != null && _selectedMetode?.nama == 'Transfer Bank')
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.only(left: 25.0, bottom: 10.0),
                           child: Row(
                             children: [
                               Image.asset(
@@ -235,7 +236,9 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                               const SizedBox(width: 16),
                               Text(
                                 _selectedBank!.nama,
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle( // boleh const karena semua argumen di sini konstan
+                                  fontSize: 16,
+                                  color: Color(0xFF5938FB)),
                               ),
                             ],
                           ),
@@ -553,7 +556,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
         estimasi: 'Garansi tiba 17-18 Oktober',
                 isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
       ),
-      OpsiPengiriman(
+            OpsiPengiriman(
         nama: 'Instant',
         harga: 12000,
         diskon: 0,
@@ -797,6 +800,27 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
   }
 }
 
+// Model untuk Voucher
+class Voucher {
+  final String title;
+  final String subtitle;
+  final String voucherType;
+  final String expiry;
+  final String image;
+  final int discountAmount;
+  bool isSelected;
+
+  Voucher({
+    required this.title,
+    required this.subtitle,
+    required this.voucherType,
+    required this.expiry,
+    required this.image,
+    required this.discountAmount,
+    this.isSelected = false,
+  });
+}
+
 // Checkout Page yang sudah direvisi
 class CheckoutPage extends StatefulWidget {
   final String productTitle;
@@ -826,14 +850,38 @@ class _CheckoutPageState extends State<CheckoutPage> {
   int _subtotalPengiriman = 5000; // Default harga pengiriman
   int _totalDiskonPengiriman = 5000; // Default diskon pengiriman
 
+  List<Voucher> _vouchers = [
+    Voucher(
+      title: 'Diskon Rp5K',
+      subtitle: 'Min. Blj Rp50K',
+      voucherType: 'Voucher Pembelian Pertama',
+      expiry: 'Terpakai 84% s/d 30.09.2025 S&K',
+      image: 'assets/images/acome.png',
+      discountAmount: 5000,
+    ),
+    Voucher(
+      title: 'Diskon Rp6K',
+      subtitle: 'Min. Blj Rp150K',
+      voucherType: 'Produk Tertentu',
+      expiry: 'Terpakai 90% s/d 30.09.2025 S&K',
+      image: 'assets/images/acome.png',
+      discountAmount: 6000,
+    ),
+  ];
+
+  Voucher? _selectedVoucher;
+
   // Hitung total pembayaran
   int get _totalPembayaran {
     final subtotalPesanan = 15900;
     final biayaLayanan = 1900;
-    final voucherDiskon = 3000;
+    final voucherDiskon = _selectedVoucher?.discountAmount ?? 0;
 
     return subtotalPesanan + _subtotalPengiriman + biayaLayanan - _totalDiskonPengiriman - voucherDiskon;
   }
+
+  // Tambahkan ValueNotifier di dalam _CheckoutPageState
+  ValueNotifier<Voucher?> _selectedVoucherNotifier = ValueNotifier<Voucher?>(null);
 
   @override
   void initState() {
@@ -854,6 +902,193 @@ class _CheckoutPageState extends State<CheckoutPage> {
       _metodePembayaranTerpilih = metode;
       _selectedBank = bank;
     });
+  }
+
+  // Fungsi untuk menampilkan dialog voucher
+  Future<void> _showVoucherDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              contentPadding: const EdgeInsets.all(16.0), // Tambahkan padding
+              content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) { // StatefulBuilder di sini
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8), // Batasi lebar
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible( // Tambahkan Flexible
+                                child: AutoSizeText(
+                                  'Voucher Acome Official Shop',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Masukkan Kode Voucher Toko',
+                              suffixText: 'Pakai',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ValueListenableBuilder<Voucher?>( // ValueListenableBuilder di sini
+                            valueListenable: _selectedVoucherNotifier,
+                            builder: (BuildContext context, Voucher? selectedVoucher, Widget? child) {
+                              return Column(
+                                children: _vouchers.map((voucher) => _buildVoucherItem(voucher, selectedVoucher == voucher)).toList(),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF5938FB),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              // setState(() {}); // Tidak perlu setState di sini
+                              _selectedVoucher = _selectedVoucherNotifier.value;
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text(
+                              'Konfirmasi',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildVoucherItem(Voucher voucher, bool isSelected) {
+    return InkWell(
+      onTap: () {
+        _selectedVoucherNotifier.value = voucher;
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue[50] : Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: Colors.grey[300]!,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Image.asset(
+              voucher.image,
+              width: 40,
+              height: 40,
+            ),
+            const SizedBox(width: 10),
+            // Di dalam _buildVoucherItem, ubah bagian Column yang berisi teks menjadi seperti ini:
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    voucher.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  AutoSizeText(
+                    voucher.subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.purple[100],
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: AutoSizeText(
+                      voucher.voucherType,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.purple,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  AutoSizeText(
+                    voucher.expiry,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Padding( // Tambahkan Padding
+              padding: const EdgeInsets.only(left: 8.0),
+              child: isSelected
+                ? Icon(
+                    Icons.check_circle, color: const Color(0xFF5938FB),
+                    size: 24,
+                  )
+                : null,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -892,7 +1127,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              children: [
               // Shipping Address Box
               Container(
                 width: double.infinity,
@@ -1003,7 +1238,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.image, color: Colors.grey),
+                            child: Image.asset('assets/images/Cooling_Pad_Laptop.png'),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -1125,7 +1360,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     // Section 2: Voucher Toko
                     InkWell(
                       onTap: () {
-                        // Aksi untuk voucher toko
+                        _showVoucherDialog(context);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -1344,7 +1579,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         // Tampilan Bank yang dipilih (Jika ada)
                         if (_selectedBank != null && _metodePembayaranTerpilih?.nama == 'Transfer Bank')
                           Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
+                            padding: const EdgeInsets.only(top: 8.0, left: 9.0),
                             child: Row(
                               children: [
                                 Image.asset(
@@ -1404,7 +1639,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       _buildPaymentRow('Biaya Layanan', 'Rp1.900'),
                       _buildPaymentRow('Total Diskon Pengiriman', '-Rp${_totalDiskonPengiriman}',
                           isDiscount: true),
-                      _buildPaymentRow('Voucher Diskon', '-Rp3.000',
+                      _buildPaymentRow('Voucher Diskon', '-Rp${_selectedVoucher?.discountAmount ?? 0}',
                           isDiscount: true),
 
                       const SizedBox(height: 8),
@@ -1473,7 +1708,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Hemat Rp${8000 + _totalDiskonPengiriman}',
+                        'Hemat Rp${8000 + _totalDiskonPengiriman + (_selectedVoucher?.discountAmount ?? 0)}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.green[600],
