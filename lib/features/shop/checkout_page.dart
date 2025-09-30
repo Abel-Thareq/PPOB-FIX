@@ -37,6 +37,638 @@ class OpsiBank {
   });
 }
 
+// Model untuk Alamat
+class Alamat {
+  final String nama;
+  final String nomorTelepon;
+  final String alamatLengkap;
+  final String daerah;
+  final bool isDefault;
+  final String label; // Tambahan untuk label alamat (Rumah, Kantor, dll)
+
+  Alamat({
+    required this.nama,
+    required this.nomorTelepon,
+    required this.alamatLengkap,
+    required this.daerah,
+    this.isDefault = false,
+    required this.label,
+  });
+}
+
+// Halaman Tambah Alamat
+class TambahAlamatPage extends StatefulWidget {
+  final Function(Alamat) onAlamatAdded;
+
+  const TambahAlamatPage({
+    Key? key,
+    required this.onAlamatAdded,
+  }) : super(key: key);
+
+  @override
+  State<TambahAlamatPage> createState() => _TambahAlamatPageState();
+}
+
+class _TambahAlamatPageState extends State<TambahAlamatPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _namaController = TextEditingController();
+  final _nomorTeleponController = TextEditingController();
+  final _alamatLengkapController = TextEditingController();
+  final _daerahController = TextEditingController();
+  
+  String _selectedLabel = 'Rumah';
+  bool _isAlamatUtama = false;
+
+  final List<String> _labelOptions = ['Rumah', 'Kantor', 'Kos', 'Lainnya'];
+
+  @override
+  void dispose() {
+    _namaController.dispose();
+    _nomorTeleponController.dispose();
+    _alamatLengkapController.dispose();
+    _daerahController.dispose();
+    super.dispose();
+  }
+
+  void _simpanAlamat() {
+    if (_formKey.currentState!.validate()) {
+      final alamatBaru = Alamat(
+        nama: _namaController.text,
+        nomorTelepon: _nomorTeleponController.text,
+        alamatLengkap: _alamatLengkapController.text,
+        daerah: _daerahController.text,
+        isDefault: _isAlamatUtama,
+        label: _selectedLabel,
+      );
+      
+      widget.onAlamatAdded(alamatBaru);
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5938FB),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Tambah Alamat',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Alamat
+              const Text(
+                'Alamat',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Nama Penerima
+              TextFormField(
+                controller: _namaController,
+                decoration: InputDecoration(
+                  labelText: 'Nama Penerima',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama penerima harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Nomor Telepon
+              TextFormField(
+                controller: _nomorTeleponController,
+                decoration: InputDecoration(
+                  labelText: 'Nomor Telepon',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nomor telepon harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Daerah
+              TextFormField(
+                controller: _daerahController,
+                decoration: InputDecoration(
+                  labelText: 'Provinsi, Kota, Kecamatan, Kode Pos',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Daerah harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Alamat Lengkap
+              TextFormField(
+                controller: _alamatLengkapController,
+                decoration: InputDecoration(
+                  labelText: 'Alamat Lengkap (Jalan, Nomor, RT/RW)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                maxLines: 3,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Alamat lengkap harus diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Detail Tambahan (Blok, Patokan)
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Detail Tambahan (Blok, Patokan, dll)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 24),
+
+              // Section Atur sebagai Alamat Utama
+              const Text(
+                'Atur sebagai Alamat Utama',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Switch untuk Alamat Utama
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Jadikan sebagai alamat utama',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    Switch(
+                      value: _isAlamatUtama,
+                      onChanged: (value) {
+                        setState(() {
+                          _isAlamatUtama = value;
+                        });
+                      },
+                      activeColor: const Color(0xFF5938FB),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Section Tanda Sebagai
+              const Text(
+                'Tanda Sebagai',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Pilihan Label Alamat
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _labelOptions.map((label) {
+                  final isSelected = _selectedLabel == label;
+                  return ChoiceChip(
+                    label: Text(label),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedLabel = label;
+                      });
+                    },
+                    selectedColor: const Color(0xFF5938FB),
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black87,
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 32),
+
+              // Tombol Simpan
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _simpanAlamat,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5938FB),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Simpan Alamat',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Pilih Alamat
+class PilihAlamatPage extends StatefulWidget {
+  final Function(Alamat) onAlamatSelected;
+  final Alamat? alamatTerpilih;
+
+  const PilihAlamatPage({
+    Key? key,
+    required this.onAlamatSelected,
+    this.alamatTerpilih,
+  }) : super(key: key);
+
+  @override
+  State<PilihAlamatPage> createState() => _PilihAlamatPageState();
+}
+
+class _PilihAlamatPageState extends State<PilihAlamatPage> {
+  late List<Alamat> _alamatList;
+  Alamat? _selectedAlamat;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Data dummy alamat
+    _alamatList = [
+      Alamat(
+        nama: 'Abel Thareq',
+        nomorTelepon: '+62 853 7764 2239',
+        alamatLengkap: 'Kost Abubakar Dumpoh, Jalan Kapten Suparman, RT.4/RW.7, Potrobangsan, Magelang Utara (KosPutra Abu Bakar)',
+        daerah: 'MAGELANG UTARA, KOTA MAGELANG, JAWA TENGAH, ID 56116',
+        isDefault: true,
+        label: 'Rumah',
+      ),
+      Alamat(
+        nama: 'Abel Thareq',
+        nomorTelepon: '+62 853 7764 2239',
+        alamatLengkap: 'Jl. Merdeka No. 123, RT.1/RW.2, Central Park',
+        daerah: 'JAKARTA PUSAT, DKI JAKARTA, ID 10110',
+        isDefault: false,
+        label: 'Kantor',
+      ),
+      Alamat(
+        nama: 'Abel Thareq',
+        nomorTelepon: '+62 853 7764 2239',
+        alamatLengkap: 'Apartemen Green Garden, Tower A Lantai 15, Jl. Sudirman Kav. 1',
+        daerah: 'JAKARTA SELATAN, DKI JAKARTA, ID 12190',
+        isDefault: false,
+        label: 'Kos',
+      ),
+    ];
+
+    _selectedAlamat = widget.alamatTerpilih ?? _alamatList.firstWhere((alamat) => alamat.isDefault);
+  }
+
+  void _selectAlamat(Alamat alamat) {
+    setState(() {
+      _selectedAlamat = alamat;
+    });
+  }
+
+  void _konfirmasiPilihan() {
+    if (_selectedAlamat != null) {
+      widget.onAlamatSelected(_selectedAlamat!);
+      Navigator.pop(context);
+    }
+  }
+
+  void _tambahAlamat() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TambahAlamatPage(
+          onAlamatAdded: (alamatBaru) {
+            setState(() {
+              _alamatList.add(alamatBaru);
+              _selectedAlamat = alamatBaru;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5938FB),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Pilih Alamat',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: Column(
+        children: [
+          // Tombol Tambah Alamat
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _tambahAlamat,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5938FB),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text(
+                  'Tambah Alamat',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: _alamatList.length,
+              itemBuilder: (context, index) {
+                final alamat = _alamatList[index];
+                final isSelected = _selectedAlamat == alamat;
+
+                return _buildAlamatItem(alamat, isSelected);
+              },
+            ),
+          ),
+
+          // Tombol Konfirmasi
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(color: Colors.grey[300]!),
+              ),
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _konfirmasiPilihan,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5938FB),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Konfirmasi',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlamatItem(Alamat alamat, bool isSelected) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF5938FB) : Colors.grey[300]!,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () => _selectAlamat(alamat),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    alamat.nama,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          alamat.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (alamat.isDefault) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5938FB).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Default',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF5938FB),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                alamat.nomorTelepon,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                alamat.alamatLengkap,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                alamat.daerah,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              if (isSelected) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green[600], size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Dipilih',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Halaman Metode Pembayaran
 class MetodePembayaranPage extends StatefulWidget {
   final Function(MetodePembayaran, OpsiBank?) onMetodeSelected;
@@ -554,7 +1186,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
         harga: 5000,
         diskon: 0,
         estimasi: 'Garansi tiba 17-18 Oktober',
-                isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
+        isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
       ),
             OpsiPengiriman(
         nama: 'Instant',
@@ -870,6 +1502,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
   ];
 
   Voucher? _selectedVoucher;
+  Alamat? _selectedAlamat;
+
+  // Tambahkan ValueNotifier di dalam _CheckoutPageState
+  ValueNotifier<Voucher?> _selectedVoucherNotifier = ValueNotifier<Voucher?>(null);
 
   // Hitung total pembayaran
   int get _totalPembayaran {
@@ -880,13 +1516,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return subtotalPesanan + _subtotalPengiriman + biayaLayanan - _totalDiskonPengiriman - voucherDiskon;
   }
 
-  // Tambahkan ValueNotifier di dalam _CheckoutPageState
-  ValueNotifier<Voucher?> _selectedVoucherNotifier = ValueNotifier<Voucher?>(null);
-
   @override
   void initState() {
     super.initState();
     _selectedBank = widget.bankTerpilih;
+    
+    // Set alamat default
+    _selectedAlamat = Alamat(
+      nama: 'Abel Thareq',
+      nomorTelepon: '+62 853 7764 2239',
+      alamatLengkap: 'Kost Abubakar Dumpoh, Jalan Kapten Suparman, RT.4/RW.7, Potrobangsan, Magelang Utara (KosPutra Abu Bakar)',
+      daerah: 'MAGELANG UTARA, KOTA MAGELANG, JAWA TENGAH, ID 56116',
+      isDefault: true,
+      label: 'Rumah',
+    );
+  }
+
+  void _handleAlamatSelected(Alamat alamat) {
+    setState(() {
+      _selectedAlamat = alamat;
+    });
   }
 
   void _handleOpsiPengirimanSelected(OpsiPengiriman opsi) {
@@ -904,9 +1553,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     });
   }
 
-  // Fungsi untuk menampilkan dialog voucher
+  // Fungsi untuk menampilkan dialog voucher - DIUBAH
   Future<void> _showVoucherDialog(BuildContext context) async {
-    return showDialog<void>(
+    // Simpan voucher yang sedang dipilih sementara
+    Voucher? tempSelectedVoucher = _selectedVoucher;
+
+    final result = await showDialog<Voucher?>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
@@ -916,19 +1568,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              contentPadding: const EdgeInsets.all(16.0), // Tambahkan padding
+              contentPadding: const EdgeInsets.all(16.0),
               content: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) { // StatefulBuilder di sini
+                builder: (BuildContext context, StateSetter setState) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8), // Batasi lebar
+                      constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Flexible( // Tambahkan Flexible
+                              Flexible(
                                 child: AutoSizeText(
                                   'Voucher Acome Official Shop',
                                   style: TextStyle(
@@ -942,7 +1594,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               IconButton(
                                 icon: const Icon(Icons.close),
                                 onPressed: () {
-                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop(tempSelectedVoucher);
                                 },
                               ),
                             ],
@@ -958,13 +1610,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ValueListenableBuilder<Voucher?>( // ValueListenableBuilder di sini
-                            valueListenable: _selectedVoucherNotifier,
-                            builder: (BuildContext context, Voucher? selectedVoucher, Widget? child) {
-                              return Column(
-                                children: _vouchers.map((voucher) => _buildVoucherItem(voucher, selectedVoucher == voucher)).toList(),
+                          Column(
+                            children: _vouchers.map((voucher) {
+                              final isSelected = tempSelectedVoucher?.title == voucher.title;
+                              return _buildVoucherItem(
+                                voucher, 
+                                isSelected,
+                                onTap: () {
+                                  setState(() {
+                                    tempSelectedVoucher = voucher;
+                                  });
+                                }
                               );
-                            },
+                            }).toList(),
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
@@ -975,9 +1633,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ),
                             ),
                             onPressed: () {
-                              // setState(() {}); // Tidak perlu setState di sini
-                              _selectedVoucher = _selectedVoucherNotifier.value;
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pop(tempSelectedVoucher);
                             },
                             child: const Text(
                               'Konfirmasi',
@@ -998,14 +1654,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
         );
       },
     );
+
+    // Update state dengan hasil dari dialog
+    if (result != null && mounted) {
+      setState(() {
+        _selectedVoucher = result;
+      });
+    }
   }
 
-  Widget _buildVoucherItem(Voucher voucher, bool isSelected) {
+  Widget _buildVoucherItem(Voucher voucher, bool isSelected, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: () {
-        _selectedVoucherNotifier.value = voucher;
-      },
+      onTap: onTap,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 8.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue[50] : Colors.white,
@@ -1023,7 +1685,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
               height: 40,
             ),
             const SizedBox(width: 10),
-            // Di dalam _buildVoucherItem, ubah bagian Column yang berisi teks menjadi seperti ini:
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1076,11 +1737,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ],
               ),
             ),
-            Padding( // Tambahkan Padding
+            Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: isSelected
                 ? Icon(
-                    Icons.check_circle, color: const Color(0xFF5938FB),
+                    Icons.check_circle, 
+                    color: const Color(0xFF5938FB),
                     size: 24,
                   )
                 : null,
@@ -1089,6 +1751,90 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
       ),
     );
+  }
+
+  // Fungsi untuk menampilkan dialog pesan - DIUBAH
+  Future<void> _showPesanDialog(BuildContext context) async {
+    String tempPesan = _pesanUntukPenjual;
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Pesan untuk Penjual',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop(tempPesan);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: tempPesan,
+                    decoration: InputDecoration(
+                      hintText: 'Tinggalkan Pesan',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    maxLines: 3,
+                    onChanged: (value) {
+                      tempPesan = value;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF5938FB),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(tempPesan);
+                    },
+                    child: const Text(
+                      'Buat Pesan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    // Update state dengan hasil dari dialog
+    if (result != null && mounted) {
+      setState(() {
+        _pesanUntukPenjual = result;
+      });
+    }
   }
 
   @override
@@ -1128,7 +1874,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              // Shipping Address Box
+              // Shipping Address Box - DIUBAH dengan tombol Ubah
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -1145,56 +1891,124 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.location_on,
-                        color: Colors.purple,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Abel Thareq',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                      // Header dengan tombol Ubah
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Alamat Pengiriman',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PilihAlamatPage(
+                                    onAlamatSelected: _handleAlamatSelected,
+                                    alamatTerpilih: _selectedAlamat,
                                   ),
                                 ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF5938FB),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'Ubah',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Informasi Alamat
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            color: Colors.purple,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _selectedAlamat?.nama ?? 'Abel Thareq',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      _selectedAlamat?.nomorTelepon ?? '+62 853 7764 2239',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
                                 Text(
-                                  '+62 853 7764 2239',
+                                  _selectedAlamat?.alamatLengkap ?? 'Kost Abubakar Dumpoh, Jalan Kapten Suparman, RT.4/RW.7, Potrobangsan, Magelang Utara (KosPutra Abu Bakar)',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
                                   ),
                                 ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _selectedAlamat?.daerah ?? 'MAGELANG UTARA, KOTA MAGELANG, JAWA TENGAH, ID 56116',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                if (_selectedAlamat?.label != null) ...[
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[50],
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      _selectedAlamat!.label,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.blue[700],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Kost Abubakar Dumpoh, Jalan Kapten Suparman, RT.4/RW.7, Potrobangsan, Magelang Utara (KosPutra Abu Bakar)',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'MAGELANG UTARA, KOTA MAGELANG, JAWA TENGAH, ID 56116',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1375,7 +2189,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 color: Colors.grey[700],
                               ),
                             ),
-                            Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
+                            Row(
+                              children: [
+                                if (_selectedVoucher != null)
+                                  Text(
+                                    _selectedVoucher!.title,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: const Color(0xFF5938FB),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                const SizedBox(width: 8),
+                                Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -1774,83 +2602,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
         ],
       ),
-    );
-  }
-
-  // Fungsi untuk menampilkan dialog pesan
-  Future<void> _showPesanDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Pesan untuk Penjual',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      hintText: 'Tinggalkan Pesan',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    maxLines: 3,
-                    onChanged: (value) {
-                      setState(() {
-                        _pesanUntukPenjual = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5938FB),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {});
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'Buat Pesan',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'checkout_page.dart'; // Pastikan import file CheckoutPage
+import 'package:flutter/services.dart';
+import 'checkout_page.dart';
 
 class DetailShopPage extends StatefulWidget {
   final String title;
@@ -9,6 +10,7 @@ class DetailShopPage extends StatefulWidget {
   final String sales;
   final String weight;
   final String stock;
+  final String mainImage;
 
   const DetailShopPage({
     super.key,
@@ -19,6 +21,7 @@ class DetailShopPage extends StatefulWidget {
     this.sales = '2rb+ terjual',
     this.weight = '0.5 kg',
     this.stock = '100',
+    required this.mainImage,
   });
 
   @override
@@ -27,15 +30,64 @@ class DetailShopPage extends StatefulWidget {
 
 class _DetailShopPageState extends State<DetailShopPage> {
   int selectedImageIndex = 0;
+  List<String> productImages = [];
 
-  // List of product images
-  final List<String> productImages = [
-    'assets/images/Cooling_Pad_Laptop.png',
-    'assets/images/Cooling_Pad_Laptop1.png',
-    'assets/images/Cooling_Pad_Laptop.png',
-    'assets/images/Cooling_Pad_Laptop1.png',
-    'assets/images/Cooling_Pad_Laptop.png',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProductImages();
+  }
+
+  // Fungsi untuk memuat gambar produk yang tersedia
+  Future<void> _loadProductImages() async {
+    final List<String> availableImages = [];
+    
+    // Selalu tambahkan gambar utama
+    availableImages.add(widget.mainImage);
+    
+    // Cek gambar tambahan (1-5)
+    for (int i = 1; i <= 5; i++) {
+      final imagePath = _getImageVariantPath(widget.mainImage, i);
+      final exists = await _checkImageExists(imagePath);
+      if (exists) {
+        availableImages.add(imagePath);
+      }
+    }
+    
+    setState(() {
+      productImages = availableImages;
+    });
+  }
+
+  // Fungsi untuk mendapatkan path variasi gambar
+  String _getImageVariantPath(String mainImage, int variant) {
+    final fileName = mainImage.split('/').last;
+    final nameWithoutExtension = fileName.split('.').first;
+    final extension = fileName.split('.').last;
+    
+    // Cek jika nama file sudah mengandung angka di akhir
+    final regex = RegExp(r'(\d+)$');
+    final match = regex.firstMatch(nameWithoutExtension);
+    
+    if (match != null) {
+      // Jika sudah ada angka, ganti angka tersebut
+      final baseName = nameWithoutExtension.substring(0, match.start);
+      return 'assets/images/${baseName}$variant.$extension';
+    } else {
+      // Jika belum ada angka, tambahkan angka
+      return 'assets/images/${nameWithoutExtension}$variant.$extension';
+    }
+  }
+
+  // Fungsi untuk mengecek apakah gambar tersedia di assets
+  Future<bool> _checkImageExists(String imagePath) async {
+    try {
+      await rootBundle.load(imagePath);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,66 +155,71 @@ class _DetailShopPageState extends State<DetailShopPage> {
                     height: 220,
                     padding: const EdgeInsets.all(16),
                     child: Center(
-                      child: Hero(
-                        tag: 'product-image-$selectedImageIndex',
-                        child: Image.asset(
-                          productImages[selectedImageIndex],
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            print('Error loading image: $error');
-                            return const Icon(Icons.error);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Thumbnail Images
-                  Container(
-                    height: 80,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: productImages.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedImageIndex = index;
-                            });
-                          },
-                          child: Container(
-                            width: 70,
-                            height: 70,
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: index == selectedImageIndex
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey[300]!,
-                                width: index == selectedImageIndex ? 2 : 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(7),
+                      child: productImages.isEmpty
+                          ? const CircularProgressIndicator()
+                          : Hero(
+                              tag: 'product-image-$selectedImageIndex',
                               child: Image.asset(
-                                productImages[index],
-                                fit: BoxFit.cover,
+                                productImages[selectedImageIndex],
+                                fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) {
-                                  print('Error loading thumbnail: $error');
+                                  print('Error loading image: $error');
                                   return const Icon(Icons.error);
                                 },
                               ),
                             ),
-                          ),
-                        );
-                      },
                     ),
                   ),
+                  
+                  // Thumbnail Images (hanya ditampilkan jika ada lebih dari 1 gambar)
+                  if (productImages.length > 1)
+                    Container(
+                      height: 80,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: productImages.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedImageIndex = index;
+                              });
+                            },
+                            child: Container(
+                              width: 70,
+                              height: 70,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: index == selectedImageIndex
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey[300]!,
+                                  width: index == selectedImageIndex ? 2 : 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(7),
+                                child: Image.asset(
+                                  productImages[index],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('Error loading thumbnail: $error');
+                                    return const Icon(Icons.error);
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   const SizedBox(height: 16),
                 ],
               ),
             ),
+            
             // Product Info
             Container(
               width: double.infinity,
@@ -258,6 +315,7 @@ class _DetailShopPageState extends State<DetailShopPage> {
               ),
             ),
             const SizedBox(height: 8),
+            
             // Description
             Container(
               width: double.infinity,
@@ -326,11 +384,10 @@ class _DetailShopPageState extends State<DetailShopPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Beli Sekarang Button - Updated untuk navigasi ke CheckoutPage
+              // Beli Sekarang Button
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigasi ke CheckoutPage dengan membawa data produk
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -338,7 +395,7 @@ class _DetailShopPageState extends State<DetailShopPage> {
                           productTitle: widget.title,
                           productPrice: widget.price.replaceAll('Rp. ', 'Rp'),
                           productSize: 'S',
-                          productColor: 'Hiram',
+                          productColor: 'Hitam',
                         ),
                       ),
                     );
