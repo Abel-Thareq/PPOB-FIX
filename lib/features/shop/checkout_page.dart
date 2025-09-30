@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
+// Fungsi helper untuk mengonversi nama produk ke nama file asset
+String _convertProductNameToAsset(String productName) {
+  // Contoh konversi: "Cooling Pad Laptop" -> "Cooling_Pad_Laptop.png"
+  String formattedName = productName.replaceAll(' ', '_');
+  return 'assets/images/$formattedName.png';
+}
+
 // Model untuk metode pembayaran
 class MetodePembayaran {
   final String nama;
@@ -44,7 +51,7 @@ class Alamat {
   final String alamatLengkap;
   final String daerah;
   final bool isDefault;
-  final String label; // Tambahan untuk label alamat (Rumah, Kantor, dll)
+  final String label;
 
   Alamat({
     required this.nama,
@@ -56,7 +63,491 @@ class Alamat {
   });
 }
 
-// Halaman Tambah Alamat
+// Halaman Pilih Daerah (Provinsi, Kabupaten, Kecamatan, Kode Pos)
+class PilihDaerahPage extends StatefulWidget {
+  final String? provinsiTerpilih;
+  final String? kabupatenTerpilih;
+  final String? kecamatanTerpilih;
+  final String? kodePosTerpilih;
+
+  const PilihDaerahPage({
+    Key? key,
+    this.provinsiTerpilih,
+    this.kabupatenTerpilih,
+    this.kecamatanTerpilih,
+    this.kodePosTerpilih,
+  }) : super(key: key);
+
+  @override
+  State<PilihDaerahPage> createState() => _PilihDaerahPageState();
+}
+
+class _PilihDaerahPageState extends State<PilihDaerahPage> {
+  String _selectedProvinsi = 'Pillin Provinsi';
+  String _selectedKabupaten = 'Pillin Kabupaten/Kota';
+  String _selectedKecamatan = 'Pillin Kecamatan';
+  String _selectedKodePos = 'Pillin Kode Pos';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedProvinsi = widget.provinsiTerpilih ?? 'Pillin Provinsi';
+    _selectedKabupaten = widget.kabupatenTerpilih ?? 'Pillin Kabupaten/Kota';
+    _selectedKecamatan = widget.kecamatanTerpilih ?? 'Pillin Kecamatan';
+    _selectedKodePos = widget.kodePosTerpilih ?? 'Pillin Kode Pos';
+  }
+
+  void _konfirmasiPilihan() {
+    if (_selectedProvinsi.startsWith('Pillin') || 
+        _selectedKabupaten.startsWith('Pillin') ||
+        _selectedKecamatan.startsWith('Pillin') ||
+        _selectedKodePos.startsWith('Pillin')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap lengkapi semua data alamat'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Kembalikan data langsung melalui Navigator.pop
+    Navigator.pop(context, {
+      'provinsi': _selectedProvinsi,
+      'kabupaten': _selectedKabupaten,
+      'kecamatan': _selectedKecamatan,
+      'kodePos': _selectedKodePos,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5938FB),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Pilih Daerah',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Alamat
+            const Text(
+              'Alamat',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Provinsi
+            _buildDaerahSection(
+              'Provinsi',
+              _selectedProvinsi,
+              () => _pilihProvinsi(),
+            ),
+            const SizedBox(height: 16),
+            
+            // Kabupaten/Kota
+            _buildDaerahSection(
+              'Kabupaten/Kota',
+              _selectedKabupaten,
+              () => _pilihKabupaten(),
+            ),
+            const SizedBox(height: 16),
+            
+            // Kecamatan
+            _buildDaerahSection(
+              'Kecamatan',
+              _selectedKecamatan,
+              () => _pilihKecamatan(),
+            ),
+            const SizedBox(height: 16),
+            
+            // Kode Pos
+            _buildDaerahSection(
+              'Kode Pos',
+              _selectedKodePos,
+              () => _pilihKodePos(),
+            ),
+            const SizedBox(height: 32),
+
+            // Tombol Simpan
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _konfirmasiPilihan,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5938FB),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Simpan',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDaerahSection(String title, String value, VoidCallback onTap) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: value.startsWith('Pillin') ? Colors.grey : Colors.black87,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.grey[600],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Fungsi-fungsi untuk memilih alamat
+  void _pilihProvinsi() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PilihanListPage(
+          title: 'Pilih Provinsi',
+          items: [
+            'Jawa Tengah',
+            'DKI Jakarta',
+            'Jawa Barat',
+            'Jawa Timur',
+            'Bali',
+            'Sumatera Utara',
+            'Yogyakarta',
+            'Banten',
+          ],
+          selectedItem: _selectedProvinsi.startsWith('Pillin') ? null : _selectedProvinsi,
+        ),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _selectedProvinsi = result;
+        // Reset pilihan turunan ketika provinsi berubah
+        _selectedKabupaten = 'Pillin Kabupaten/Kota';
+        _selectedKecamatan = 'Pillin Kecamatan';
+        _selectedKodePos = 'Pillin Kode Pos';
+      });
+    }
+  }
+
+  void _pilihKabupaten() async {
+    if (_selectedProvinsi.startsWith('Pillin')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih provinsi terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    List<String> items = [];
+    if (_selectedProvinsi == 'Jawa Tengah') {
+      items = [
+        'Kota Magelang',
+        'Kota Semarang',
+        'Kota Solo',
+        'Kabupaten Magelang',
+        'Kabupaten Semarang',
+        'Kabupaten Boyolali',
+      ];
+    } else if (_selectedProvinsi == 'DKI Jakarta') {
+      items = [
+        'Jakarta Pusat',
+        'Jakarta Selatan',
+        'Jakarta Barat',
+        'Jakarta Timur',
+        'Jakarta Utara',
+      ];
+    } else {
+      items = [
+        'Kota Contoh 1',
+        'Kota Contoh 2',
+        'Kabupaten Contoh 1',
+        'Kabupaten Contoh 2',
+      ];
+    }
+
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PilihanListPage(
+          title: 'Pilih Kabupaten/Kota',
+          items: items,
+          selectedItem: _selectedKabupaten.startsWith('Pillin') ? null : _selectedKabupaten,
+        ),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _selectedKabupaten = result;
+        // Reset pilihan turunan ketika kabupaten berubah
+        _selectedKecamatan = 'Pillin Kecamatan';
+        _selectedKodePos = 'Pillin Kode Pos';
+      });
+    }
+  }
+
+  void _pilihKecamatan() async {
+    if (_selectedKabupaten.startsWith('Pillin')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih kabupaten/kota terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    List<String> items = [];
+    if (_selectedKabupaten == 'Kota Magelang') {
+      items = [
+        'Magelang Utara',
+        'Magelang Selatan',
+        'Magelang Tengah',
+      ];
+    } else if (_selectedKabupaten == 'Jakarta Pusat') {
+      items = [
+        'Gambir',
+        'Sawah Besar',
+        'Kemayoran',
+        'Senen',
+        'Cempaka Putih',
+        'Johar Baru',
+      ];
+    } else {
+      items = [
+        'Kecamatan Contoh 1',
+        'Kecamatan Contoh 2',
+        'Kecamatan Contoh 3',
+      ];
+    }
+
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PilihanListPage(
+          title: 'Pilih Kecamatan',
+          items: items,
+          selectedItem: _selectedKecamatan.startsWith('Pillin') ? null : _selectedKecamatan,
+        ),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _selectedKecamatan = result;
+        // Reset kode pos ketika kecamatan berubah
+        _selectedKodePos = 'Pillin Kode Pos';
+      });
+    }
+  }
+
+  void _pilihKodePos() async {
+    if (_selectedKecamatan.startsWith('Pillin')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih kecamatan terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    List<String> items = [];
+    if (_selectedKecamatan == 'Magelang Utara') {
+      items = ['56116', '56117'];
+    } else if (_selectedKecamatan == 'Gambir') {
+      items = ['10110', '10120'];
+    } else {
+      items = ['12345', '67890', '11223', '44556'];
+    }
+
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PilihanListPage(
+          title: 'Pilih Kode Pos',
+          items: items,
+          selectedItem: _selectedKodePos.startsWith('Pillin') ? null : _selectedKodePos,
+        ),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _selectedKodePos = result;
+      });
+    }
+  }
+}
+
+// Halaman untuk menampilkan list pilihan
+class PilihanListPage extends StatefulWidget {
+  final String title;
+  final List<String> items;
+  final String? selectedItem;
+
+  const PilihanListPage({
+    Key? key,
+    required this.title,
+    required this.items,
+    this.selectedItem,
+  }) : super(key: key);
+
+  @override
+  State<PilihanListPage> createState() => _PilihanListPageState();
+}
+
+class _PilihanListPageState extends State<PilihanListPage> {
+  String? _selectedItem;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedItem = widget.selectedItem;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5938FB),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: ListView.builder(
+        itemCount: widget.items.length,
+        itemBuilder: (context, index) {
+          final item = widget.items[index];
+          final isSelected = _selectedItem == item;
+
+          return ListTile(
+            title: Text(
+              item,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? const Color(0xFF5938FB) : Colors.black87,
+              ),
+            ),
+            trailing: isSelected
+                ? Icon(
+                    Icons.check_circle,
+                    color: const Color(0xFF5938FB),
+                  )
+                : null,
+            onTap: () {
+              Navigator.pop(context, item);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Halaman Tambah Alamat dengan navigasi ke halaman Pilih Daerah
 class TambahAlamatPage extends StatefulWidget {
   final Function(Alamat) onAlamatAdded;
 
@@ -74,7 +565,12 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
   final _namaController = TextEditingController();
   final _nomorTeleponController = TextEditingController();
   final _alamatLengkapController = TextEditingController();
-  final _daerahController = TextEditingController();
+  
+  // Variabel untuk menyimpan data alamat yang dipilih
+  String _selectedProvinsi = 'Pillin Provinsi';
+  String _selectedKabupaten = 'Pillin Kabupaten/Kota';
+  String _selectedKecamatan = 'Pillin Kecamatan';
+  String _selectedKodePos = 'Pillin Kode Pos';
   
   String _selectedLabel = 'Rumah';
   bool _isAlamatUtama = false;
@@ -86,17 +582,72 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
     _namaController.dispose();
     _nomorTeleponController.dispose();
     _alamatLengkapController.dispose();
-    _daerahController.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk membuka halaman pemilihan daerah
+  void _bukaHalamanPilihDaerah() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PilihDaerahPage(
+          provinsiTerpilih: _selectedProvinsi.startsWith('Pillin') ? null : _selectedProvinsi,
+          kabupatenTerpilih: _selectedKabupaten.startsWith('Pillin') ? null : _selectedKabupaten,
+          kecamatanTerpilih: _selectedKecamatan.startsWith('Pillin') ? null : _selectedKecamatan,
+          kodePosTerpilih: _selectedKodePos.startsWith('Pillin') ? null : _selectedKodePos,
+        ),
+      ),
+    );
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        _selectedProvinsi = result['provinsi'] ?? 'Pillin Provinsi';
+        _selectedKabupaten = result['kabupaten'] ?? 'Pillin Kabupaten/Kota';
+        _selectedKecamatan = result['kecamatan'] ?? 'Pillin Kecamatan';
+        _selectedKodePos = result['kodePos'] ?? 'Pillin Kode Pos';
+      });
+    }
+  }
+
+  // Fungsi untuk mendapatkan teks alamat lengkap
+  String get _daerahText {
+    if (_selectedProvinsi.startsWith('Pillin') && 
+        _selectedKabupaten.startsWith('Pillin') &&
+        _selectedKecamatan.startsWith('Pillin') &&
+        _selectedKodePos.startsWith('Pillin')) {
+      return '';
+    }
+    
+    List<String> parts = [];
+    if (!_selectedProvinsi.startsWith('Pillin')) parts.add(_selectedProvinsi);
+    if (!_selectedKabupaten.startsWith('Pillin')) parts.add(_selectedKabupaten);
+    if (!_selectedKecamatan.startsWith('Pillin')) parts.add(_selectedKecamatan);
+    if (!_selectedKodePos.startsWith('Pillin')) parts.add('Kode Pos: ${_selectedKodePos}');
+    
+    return parts.join(', ');
   }
 
   void _simpanAlamat() {
     if (_formKey.currentState!.validate()) {
+      // Validasi apakah alamat lengkap sudah dipilih
+      if (_selectedProvinsi.startsWith('Pillin') || 
+          _selectedKabupaten.startsWith('Pillin') ||
+          _selectedKecamatan.startsWith('Pillin') ||
+          _selectedKodePos.startsWith('Pillin')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Harap lengkapi semua data alamat (Provinsi, Kabupaten, Kecamatan, Kode Pos)'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final alamatBaru = Alamat(
         nama: _namaController.text,
         nomorTelepon: _nomorTeleponController.text,
         alamatLengkap: _alamatLengkapController.text,
-        daerah: _daerahController.text,
+        daerah: _daerahText,
         isDefault: _isAlamatUtama,
         label: _selectedLabel,
       );
@@ -196,23 +747,53 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
               ),
               const SizedBox(height: 12),
 
-              // Daerah
-              TextFormField(
-                controller: _daerahController,
-                decoration: InputDecoration(
-                  labelText: 'Provinsi, Kota, Kecamatan, Kode Pos',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+              // Button untuk memilih daerah (menggantikan TextFormField)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Provinsi, Kota, Kecamatan, Kode Pos',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Daerah harus diisi';
-                  }
-                  return null;
-                },
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: _bukaHalamanPilihDaerah,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _daerahText.isEmpty ? 'Pilih Provinsi, Kota, Kecamatan, Kode Pos' : _daerahText,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _daerahText.isEmpty ? Colors.grey : Colors.black87,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey[600],
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
 
@@ -796,7 +1377,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _transferBankExpanded ? Colors.white : Colors.grey[100], // Warna beda
+                    color: _transferBankExpanded ? Colors.white : Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -855,7 +1436,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                       ),
 
                       // Tampilan Bank yang dipilih
-                       if (_selectedBank != null && _selectedMetode?.nama == 'Transfer Bank')
+                      if (_selectedBank != null && _selectedMetode?.nama == 'Transfer Bank')
                         Padding(
                           padding: const EdgeInsets.only(left: 25.0, bottom: 10.0),
                           child: Row(
@@ -868,7 +1449,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                               const SizedBox(width: 16),
                               Text(
                                 _selectedBank!.nama,
-                                style: const TextStyle( // boleh const karena semua argumen di sini konstan
+                                style: const TextStyle(
                                   fontSize: 16,
                                   color: Color(0xFF5938FB)),
                               ),
@@ -1065,7 +1646,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                   color: const Color(0xFF5938FB),
                   size: 24,
                 ),
-               if (isSelected && metode.nama == 'Transfer Bank' && _selectedBank != null)
+              if (isSelected && metode.nama == 'Transfer Bank' && _selectedBank != null)
                 Icon(
                   Icons.check_circle,
                   color: const Color(0xFF5938FB),
@@ -1082,7 +1663,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: isSelected ? Colors.blue[50] : null, // Highlight warna ketika dipilih
+        color: isSelected ? Colors.blue[50] : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -1102,7 +1683,7 @@ class _MetodePembayaranPageState extends State<MetodePembayaranPage> {
                   ),
                 ],
               ),
-               if (isSelected)
+              if (isSelected)
                 Icon(
                   Icons.check_circle,
                   color: const Color(0xFF5938FB),
@@ -1188,7 +1769,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
         estimasi: 'Garansi tiba 17-18 Oktober',
         isSelected: widget.opsiTerpilih?.nama == 'Hemat Kargo',
       ),
-            OpsiPengiriman(
+      OpsiPengiriman(
         nama: 'Instant',
         harga: 12000,
         diskon: 0,
@@ -1210,7 +1791,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
     if (_selectedOpsi != null) {
       widget.onOpsiSelected(_selectedOpsi!);
       Navigator.pop(context);
-          }
+    }
   }
 
   @override
@@ -1269,7 +1850,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                                Row(
+                Row(
                   children: [
                     Icon(Icons.timer, color: Colors.green[600], size: 16),
                     const SizedBox(width: 4),
@@ -1344,6 +1925,7 @@ class _OpsiPengirimanPageState extends State<OpsiPengirimanPage> {
       ),
     );
   }
+
   Widget _buildOpsiItem(OpsiPengiriman opsi, bool isSelected) {
     return Card(
       margin: const EdgeInsets.all(16),
@@ -1453,7 +2035,7 @@ class Voucher {
   });
 }
 
-// Checkout Page yang sudah direvisi
+// Checkout Page
 class CheckoutPage extends StatefulWidget {
   final String productTitle;
   final String productPrice;
@@ -1479,8 +2061,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   OpsiPengiriman? _opsiPengirimanTerpilih;
   MetodePembayaran? _metodePembayaranTerpilih;
   OpsiBank? _selectedBank;
-  int _subtotalPengiriman = 5000; // Default harga pengiriman
-  int _totalDiskonPengiriman = 5000; // Default diskon pengiriman
+  int _subtotalPengiriman = 5000;
+  int _totalDiskonPengiriman = 5000;
 
   List<Voucher> _vouchers = [
     Voucher(
@@ -1504,12 +2086,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Voucher? _selectedVoucher;
   Alamat? _selectedAlamat;
 
-  // Tambahkan ValueNotifier di dalam _CheckoutPageState
   ValueNotifier<Voucher?> _selectedVoucherNotifier = ValueNotifier<Voucher?>(null);
 
-  // Hitung total pembayaran
   int get _totalPembayaran {
-    final subtotalPesanan = 15900;
+    final String priceString = widget.productPrice;
+    final String cleanString = priceString.replaceAll(RegExp(r'[Rp\s\.]'), '');
+    final int subtotalPesanan = int.parse(cleanString);
     final biayaLayanan = 1900;
     final voucherDiskon = _selectedVoucher?.discountAmount ?? 0;
 
@@ -1521,7 +2103,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     super.initState();
     _selectedBank = widget.bankTerpilih;
     
-    // Set alamat default
     _selectedAlamat = Alamat(
       nama: 'Abel Thareq',
       nomorTelepon: '+62 853 7764 2239',
@@ -1553,9 +2134,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     });
   }
 
-  // Fungsi untuk menampilkan dialog voucher - DIUBAH
   Future<void> _showVoucherDialog(BuildContext context) async {
-    // Simpan voucher yang sedang dipilih sementara
     Voucher? tempSelectedVoucher = _selectedVoucher;
 
     final result = await showDialog<Voucher?>(
@@ -1655,7 +2234,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       },
     );
 
-    // Update state dengan hasil dari dialog
     if (result != null && mounted) {
       setState(() {
         _selectedVoucher = result;
@@ -1753,7 +2331,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  // Fungsi untuk menampilkan dialog pesan - DIUBAH
   Future<void> _showPesanDialog(BuildContext context) async {
     String tempPesan = _pesanUntukPenjual;
 
@@ -1829,7 +2406,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       },
     );
 
-    // Update state dengan hasil dari dialog
     if (result != null && mounted) {
       setState(() {
         _pesanUntukPenjual = result;
@@ -1839,6 +2415,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Menggunakan fungsi konversi untuk mendapatkan path gambar produk
+    String productImage = _convertProductNameToAsset(widget.productTitle);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -1873,8 +2452,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              // Shipping Address Box - DIUBAH dengan tombol Ubah
+            children: [
+              // Shipping Address Box
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -1894,7 +2473,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header dengan tombol Ubah
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -1938,7 +2516,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 12),
                       
-                      // Informasi Alamat
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -2052,7 +2629,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Image.asset('assets/images/Cooling_Pad_Laptop.png'),
+                            // Menggunakan gambar produk yang dikonversi dari nama produk
+                            child: Image.asset(productImage),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -2110,7 +2688,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
 
-              // Container utama yang menggabungkan section dari Pesan untuk Penjual hingga Total Produk
+              // Container utama yang menggabungkan section
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -2302,7 +2880,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                                                  Text(
+                          Text(
                             'Voucher s/d Rp10.000 jika pesanan belum tiba 18 Sep 2025',
                             style: TextStyle(
                               fontSize: 12,
@@ -2330,7 +2908,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ),
                           Text(
-                            'Rp15.900',
+                            widget.productPrice,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -2344,7 +2922,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
 
-              // Box Metode Pembayaran - REVISI dengan navigasi ke halaman baru
+              // Box Metode Pembayaran
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -2374,8 +2952,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(  // Mengubah Padding menjadi Column
-                      crossAxisAlignment: CrossAxisAlignment.start, // Align kiri
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2404,7 +2982,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ],
                         ),
-                        // Tampilan Bank yang dipilih (Jika ada)
                         if (_selectedBank != null && _metodePembayaranTerpilih?.nama == 'Transfer Bank')
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0, left: 9.0),
@@ -2462,7 +3039,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 12),
 
-                      _buildPaymentRow('Subtotal Pesanan', 'Rp15.900'),
+                      _buildPaymentRow('Subtotal Pesanan', widget.productPrice),
                       _buildPaymentRow('Subtotal Pengiriman', 'Rp${_subtotalPengiriman}'),
                       _buildPaymentRow('Biaya Layanan', 'Rp1.900'),
                       _buildPaymentRow('Total Diskon Pengiriman', '-Rp${_totalDiskonPengiriman}',
