@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'keranjang_page.dart';
 
 // Fungsi helper untuk mengonversi nama produk ke nama file asset
 String _convertProductNameToAsset(String productName) {
@@ -1023,6 +1024,265 @@ class _PilihAlamatPageState extends State<PilihAlamatPage> {
     );
   }
 
+  // Fungsi untuk menampilkan dialog pilihan alamat
+  void _showAlamatOptionsDialog(Alamat alamat) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          contentPadding: const EdgeInsets.all(0),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      alamat.nama,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      alamat.nomorTelepon,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      alamat.alamatLengkap,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      alamat.daerah,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Divider
+              Container(height: 1, color: Colors.grey[300]),
+              
+              // Opsi Jadikan Alamat Utama
+              ListTile(
+                leading: const Icon(
+                  Icons.star,
+                  color: Color(0xFF5938FB),
+                ),
+                title: const Text(
+                  'Jadikan Alamat Utama',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setAsDefaultAddress(alamat);
+                },
+              ),
+              
+              // Divider
+              Container(height: 1, color: Colors.grey[300]),
+              
+              // Opsi Hapus Alamat
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                ),
+                title: const Text(
+                  'Hapus Alamat',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmationDialog(alamat);
+                },
+              ),
+              
+              // Divider
+              Container(height: 1, color: Colors.grey[300]),
+              
+              // Tombol Batalkan
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.all(16.0),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(16.0),
+                        bottomRight: Radius.circular(16.0),
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'Batalkan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF5938FB),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Fungsi untuk mengatur alamat sebagai default
+  void _setAsDefaultAddress(Alamat alamat) {
+    setState(() {
+      // Reset semua alamat menjadi non-default
+      for (var item in _alamatList) {
+        if (item == alamat) {
+          // Update alamat yang dipilih menjadi default
+          _alamatList[_alamatList.indexOf(item)] = Alamat(
+            nama: item.nama,
+            nomorTelepon: item.nomorTelepon,
+            alamatLengkap: item.alamatLengkap,
+            daerah: item.daerah,
+            isDefault: true,
+            label: item.label,
+          );
+        } else {
+          // Set lainnya menjadi non-default
+          _alamatList[_alamatList.indexOf(item)] = Alamat(
+            nama: item.nama,
+            nomorTelepon: item.nomorTelepon,
+            alamatLengkap: item.alamatLengkap,
+            daerah: item.daerah,
+            isDefault: false,
+            label: item.label,
+          );
+        }
+      }
+      _selectedAlamat = alamat;
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${alamat.nama} diatur sebagai alamat utama'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  // Fungsi untuk menampilkan dialog konfirmasi hapus
+  void _showDeleteConfirmationDialog(Alamat alamat) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: const Text(
+            'Hapus Alamat',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Apakah Anda yakin ingin menghapus alamat ini?',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Batalkan',
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteAddress(alamat);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text(
+                'Hapus',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fungsi untuk menghapus alamat
+  void _deleteAddress(Alamat alamat) {
+    setState(() {
+      _alamatList.remove(alamat);
+      // Jika alamat yang dihapus adalah yang terpilih, pilih alamat default lainnya
+      if (_selectedAlamat == alamat) {
+        _selectedAlamat = _alamatList.isNotEmpty ? _alamatList.first : null;
+      }
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Alamat berhasil dihapus'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1134,115 +1394,120 @@ class _PilihAlamatPageState extends State<PilihAlamatPage> {
   }
 
   Widget _buildAlamatItem(Alamat alamat, bool isSelected) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected ? const Color(0xFF5938FB) : Colors.grey[300]!,
-          width: isSelected ? 2 : 1,
+    return GestureDetector(
+      onLongPress: () {
+        _showAlamatOptionsDialog(alamat);
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: isSelected ? const Color(0xFF5938FB) : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: () => _selectAlamat(alamat),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    alamat.nama,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          alamat.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+        child: InkWell(
+          onTap: () => _selectAlamat(alamat),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      alamat.nama,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                      if (alamat.isDefault) ...[
-                        const SizedBox(width: 8),
+                    ),
+                    Row(
+                      children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF5938FB).withOpacity(0.1),
+                            color: Colors.blue[50],
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'Default',
+                          child: Text(
+                            alamat.label,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF5938FB),
+                              color: Colors.blue[700],
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
+                        if (alamat.isDefault) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF5938FB).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Default',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF5938FB),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                alamat.nomorTelepon,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                alamat.alamatLengkap,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                alamat.daerah,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              if (isSelected) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green[600], size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Dipilih',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.green[600],
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  alamat.nomorTelepon,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  alamat.alamatLengkap,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  alamat.daerah,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green[600], size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Dipilih',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.green[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -2035,21 +2300,13 @@ class Voucher {
   });
 }
 
-// Checkout Page
+// Checkout Page (Updated untuk menerima multiple items dari keranjang)
 class CheckoutPage extends StatefulWidget {
-  final String productTitle;
-  final String productPrice;
-  final String productSize;
-  final String productColor;
-  final OpsiBank? bankTerpilih;
+  final List<KeranjangItem> keranjangItems;
 
   const CheckoutPage({
     Key? key,
-    required this.productTitle,
-    required this.productPrice,
-    this.productSize = 'S',
-    this.productColor = 'Hitam',
-    this.bankTerpilih,
+    required this.keranjangItems,
   }) : super(key: key);
 
   @override
@@ -2070,7 +2327,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       subtitle: 'Min. Blj Rp50K',
       voucherType: 'Voucher Pembelian Pertama',
       expiry: 'Terpakai 84% s/d 30.09.2025 S&K',
-      image: 'assets/images/acome.png',
+      image: 'assets/images/iconmodipay.png',
       discountAmount: 5000,
     ),
     Voucher(
@@ -2078,7 +2335,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       subtitle: 'Min. Blj Rp150K',
       voucherType: 'Produk Tertentu',
       expiry: 'Terpakai 90% s/d 30.09.2025 S&K',
-      image: 'assets/images/acome.png',
+      image: 'assets/images/iconmodipay.png',
       discountAmount: 6000,
     ),
   ];
@@ -2088,20 +2345,27 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   ValueNotifier<Voucher?> _selectedVoucherNotifier = ValueNotifier<Voucher?>(null);
 
+  // Menghitung total harga semua produk
+  int get _subtotalPesanan {
+    int total = 0;
+    for (var item in widget.keranjangItems) {
+      final String cleanString = item.harga.replaceAll(RegExp(r'[Rp\s\.]'), '');
+      final int itemPrice = int.parse(cleanString);
+      total += itemPrice * item.quantity;
+    }
+    return total;
+  }
+
   int get _totalPembayaran {
-    final String priceString = widget.productPrice;
-    final String cleanString = priceString.replaceAll(RegExp(r'[Rp\s\.]'), '');
-    final int subtotalPesanan = int.parse(cleanString);
     final biayaLayanan = 1900;
     final voucherDiskon = _selectedVoucher?.discountAmount ?? 0;
 
-    return subtotalPesanan + _subtotalPengiriman + biayaLayanan - _totalDiskonPengiriman - voucherDiskon;
+    return _subtotalPesanan + _subtotalPengiriman + biayaLayanan - _totalDiskonPengiriman - voucherDiskon;
   }
 
   @override
   void initState() {
     super.initState();
-    _selectedBank = widget.bankTerpilih;
     
     _selectedAlamat = Alamat(
       nama: 'Abel Thareq',
@@ -2415,9 +2679,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Menggunakan fungsi konversi untuk mendapatkan path gambar produk
-    String productImage = _convertProductNameToAsset(widget.productTitle);
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -2592,7 +2853,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
 
-              // Product Information Box
+              // Product Information Box - Menampilkan semua produk dari keranjang
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12.0),
@@ -2613,76 +2874,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'TOKO MAJU JAYA',
+                        'Produk Dipesan',
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            // Menggunakan gambar produk yang dikonversi dari nama produk
-                            child: Image.asset(productImage),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.productTitle,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${widget.productSize}, ${widget.productColor}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  widget.productPrice,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF5938FB),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'x1',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      ...widget.keranjangItems.map((item) {
+                        return _buildProductItem(item);
+                      }).toList(),
                     ],
                   ),
                 ),
@@ -2900,7 +3102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Total 1 Produk',
+                            'Total ${widget.keranjangItems.length} Produk',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -2908,7 +3110,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ),
                           Text(
-                            widget.productPrice,
+                            'Rp$_subtotalPesanan',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -3039,10 +3241,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 12),
 
-                      _buildPaymentRow('Subtotal Pesanan', widget.productPrice),
-                      _buildPaymentRow('Subtotal Pengiriman', 'Rp${_subtotalPengiriman}'),
+                      _buildPaymentRow('Subtotal Pesanan', 'Rp$_subtotalPesanan'),
+                      _buildPaymentRow('Subtotal Pengiriman', 'Rp$_subtotalPengiriman'),
                       _buildPaymentRow('Biaya Layanan', 'Rp1.900'),
-                      _buildPaymentRow('Total Diskon Pengiriman', '-Rp${_totalDiskonPengiriman}',
+                      _buildPaymentRow('Total Diskon Pengiriman', '-Rp$_totalDiskonPengiriman',
                           isDiscount: true),
                       _buildPaymentRow('Voucher Diskon', '-Rp${_selectedVoucher?.discountAmount ?? 0}',
                           isDiscount: true),
@@ -3053,7 +3255,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                       _buildPaymentRow(
                         'Total Pembayaran',
-                        'Rp${_totalPembayaran}',
+                        'Rp$_totalPembayaran',
                         isTotal: true,
                       ),
                     ],
@@ -3100,7 +3302,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                       ),
                       Text(
-                        'Rp${_totalPembayaran}',
+                        'Rp$_totalPembayaran',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -3151,6 +3353,91 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductItem(KeranjangItem item) {
+    String productImage = _convertProductNameToAsset(item.nama);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Image.asset(
+              productImage,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    color: Colors.grey,
+                    size: 30,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.nama,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${item.ukuran ?? ''}${item.ukuran != null && item.model != null ? ', ' : ''}${item.model ?? ''}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.harga,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF5938FB),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'x${item.quantity}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

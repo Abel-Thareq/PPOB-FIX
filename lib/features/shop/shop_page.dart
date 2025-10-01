@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ppob_app/features/shop/keranjang_page.dart';
 import 'detailshop_page.dart';
 
 // Model Produk
@@ -154,7 +155,10 @@ class _ShopPageState extends State<ShopPage>
                               size: 34,
                             ),
                             onPressed: () {
-                              // Aksi untuk keranjang belanja
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const KeranjangPage()),
+                              );
                             },
                           ),
                         ),
