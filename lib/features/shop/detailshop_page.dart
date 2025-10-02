@@ -121,7 +121,7 @@ class _DetailShopPageState extends State<DetailShopPage> {
             name: widget.title,
             price: widget.price,
             stock: int.parse(widget.stock),
-            models: ['Gede banget', 'Sedikit Kecil', 'Sedang', 'Sedikit Gede', 'Kurang Gede'],
+            models: ['Model 1', 'Model 2', 'Model 3'],
             sizes: ['M', 'L', 'XL', 'XXL', 'XXXL'],
           ),
           isBuyNow: isBuyNow,
@@ -528,7 +528,6 @@ class _ProductOptionsBottomSheetState extends State<ProductOptionsBottomSheet> {
   void _tambahKeKeranjang(BuildContext context) {
     // Format nama produk untuk dijadikan nama file gambar
     String formattedName = widget.product.name
-        .toLowerCase()
         .replaceAll(' ', '_')
         .replaceAll(RegExp(r'[^\w_]'), '');
     
@@ -672,87 +671,24 @@ class _ProductOptionsBottomSheetState extends State<ProductOptionsBottomSheet> {
                 ),
                 const SizedBox(height: 12),
 
-                // Model Options - Bullet Points
+                // Model Options - Checkbox List
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (int i = 0; i < 2; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: const BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            Text(
-                              widget.product.models[i],
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Model Options - Table
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                    },
-                    children: [
-                      TableRow(
-                        children: [
-                          for (int i = 2; i < 5; i++)
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedModel = widget.product.models[i];
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: _selectedModel == widget.product.models[i]
-                                      ? const Color(0xFF5938FB).withOpacity(0.1)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  widget.product.models[i],
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: _selectedModel == widget.product.models[i]
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: _selectedModel == widget.product.models[i]
-                                        ? const Color(0xFF5938FB)
-                                        : Colors.black,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  children: widget.product.models.map((model) {
+                    return CheckboxListTile(
+                      title: Text(model),
+                      value: _selectedModel == model,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          if (value == true) {
+                            _selectedModel = model;
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.zero,
+                      activeColor: const Color(0xFF5938FB),
+                    );
+                  }).toList(),
                 ),
 
                 const SizedBox(height: 24),
@@ -947,7 +883,6 @@ class _ProductOptionsBottomSheetState extends State<ProductOptionsBottomSheet> {
   Widget _buildProductImage() {
     // Format nama produk untuk dijadikan nama file
     String formattedName = widget.product.name
-        .toLowerCase()
         .replaceAll(' ', '_')
         .replaceAll(RegExp(r'[^\w_]'), '');
     

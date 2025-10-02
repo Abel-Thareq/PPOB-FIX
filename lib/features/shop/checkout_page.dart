@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'keranjang_page.dart';
+import 'verifikasi_shop.dart';
 
 // Fungsi helper untuk mengonversi nama produk ke nama file asset
 String _convertProductNameToAsset(String productName) {
@@ -2300,6 +2301,35 @@ class Voucher {
   });
 }
 
+// Model untuk data checkout yang akan dikirim ke VerifikasiShop
+class CheckoutData {
+  final List<KeranjangItem> produk;
+  final Alamat alamat;
+  final String pesanUntukPenjual;
+  final OpsiPengiriman opsiPengiriman;
+  final MetodePembayaran metodePembayaran;
+  final OpsiBank? bank;
+  final Voucher? voucher;
+  final int subtotalPesanan;
+  final int subtotalPengiriman;
+  final int totalDiskonPengiriman;
+  final int totalPembayaran;
+
+  CheckoutData({
+    required this.produk,
+    required this.alamat,
+    required this.pesanUntukPenjual,
+    required this.opsiPengiriman,
+    required this.metodePembayaran,
+    this.bank,
+    this.voucher,
+    required this.subtotalPesanan,
+    required this.subtotalPengiriman,
+    required this.totalDiskonPengiriman,
+    required this.totalPembayaran,
+  });
+}
+
 // Checkout Page (Updated untuk menerima multiple items dari keranjang)
 class CheckoutPage extends StatefulWidget {
   final List<KeranjangItem> keranjangItems;
@@ -2367,6 +2397,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   void initState() {
     super.initState();
     
+    // Set default alamat
     _selectedAlamat = Alamat(
       nama: 'Abel Thareq',
       nomorTelepon: '+62 853 7764 2239',
@@ -2374,6 +2405,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
       daerah: 'MAGELANG UTARA, KOTA MAGELANG, JAWA TENGAH, ID 56116',
       isDefault: true,
       label: 'Rumah',
+    );
+
+    // Set default opsi pengiriman
+    _opsiPengirimanTerpilih = OpsiPengiriman(
+      nama: 'Hemat Kargo',
+      harga: 5000,
+      diskon: 0,
+      estimasi: 'Garansi tiba 17-18 Oktober',
+      isSelected: true,
+    );
+
+    // Set default metode pembayaran
+    _metodePembayaranTerpilih = MetodePembayaran(
+      nama: 'Saldo Modipay',
+      icon: 'assets/images/iconmodipay.png',
+      isSelected: true,
     );
   }
 
@@ -2396,6 +2443,60 @@ class _CheckoutPageState extends State<CheckoutPage> {
       _metodePembayaranTerpilih = metode;
       _selectedBank = bank;
     });
+  }
+
+  // Fungsi untuk membuat pesanan dan navigasi ke VerifikasiShop
+  void _buatPesanan() {
+    // Validasi data yang diperlukan
+    if (_selectedAlamat == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih alamat pengiriman'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_opsiPengirimanTerpilih == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih opsi pengiriman'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_metodePembayaranTerpilih == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap pilih metode pembayaran'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Navigasi ke VerifikasiShop dengan data checkout
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VerifikasiShop(
+          produk: widget.keranjangItems,
+          alamat: _selectedAlamat!,
+          pesanUntukPenjual: _pesanUntukPenjual,
+          opsiPengiriman: _opsiPengirimanTerpilih!,
+          metodePembayaran: _metodePembayaranTerpilih!,
+          bank: _selectedBank,
+          voucher: _selectedVoucher,
+          subtotalPesanan: _subtotalPesanan,
+          subtotalPengiriman: _subtotalPengiriman,
+          totalDiskonPengiriman: _totalDiskonPengiriman,
+          totalPembayaran: _totalPembayaran,
+        ),
+      ),
+    );
   }
 
   Future<void> _showVoucherDialog(BuildContext context) async {
@@ -3325,9 +3426,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       SizedBox(
                         width: 200,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // Handle order placement
-                          },
+                          onPressed: _buatPesanan, // Panggil fungsi buat pesanan
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF5938FB),
                             elevation: 0,
