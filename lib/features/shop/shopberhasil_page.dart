@@ -156,271 +156,281 @@ Total Pembelian: ${formatCurrency(widget.checkoutData.totalPembayaran)}
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F8FF),
-        body: Stack(
+        body: Column(
           children: [
-            SizedBox(
+            // Header tetap di atas
+            Container(
               height: 100.h,
               width: double.infinity,
-              child: Image.asset(
-                'assets/images/header.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned(
-              top: 16.h,
-              left: 16.w,
-              child: SafeArea(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  color: Colors.white,
-                  iconSize: 28.r,
-                  onPressed: _onBackPressed,
-                ),
-              ),
-            ),
-            SingleChildScrollView(
-              padding: EdgeInsets.only(top: 120.h, bottom: 20.h, left: horizontalPadding, right: horizontalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Stack(
                 children: [
-                  Container(
-                    width: 60.w,
-                    height: 60.w,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 35.r,
+                  Image.asset(
+                    'assets/images/header.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                  Positioned(
+                    top: 16.h,
+                    left: 16.w,
+                    child: SafeArea(
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        color: Colors.white,
+                        iconSize: 28.r,
+                        onPressed: _onBackPressed,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 13.h),
-                  Text(
-                    "Transaksi Berhasil",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                ],
+              ),
+            ),
+            // Konten yang bisa di-scroll di bawah header
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(top: 20.h, bottom: 20.h, left: horizontalPadding, right: horizontalPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 60.w,
+                      height: 60.w,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 35.r,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 25.h),
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 6.r,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
+                    SizedBox(height: 13.h),
+                    Text(
+                      "Transaksi Berhasil",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Informasi dasar transaksi
-                        _DetailRow("Tanggal", formattedDate),
-                        _DetailRow("No. Ref", noRef),
-                        SizedBox(height: 16.h),
-                        const Divider(height: 1, color: Colors.grey),
-                        SizedBox(height: 16.h),
-                        _DetailRow("Sumber Dana", _getSumberDana()),
-                        _DetailRow("Jenis Transaksi", "Shopping"),
-                        _DetailRow("Nama Pemesan", widget.checkoutData.alamat.nama),
-                        _DetailRow("Nama Produk", _getProductNames()),
-                        
-                        // Tombol Lihat Detail Transaksi
-                        SizedBox(height: 16.h),
-                        Center(
-                          child: GestureDetector(
-                            onTap: _toggleDetails,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0F0F0),
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Lihat Detail Transaksi",
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: const Color(0xFF6C4EFF),
-                                      fontWeight: FontWeight.w500,
+                    SizedBox(height: 25.h),
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6.r,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Informasi dasar transaksi
+                          _DetailRow("Tanggal", formattedDate),
+                          _DetailRow("No. Ref", noRef),
+                          SizedBox(height: 16.h),
+                          const Divider(height: 1, color: Colors.grey),
+                          SizedBox(height: 16.h),
+                          _DetailRow("Sumber Dana", _getSumberDana()),
+                          _DetailRow("Jenis Transaksi", "Shopping"),
+                          _DetailRow("Nama Pemesan", widget.checkoutData.alamat.nama),
+                          _DetailRow("Nama Produk", _getProductNames()),
+                          
+                          // Tombol Lihat Detail Transaksi
+                          SizedBox(height: 16.h),
+                          Center(
+                            child: GestureDetector(
+                              onTap: _toggleDetails,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF0F0F0),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "Lihat Detail Transaksi",
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: const Color(0xFF6C4EFF),
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Icon(
-                                    _showDetails ? Icons.expand_less : Icons.expand_more,
-                                    size: 16.r,
-                                    color: const Color(0xFF6C4EFF),
+                                    SizedBox(width: 4.w),
+                                    Icon(
+                                      _showDetails ? Icons.expand_less : Icons.expand_more,
+                                      size: 16.r,
+                                      color: const Color(0xFF6C4EFF),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          
+                          // Detail tambahan yang bisa di-expand
+                          if (_showDetails) ...[
+                            const Divider(height: 1, color: Colors.grey),
+                            SizedBox(height: 16.h),
+                            
+                            // Tampilkan detail semua produk
+                            Text(
+                              'Detail Produk:',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            ...widget.checkoutData.produk.map((item) => Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      '• ${item.nama} (x${item.quantity})',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        
-                        // Detail tambahan yang bisa di-expand
-                        if (_showDetails) ...[
-                          const Divider(height: 1, color: Colors.grey),
-                          SizedBox(height: 16.h),
-                          
-                          // Tampilkan detail semua produk
-                          Text(
-                            'Detail Produk:',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          ...widget.checkoutData.produk.map((item) => Padding(
-                            padding: EdgeInsets.only(bottom: 8.h),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            )).toList(),
+                            
+                            SizedBox(height: 16.h),
+                            _DetailRow("Alamat", _getFormattedAddress()),
+                            _DetailRow("Opsi Pengiriman", widget.checkoutData.opsiPengiriman.nama),
+                            SizedBox(height: 16.h),
+                            const Divider(height: 1, color: Colors.grey),
+                            SizedBox(height: 16.h),
+                            
+                            // RINCIAN PEMBAYARAN - DITAMBAHKAN SUBTOTAL PENGIRIMAN
+                            _DetailRow("Subtotal Pesanan", formatCurrency(widget.checkoutData.subtotalPesanan)),
+                            _DetailRow("Subtotal Pengiriman", formatCurrency(widget.checkoutData.subtotalPengiriman)),
+                            
+                            // Biaya Layanan (jika ada di CheckoutData, jika tidak bisa ditambahkan default)
+                            _DetailRow("Biaya Layanan", "Rp1.900"),
+                            
+                            _DetailRow("Total Diskon", "-${formatCurrency(_getTotalDiskon())}"),
+                            
+                            SizedBox(height: 16.h),
+                            const Divider(height: 1, color: Colors.grey),
+                            SizedBox(height: 16.h),
+                            
+                            // TOTAL PEMBAYARAN
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    '• ${item.nama} (x${item.quantity})',
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: Colors.grey[700],
-                                    ),
+                                Text(
+                                  "Total Pembelian",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  formatCurrency(widget.checkoutData.totalPembayaran),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF6C4EFF),
                                   ),
                                 ),
                               ],
                             ),
-                          )).toList(),
-                          
-                          SizedBox(height: 16.h),
-                          _DetailRow("Alamat", _getFormattedAddress()),
-                          _DetailRow("Opsi Pengiriman", widget.checkoutData.opsiPengiriman.nama),
-                          SizedBox(height: 16.h),
-                          const Divider(height: 1, color: Colors.grey),
-                          SizedBox(height: 16.h),
-                          
-                          // RINCIAN PEMBAYARAN - DITAMBAHKAN SUBTOTAL PENGIRIMAN
-                          _DetailRow("Subtotal Pesanan", formatCurrency(widget.checkoutData.subtotalPesanan)),
-                          _DetailRow("Subtotal Pengiriman", formatCurrency(widget.checkoutData.subtotalPengiriman)),
-                          
-                          // Biaya Layanan (jika ada di CheckoutData, jika tidak bisa ditambahkan default)
-                          _DetailRow("Biaya Layanan", "Rp1.900"),
-                          
-                          _DetailRow("Total Diskon", "-${formatCurrency(_getTotalDiskon())}"),
-                          
-                          SizedBox(height: 16.h),
-                          const Divider(height: 1, color: Colors.grey),
-                          SizedBox(height: 16.h),
-                          
-                          // TOTAL PEMBAYARAN
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Total Pembelian",
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                            
+                            SizedBox(height: 16.h),
+                            const Divider(height: 1, color: Colors.grey),
+                            SizedBox(height: 16.h),
+                            
+                            // STATUS PESANAN
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Daftar Pesanan",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                formatCurrency(widget.checkoutData.totalPembayaran),
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF6C4EFF),
+                                Text(
+                                  "Selesai",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          
-                          SizedBox(height: 16.h),
-                          const Divider(height: 1, color: Colors.grey),
-                          SizedBox(height: 16.h),
-                          
-                          // STATUS PESANAN
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Daftar Pesanan",
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Text(
-                                "Selesai",
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ],
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _shareTransactionDetails,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF6C4EFF),
+                              side: const BorderSide(color: Color(0xFF6C4EFF)),
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                            ),
+                            child: Text(
+                              'Bagikan',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _onBackPressed,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C4EFF),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                            ),
+                            child: Text(
+                              'Selesai',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _shareTransactionDetails,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF6C4EFF),
-                            side: const BorderSide(color: Color(0xFF6C4EFF)),
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          child: Text(
-                            'Bagikan',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _onBackPressed,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6C4EFF),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          child: Text(
-                            'Selesai',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

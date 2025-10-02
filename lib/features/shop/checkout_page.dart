@@ -85,25 +85,25 @@ class PilihDaerahPage extends StatefulWidget {
 }
 
 class _PilihDaerahPageState extends State<PilihDaerahPage> {
-  String _selectedProvinsi = 'Pillin Provinsi';
-  String _selectedKabupaten = 'Pillin Kabupaten/Kota';
-  String _selectedKecamatan = 'Pillin Kecamatan';
-  String _selectedKodePos = 'Pillin Kode Pos';
+  String _selectedProvinsi = 'Pilih Provinsi';
+  String _selectedKabupaten = 'Pilih Kabupaten/Kota';
+  String _selectedKecamatan = 'Pilih Kecamatan';
+  String _selectedKodePos = 'Pilih Kode Pos';
 
   @override
   void initState() {
     super.initState();
-    _selectedProvinsi = widget.provinsiTerpilih ?? 'Pillin Provinsi';
-    _selectedKabupaten = widget.kabupatenTerpilih ?? 'Pillin Kabupaten/Kota';
-    _selectedKecamatan = widget.kecamatanTerpilih ?? 'Pillin Kecamatan';
-    _selectedKodePos = widget.kodePosTerpilih ?? 'Pillin Kode Pos';
+    _selectedProvinsi = widget.provinsiTerpilih ?? 'Pilih Provinsi';
+    _selectedKabupaten = widget.kabupatenTerpilih ?? 'Pilih Kabupaten/Kota';
+    _selectedKecamatan = widget.kecamatanTerpilih ?? 'Pilih Kecamatan';
+    _selectedKodePos = widget.kodePosTerpilih ?? 'Pilih Kode Pos';
   }
 
   void _konfirmasiPilihan() {
-    if (_selectedProvinsi.startsWith('Pillin') || 
-        _selectedKabupaten.startsWith('Pillin') ||
-        _selectedKecamatan.startsWith('Pillin') ||
-        _selectedKodePos.startsWith('Pillin')) {
+    if (_selectedProvinsi.startsWith('Pilih') || 
+        _selectedKabupaten.startsWith('Pilih') ||
+        _selectedKecamatan.startsWith('Pilih') ||
+        _selectedKodePos.startsWith('Pilih')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Harap lengkapi semua data alamat'),
@@ -260,7 +260,7 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
                   value,
                   style: TextStyle(
                     fontSize: 14,
-                    color: value.startsWith('Pillin') ? Colors.grey : Colors.black87,
+                    color: value.startsWith('Pilih') ? Colors.grey : Colors.black87,
                   ),
                 ),
                 Icon(
@@ -292,7 +292,7 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
             'Yogyakarta',
             'Banten',
           ],
-          selectedItem: _selectedProvinsi.startsWith('Pillin') ? null : _selectedProvinsi,
+          selectedItem: _selectedProvinsi.startsWith('Pilih') ? null : _selectedProvinsi,
         ),
       ),
     );
@@ -301,15 +301,15 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
       setState(() {
         _selectedProvinsi = result;
         // Reset pilihan turunan ketika provinsi berubah
-        _selectedKabupaten = 'Pillin Kabupaten/Kota';
-        _selectedKecamatan = 'Pillin Kecamatan';
-        _selectedKodePos = 'Pillin Kode Pos';
+        _selectedKabupaten = 'Pilih Kabupaten/Kota';
+        _selectedKecamatan = 'Pilih Kecamatan';
+        _selectedKodePos = 'Pilih Kode Pos';
       });
     }
   }
 
   void _pilihKabupaten() async {
-    if (_selectedProvinsi.startsWith('Pillin')) {
+    if (_selectedProvinsi.startsWith('Pilih')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Harap pilih provinsi terlebih dahulu'),
@@ -352,7 +352,7 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
         builder: (context) => PilihanListPage(
           title: 'Pilih Kabupaten/Kota',
           items: items,
-          selectedItem: _selectedKabupaten.startsWith('Pillin') ? null : _selectedKabupaten,
+          selectedItem: _selectedKabupaten.startsWith('Pilih') ? null : _selectedKabupaten,
         ),
       ),
     );
@@ -361,14 +361,14 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
       setState(() {
         _selectedKabupaten = result;
         // Reset pilihan turunan ketika kabupaten berubah
-        _selectedKecamatan = 'Pillin Kecamatan';
-        _selectedKodePos = 'Pillin Kode Pos';
+        _selectedKecamatan = 'Pilih Kecamatan';
+        _selectedKodePos = 'Pilih Kode Pos';
       });
     }
   }
 
   void _pilihKecamatan() async {
-    if (_selectedKabupaten.startsWith('Pillin')) {
+    if (_selectedKabupaten.startsWith('Pilih')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Harap pilih kabupaten/kota terlebih dahulu'),
@@ -408,7 +408,7 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
         builder: (context) => PilihanListPage(
           title: 'Pilih Kecamatan',
           items: items,
-          selectedItem: _selectedKecamatan.startsWith('Pillin') ? null : _selectedKecamatan,
+          selectedItem: _selectedKecamatan.startsWith('Pilih') ? null : _selectedKecamatan,
         ),
       ),
     );
@@ -417,13 +417,13 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
       setState(() {
         _selectedKecamatan = result;
         // Reset kode pos ketika kecamatan berubah
-        _selectedKodePos = 'Pillin Kode Pos';
+        _selectedKodePos = 'Pilih Kode Pos';
       });
     }
   }
 
   void _pilihKodePos() async {
-    if (_selectedKecamatan.startsWith('Pillin')) {
+    if (_selectedKecamatan.startsWith('Pilih')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Harap pilih kecamatan terlebih dahulu'),
@@ -448,7 +448,7 @@ class _PilihDaerahPageState extends State<PilihDaerahPage> {
         builder: (context) => PilihanListPage(
           title: 'Pilih Kode Pos',
           items: items,
-          selectedItem: _selectedKodePos.startsWith('Pillin') ? null : _selectedKodePos,
+          selectedItem: _selectedKodePos.startsWith('Pilih') ? null : _selectedKodePos,
         ),
       ),
     );
@@ -569,10 +569,10 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
   final _alamatLengkapController = TextEditingController();
   
   // Variabel untuk menyimpan data alamat yang dipilih
-  String _selectedProvinsi = 'Pillin Provinsi';
-  String _selectedKabupaten = 'Pillin Kabupaten/Kota';
-  String _selectedKecamatan = 'Pillin Kecamatan';
-  String _selectedKodePos = 'Pillin Kode Pos';
+  String _selectedProvinsi = 'Pilih Provinsi';
+  String _selectedKabupaten = 'Pilih Kabupaten/Kota';
+  String _selectedKecamatan = 'Pilih Kecamatan';
+  String _selectedKodePos = 'Pilih Kode Pos';
   
   String _selectedLabel = 'Rumah';
   bool _isAlamatUtama = false;
@@ -593,38 +593,38 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
       context,
       MaterialPageRoute(
         builder: (context) => PilihDaerahPage(
-          provinsiTerpilih: _selectedProvinsi.startsWith('Pillin') ? null : _selectedProvinsi,
-          kabupatenTerpilih: _selectedKabupaten.startsWith('Pillin') ? null : _selectedKabupaten,
-          kecamatanTerpilih: _selectedKecamatan.startsWith('Pillin') ? null : _selectedKecamatan,
-          kodePosTerpilih: _selectedKodePos.startsWith('Pillin') ? null : _selectedKodePos,
+          provinsiTerpilih: _selectedProvinsi.startsWith('Pilih') ? null : _selectedProvinsi,
+          kabupatenTerpilih: _selectedKabupaten.startsWith('Pilih') ? null : _selectedKabupaten,
+          kecamatanTerpilih: _selectedKecamatan.startsWith('Pilih') ? null : _selectedKecamatan,
+          kodePosTerpilih: _selectedKodePos.startsWith('Pilih') ? null : _selectedKodePos,
         ),
       ),
     );
 
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
-        _selectedProvinsi = result['provinsi'] ?? 'Pillin Provinsi';
-        _selectedKabupaten = result['kabupaten'] ?? 'Pillin Kabupaten/Kota';
-        _selectedKecamatan = result['kecamatan'] ?? 'Pillin Kecamatan';
-        _selectedKodePos = result['kodePos'] ?? 'Pillin Kode Pos';
+        _selectedProvinsi = result['provinsi'] ?? 'Pilih Provinsi';
+        _selectedKabupaten = result['kabupaten'] ?? 'Pilih Kabupaten/Kota';
+        _selectedKecamatan = result['kecamatan'] ?? 'Pilih Kecamatan';
+        _selectedKodePos = result['kodePos'] ?? 'Pilih Kode Pos';
       });
     }
   }
 
   // Fungsi untuk mendapatkan teks alamat lengkap
   String get _daerahText {
-    if (_selectedProvinsi.startsWith('Pillin') && 
-        _selectedKabupaten.startsWith('Pillin') &&
-        _selectedKecamatan.startsWith('Pillin') &&
-        _selectedKodePos.startsWith('Pillin')) {
+    if (_selectedProvinsi.startsWith('Pilih') && 
+        _selectedKabupaten.startsWith('Pilih') &&
+        _selectedKecamatan.startsWith('Pilih') &&
+        _selectedKodePos.startsWith('Pilih')) {
       return '';
     }
     
     List<String> parts = [];
-    if (!_selectedProvinsi.startsWith('Pillin')) parts.add(_selectedProvinsi);
-    if (!_selectedKabupaten.startsWith('Pillin')) parts.add(_selectedKabupaten);
-    if (!_selectedKecamatan.startsWith('Pillin')) parts.add(_selectedKecamatan);
-    if (!_selectedKodePos.startsWith('Pillin')) parts.add('Kode Pos: ${_selectedKodePos}');
+    if (!_selectedProvinsi.startsWith('Pilih')) parts.add(_selectedProvinsi);
+    if (!_selectedKabupaten.startsWith('Pilih')) parts.add(_selectedKabupaten);
+    if (!_selectedKecamatan.startsWith('Pilih')) parts.add(_selectedKecamatan);
+    if (!_selectedKodePos.startsWith('Pilih')) parts.add('Kode Pos: ${_selectedKodePos}');
     
     return parts.join(', ');
   }
@@ -632,10 +632,10 @@ class _TambahAlamatPageState extends State<TambahAlamatPage> {
   void _simpanAlamat() {
     if (_formKey.currentState!.validate()) {
       // Validasi apakah alamat lengkap sudah dipilih
-      if (_selectedProvinsi.startsWith('Pillin') || 
-          _selectedKabupaten.startsWith('Pillin') ||
-          _selectedKecamatan.startsWith('Pillin') ||
-          _selectedKodePos.startsWith('Pillin')) {
+      if (_selectedProvinsi.startsWith('Pilih') || 
+          _selectedKabupaten.startsWith('Pilih') ||
+          _selectedKecamatan.startsWith('Pilih') ||
+          _selectedKodePos.startsWith('Pilih')) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Harap lengkapi semua data alamat (Provinsi, Kabupaten, Kecamatan, Kode Pos)'),

@@ -19,6 +19,8 @@ import 'package:ppob_app/features/pgn/presentation/pages/pgn_page.dart';
 import 'package:ppob_app/features/samsat/presentation/pages/samsat_page.dart';
 import 'package:ppob_app/features/snpmb/presentation/pages/snpmb_page.dart';
 import 'package:ppob_app/features/telkom/presentation/pages/telkom_page.dart';
+import 'package:ppob_app/features/transaction/presentation/pages/pendidikan_page.dart';
+import 'package:ppob_app/features/transaction/presentation/pages/properti1_page.dart';
 
 class TagihanPage extends StatelessWidget {
   const TagihanPage({super.key});
@@ -309,6 +311,16 @@ class TagihanPage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PajakDaerahPage()),
+      );
+    } else if (title == 'Pendidikan') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PendidikanPage()),
+      );
+    } else if (title == 'IPL & Properti') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Properti1Page()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

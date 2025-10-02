@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ppob_app/features/donasi/presentation/pages/donasi_page.dart';
 import 'package:ppob_app/features/reksa_dana/presentation/pages/reksa_page.dart';
+import 'package:ppob_app/features/transaction/presentation/pages/emas_page.dart';
+import 'package:ppob_app/features/transaction/presentation/pages/zakat_page.dart';
 import 'package:ppob_app/features/wakaf/presentation/pages/wakaf_page.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 
@@ -49,6 +51,18 @@ class LainnyaPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const WakafPage()),
+        );
+        break;
+      case 'Emas':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const EmasPage()),
+        );
+        break;
+      case 'Zakat':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ZakatPage()),
         );
         break;
       default:
