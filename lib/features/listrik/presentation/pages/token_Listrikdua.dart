@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/core/widgets/custom_button.dart';
-import 'package:ppob_app/features/listrik/presentation/pages/token_Listriktiga.dart'; // pastikan import page tujuan
+import 'package:ppob_app/features/listrik/presentation/pages/token_Listriktiga.dart';
 
 class TokenListrik2Page extends StatefulWidget {
-  const TokenListrik2Page({super.key});
+  final String meterNumber;
+
+  const TokenListrik2Page({
+    super.key,
+    required this.meterNumber,
+  });
 
   @override
   State<TokenListrik2Page> createState() => _TokenListrik2PageState();
@@ -13,11 +18,30 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
   bool isSaved = false;
   String? selectedNominal;
 
+  // Fungsi untuk mengonversi string nominal ke integer
+  int _parseNominalToInt(String nominal) {
+    // Hapus "Rp" dan titik, lalu konversi ke integer
+    String cleaned = nominal.replaceAll('Rp', '').replaceAll('.', '');
+    return int.tryParse(cleaned) ?? 0;
+  }
+
   @override
   Widget build(BuildContext context) {
-    const originalName = "PONPES ASSALAFIYYAH 2";
-    final maskedName =
-    originalName.replaceRange(3, null, "X" * (originalName.length - 3));
+    // Format nomor meter untuk ditampilkan (misalnya: 5210XXXXX)
+    String formatMeterNumber(String meterNumber) {
+      if (meterNumber.length <= 4) {
+        return meterNumber;
+      }
+      return '${meterNumber.substring(0, 4)}${'X' * (meterNumber.length - 4)}';
+    }
+
+    // Format nama untuk ditampilkan (misalnya: PONXXXXX)
+    String formatName(String name) {
+      if (name.length <= 3) {
+        return name;
+      }
+      return '${name.substring(0, 3)}${'X' * (name.length - 3)}';
+    }
 
     return Scaffold(
       body: Column(
@@ -35,10 +59,10 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(11.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -68,7 +92,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            maskedName,
+                            formatName('PONPES ASSALAFIYYAH 2'), // Menggunakan fungsi formatName
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -82,9 +106,9 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                               color: Colors.grey,
                             ),
                           ),
-                          const Text(
-                            '521041373414 - SI / 5500 VA',
-                            style: TextStyle(
+                          Text(
+                            '${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA',
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
                             ),
@@ -167,30 +191,32 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                   const SizedBox(height: 8),
 
                   // BOX BESAR LIST NOMINAL
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 40),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 2.2,
-                      children: [
-                        _buildNominalButton('Rp20.000'),
-                        _buildNominalButton('Rp50.000'),
-                        _buildNominalButton('Rp100.000'),
-                        _buildNominalButton('Rp200.000'),
-                        _buildNominalButton('Rp500.000'),
-                        _buildNominalButton('Rp1.000.000'),
-                        _buildNominalButton('Rp5.000.000'),
-                        _buildNominalButton('Rp10.000.000'),
-                      ],
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 2.2,
+                        children: [
+                          _buildNominalButton('Rp20.000'),
+                          _buildNominalButton('Rp50.000'),
+                          _buildNominalButton('Rp100.000'),
+                          _buildNominalButton('Rp200.000'),
+                          _buildNominalButton('Rp500.000'),
+                          _buildNominalButton('Rp1.000.000'),
+                          _buildNominalButton('Rp5.000.000'),
+                          _buildNominalButton('Rp10.000.000'),
+                        ],
+                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      ),
                     ),
                   ),
                 ],
@@ -208,7 +234,9 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TokenListrik3Page(),
+                      builder: (context) => TokenListrik3Page(
+                        selectedNominal: _parseNominalToInt(selectedNominal!),
+                      ),
                     ),
                   );
                 } else {

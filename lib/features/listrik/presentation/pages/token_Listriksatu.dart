@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/core/widgets/custom_button.dart';
-import 'package:ppob_app/features/listrik/presentation/pages/token_Listrikdua.dart'; // Import the TokenListrik2Page
+import 'package:ppob_app/features/listrik/presentation/pages/token_Listrikdua.dart';
 
-class TokenListrik1Page extends StatelessWidget {
+class TokenListrik1Page extends StatefulWidget {
   const TokenListrik1Page({super.key});
+
+  @override
+  State<TokenListrik1Page> createState() => _TokenListrik1PageState();
+}
+
+class _TokenListrik1PageState extends State<TokenListrik1Page> {
+  final TextEditingController _meterNumberController = TextEditingController();
+
+  @override
+  void dispose() {
+    _meterNumberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +103,8 @@ class TokenListrik1Page extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   TextField(
+                    controller: _meterNumberController,
+                    keyboardType: TextInputType.number, // Keyboard angka saja
                     decoration: InputDecoration(
                       hintText: 'Masukan No.Meter / ID Pelanggan',
                       border: OutlineInputBorder(
@@ -125,10 +140,21 @@ class TokenListrik1Page extends StatelessWidget {
             child: CustomButton(
               text: 'Lanjutkan',
               onPressed: () {
+                if (_meterNumberController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Silakan masukkan No. Meter / ID Pelanggan'),
+                    ),
+                  );
+                  return;
+                }
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TokenListrik2Page(),
+                    builder: (context) => TokenListrik2Page(
+                      meterNumber: _meterNumberController.text,
+                    ),
                   ),
                 );
               },

@@ -3,7 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/token_listrikempat.dart';
 
 class TokenListrik3Page extends StatefulWidget {
-  const TokenListrik3Page({super.key});
+  final int selectedNominal;
+  
+  const TokenListrik3Page({
+    super.key,
+    required this.selectedNominal,
+  });
 
   @override
   State<TokenListrik3Page> createState() => _TokenListrik3PageState();
@@ -20,11 +25,19 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
 
   String selectedPaymentMethod = "Saldo Modipay";
   String? selectedBank;
+  String? selectedVoucher;
+  String? selectedVoucherCode;
+  int voucherDiscount = 0;
+  bool isVoucherApplied = false;
+  TextEditingController voucherController = TextEditingController();
+  bool showSpecialVoucher = false;
 
-  final totalPesanan = 500000;
-  int biayaAdmin = 3000;
+  // Menggunakan selectedNominal dari page 2 sebagai totalPesanan
+  int get totalPesanan => widget.selectedNominal;
+  
+  int biayaAdmin = 2000;
 
-  int get totalPembayaran => totalPesanan + biayaAdmin;
+  int get totalPembayaran => totalPesanan + biayaAdmin - voucherDiscount;
 
   void updateBiayaAdmin() {
     setState(() {
@@ -36,6 +49,381 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
         biayaAdmin = 3000;
       }
     });
+  }
+
+  void _showVoucherDialog(BuildContext context) {
+    String searchQuery = '';
+    bool tempShowSpecialVoucher = false;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header dengan nama pelanggan
+                        const Text(
+                          "PONXXXXXXXXXXXXXXXXXX",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Title Voucher
+                        const Text(
+                          "Voucher",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Input Kode Voucher dengan tombol Pakai
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade400),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: TextField(
+                                  controller: voucherController,
+                                  onChanged: (value) {
+                                    setStateDialog(() {
+                                      searchQuery = value;
+                                      tempShowSpecialVoucher = false;
+                                    });
+                                  },
+                                  style: const TextStyle(fontSize: 12),
+                                  decoration: const InputDecoration(
+                                    hintText: "Masukkan Kode Voucher",
+                                    border: InputBorder.none,
+                                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 60,
+                              height: 40,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF6C4EFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                onPressed: () {
+                                  if (searchQuery.toUpperCase() == 'A78SHUAK') {
+                                    setStateDialog(() {
+                                      tempShowSpecialVoucher = true;
+                                    });
+                                  }
+                                },
+                                child: const Text(
+                                  "Pakai",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Voucher Khusus (hanya muncul setelah tekan tombol Pakai)
+                        if (tempShowSpecialVoucher)
+                          _buildSpecialVoucherItem(
+                            'A78SHUAK',
+                            'Diskon Tiktok',
+                            10000,
+                            0,
+                            selectedVoucherCode == 'A78SHUAK',
+                            () {
+                              setStateDialog(() {
+                                selectedVoucherCode = 'A78SHUAK';
+                                selectedVoucher = 'Diskon Tiktok';
+                                voucherDiscount = 10000;
+                              });
+                            },
+                          ),
+
+                        if (tempShowSpecialVoucher)
+                          const SizedBox(height: 8),
+
+                        // Daftar Voucher Biasa
+                        const Text(
+                          "Voucher Tersedia",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Voucher Biasa
+                        Column(
+                          children: [
+                            _buildVoucherItem(
+                              'DISKON5K',
+                              'Diskon Rp5K',
+                              5000,
+                              50000,
+                              selectedVoucherCode == 'DISKON5K',
+                              () {
+                                setStateDialog(() {
+                                  selectedVoucherCode = 'DISKON5K';
+                                  selectedVoucher = 'Diskon Rp5K';
+                                  voucherDiscount = 5000;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 6),
+                            _buildVoucherItem(
+                              'DISKON6K',
+                              'Diskon Rp6K',
+                              6000,
+                              150000,
+                              selectedVoucherCode == 'DISKON6K',
+                              () {
+                                setStateDialog(() {
+                                  selectedVoucherCode = 'DISKON6K';
+                                  selectedVoucher = 'Diskon Rp6K';
+                                  voucherDiscount = 6000;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
+
+                        // Konfirmasi Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C4EFF),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              setState(() {
+                                isVoucherApplied = selectedVoucherCode != null;
+                                showSpecialVoucher = tempShowSpecialVoucher;
+                              });
+                            },
+                            child: const Text(
+                              "Konfirmasi",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSpecialVoucherItem(String code, String name, int discount, int minPurchase, bool isSelected, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(6),
+        color: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C4EFF).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Image.asset(
+              'assets/images/tiktok.png',
+              width: 18,
+              height: 18,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.local_offer_outlined, color: Color(0xFF6C4EFF), size: 16),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  code,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
+                Text(
+                  "Diskon ${formatCurrency(discount)}",
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF6C4EFF) : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF6C4EFF) : Colors.grey.shade400,
+                ),
+              ),
+              child: Text(
+                "Pakai",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVoucherItem(String code, String name, int discount, int minPurchase, bool isSelected, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(6),
+        color: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C4EFF).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Image.asset(
+              'assets/images/iconmodipay.png',
+              width: 18,
+              height: 18,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.local_offer_outlined, color: Color(0xFF6C4EFF), size: 16),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "Min. Beli ${formatCurrency(minPurchase)}",
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF6C4EFF) : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF6C4EFF) : Colors.grey.shade400,
+                ),
+              ),
+              child: Text(
+                "Pakai",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPaymentMethodSheet(BuildContext context) {
@@ -406,6 +794,7 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Voucher Section
                   Container(
                     padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -414,22 +803,35 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text("Voucher", style: TextStyle(fontSize: 14)),
-                        Row(
-                          children: [
-                            Text(
-                              "Gunakan/masukan kode",
-                              style:
-                              TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                            SizedBox(width: 8),
-                            Icon(Icons.chevron_right, size: 20),
-                          ],
-                        ),
-                      ],
+                    child: InkWell(
+                      onTap: () => _showVoucherDialog(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Voucher", style: TextStyle(fontSize: 14)),
+                          Row(
+                            children: [
+                              if (isVoucherApplied && selectedVoucher != null)
+                                Text(
+                                  selectedVoucher!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF6C4EFF),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              else
+                                const Text(
+                                  "Gunakan/masukan kode",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey),
+                                ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -477,6 +879,21 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                           ],
                         ),
                         const SizedBox(height: 12),
+                        if (isVoucherApplied && voucherDiscount > 0)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Diskon Voucher",
+                                  style: TextStyle(fontSize: 14)),
+                              Text(
+                                "-${formatCurrency(voucherDiscount)}",
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.green),
+                              ),
+                            ],
+                          ),
+                        if (isVoucherApplied && voucherDiscount > 0)
+                          const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

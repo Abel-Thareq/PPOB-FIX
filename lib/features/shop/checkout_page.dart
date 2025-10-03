@@ -2526,7 +2526,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             children: [
                               Flexible(
                                 child: AutoSizeText(
-                                  'Voucher Acome Official Shop',
+                                  'Voucher PPOB Merah Putih',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
