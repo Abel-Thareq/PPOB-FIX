@@ -236,6 +236,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                     MaterialPageRoute(
                       builder: (context) => TokenListrik3Page(
                         selectedNominal: _parseNominalToInt(selectedNominal!),
+                        meterNumber: widget.meterNumber, // Kirim meterNumber ke page 3
                       ),
                     ),
                   );

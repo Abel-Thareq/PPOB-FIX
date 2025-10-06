@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ppob_app/features/listrik/presentation/pages/token_listrikempat.dart';
+import 'package:ppob_app/features/listrik/presentation/pages/token_Listrikempat.dart';
 
 class TokenListrik3Page extends StatefulWidget {
   final int selectedNominal;
+  final String meterNumber; // Tambahkan parameter meterNumber
   
   const TokenListrik3Page({
     super.key,
     required this.selectedNominal,
+    required this.meterNumber, // Terima meterNumber dari page 2
   });
 
   @override
@@ -21,6 +23,22 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
       symbol: 'Rp',
       decimalDigits: 0,
     ).format(amount);
+  }
+
+  // Fungsi untuk memformat nomor meter (sama seperti di page 2)
+  String formatMeterNumber(String meterNumber) {
+    if (meterNumber.length <= 4) {
+      return meterNumber;
+    }
+    return '${meterNumber.substring(0, 4)}${'X' * (meterNumber.length - 4)}';
+  }
+
+  // Fungsi untuk memformat nama (sama seperti di page 2)
+  String formatName(String name) {
+    if (name.length <= 3) {
+      return name;
+    }
+    return '${name.substring(0, 3)}${'X' * (name.length - 3)}';
   }
 
   String selectedPaymentMethod = "Saldo Modipay";
@@ -78,17 +96,6 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header dengan nama pelanggan
-                        const Text(
-                          "PONXXXXXXXXXXXXXXXXXX",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Title Voucher
                         const Text(
                           "Voucher",
                           style: TextStyle(
@@ -103,10 +110,10 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                           children: [
                             Expanded(
                               child: Container(
-                                height: 40,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(horizontal: 1),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade400),
+                                  border: Border.all(color: Colors.transparent),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: TextField(
@@ -749,26 +756,26 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                               height: 50,
                             ),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "PONXXXXXXXXXXXXXXXX",
-                                    style: TextStyle(
+                                    formatName('PONPES ASSALAFIYYAH 2'), // Gunakan fungsi formatName
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
-                                  Text(
+                                  const SizedBox(height: 4),
+                                  const Text(
                                     "Token Listrik",
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
-                                    "521041373414 - SI / 5500 VA",
-                                    style: TextStyle(
+                                    "${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA", // Gunakan meterNumber dari widget
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                 ],
@@ -979,7 +986,17 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TokenListrikEmpatPage(),
+                            builder: (context) => TokenListrikEmpatPage(
+                              customerName: formatName('PONPES ASSALAFIYYAH 2'),
+                              meterNumber: "${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA", // Kirim meterNumber yang sudah diformat
+                              paymentMethod: selectedPaymentMethod,
+                              selectedBank: selectedBank,
+                              totalPesanan: totalPesanan,
+                              voucherDiscount: voucherDiscount,
+                              biayaAdmin: biayaAdmin,
+                              totalPembayaran: totalPembayaran,
+                              selectedVoucher: selectedVoucher ?? "Tidak ada voucher",
+                            ),
                           ),
                         );
                       }
