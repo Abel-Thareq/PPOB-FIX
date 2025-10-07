@@ -686,44 +686,32 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding:
-            const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 16),
-            color: const Color(0xFF6C4EFF),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+          // HEADER - Diubah seperti di TokenListrik2Page
+          Stack(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 120,
+                child: Image.asset(
+                  'assets/images/header.png',
+                  fit: BoxFit.cover,
                 ),
-                const Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        "modipay",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "SATU PINTU SEMUA PEMBAYARAN",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    iconSize: 28,
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                const SizedBox(width: 40),
-              ],
-            ),
+              ),
+            ],
           ),
 
+          // CONTENT
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -937,6 +925,7 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
             ),
           ),
 
+          // FOOTER BUTTON
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: const BoxDecoration(

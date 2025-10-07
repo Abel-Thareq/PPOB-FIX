@@ -36,7 +36,6 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
   Widget build(BuildContext context) {
     const originalName = "PURWANDI"; // Original name
     const maskedName = "Tagihan Listrik";
-    const idPel = "521040786209";
 
     return Scaffold(
       body: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/token_Listriklima.dart';
+import 'package:ppob_app/features/listrik/presentation/pages/transaksi_gagal.dart';
 
 class TokenListrikEmpatPage extends StatefulWidget {
   final String customerName;
@@ -51,25 +52,47 @@ class _TokenListrikEmpatPageState extends State<TokenListrikEmpatPage> {
 
   void _onSubmitPressed() {
     if (enteredPin.length == pinLength) {
-      // Data sudah tersedia di widget.customerName, widget.paymentMethod, dll.
-      // Bisa digunakan untuk ke halaman berikutnya atau proses lainnya
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TokenListrikLimaPage(
-            // Kirim data ke halaman berikutnya jika diperlukan
-            customerName: widget.customerName,
-            meterNumber: widget.meterNumber,
-            paymentMethod: widget.paymentMethod,
-            selectedBank: widget.selectedBank,
-            totalPesanan: widget.totalPesanan,
-            voucherDiscount: widget.voucherDiscount,
-            biayaAdmin: widget.biayaAdmin,
-            totalPembayaran: widget.totalPembayaran,
-            selectedVoucher: widget.selectedVoucher,
+      // Validasi PIN
+      if (enteredPin == "555555") {
+        // PIN benar - lanjut ke halaman berikutnya
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TokenListrikLimaPage(
+              customerName: widget.customerName,
+              meterNumber: widget.meterNumber,
+              paymentMethod: widget.paymentMethod,
+              selectedBank: widget.selectedBank,
+              totalPesanan: widget.totalPesanan,
+              voucherDiscount: widget.voucherDiscount,
+              biayaAdmin: widget.biayaAdmin,
+              totalPembayaran: widget.totalPembayaran,
+              selectedVoucher: widget.selectedVoucher,
+            ),
           ),
-        ),
-      );
+        );
+      } else if (enteredPin == "111111") {
+        // PIN khusus untuk transaksi gagal
+        Navigator.push(
+           context,
+           MaterialPageRoute(
+             builder: (context) => TransaksiGagalPage(),
+           ),
+         );
+      } else {
+        // PIN salah
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("PIN salah, silakan coba lagi"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        
+        // Reset PIN setelah menampilkan pesan error
+        setState(() {
+          enteredPin = '';
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -86,12 +109,12 @@ class _TokenListrikEmpatPageState extends State<TokenListrikEmpatPage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // HEADER gambar
+          // HEADER - Diperbaiki sesuai layout TokenListrik2Page
           Stack(
             children: [
               SizedBox(
                 width: double.infinity,
-                height: 160,
+                height: 120, // Diubah dari 160 menjadi 120
                 child: Image.asset(
                   'assets/images/header.png',
                   fit: BoxFit.cover,
@@ -99,7 +122,7 @@ class _TokenListrikEmpatPageState extends State<TokenListrikEmpatPage> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0), // Diubah dari EdgeInsets.all(16.0)
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,

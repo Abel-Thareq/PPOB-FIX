@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listriklima.dart';
+import 'package:ppob_app/features/listrik/presentation/pages/transaksi_gagal.dart';
 
 class NonTagihanListrikEmpat extends StatefulWidget {
   final String customerName;
@@ -51,22 +52,47 @@ class _NonTagihanListrikEmpatState extends State<NonTagihanListrikEmpat> {
 
   void _onSubmitPressed() {
     if (enteredPin.length == pinLength) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => NonTagihanListriklima(
-            customerName: widget.customerName,
-            meterNumber: widget.meterNumber,
-            paymentMethod: widget.paymentMethod,
-            selectedBank: widget.selectedBank,
-            totalPesanan: widget.totalPesanan,
-            voucherDiscount: widget.voucherDiscount,
-            biayaAdmin: widget.biayaAdmin,
-            totalPembayaran: widget.totalPembayaran,
-            selectedVoucher: widget.selectedVoucher,
+      // Validasi PIN
+      if (enteredPin == "555555") {
+        // PIN benar - lanjut ke halaman berikutnya
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NonTagihanListriklima(
+              customerName: widget.customerName,
+              meterNumber: widget.meterNumber,
+              paymentMethod: widget.paymentMethod,
+              selectedBank: widget.selectedBank,
+              totalPesanan: widget.totalPesanan,
+              voucherDiscount: widget.voucherDiscount,
+              biayaAdmin: widget.biayaAdmin,
+              totalPembayaran: widget.totalPembayaran,
+              selectedVoucher: widget.selectedVoucher,
+            ),
           ),
-        ),
-      );
+        );
+      } else if (enteredPin == "111111") {
+        // PIN khusus untuk transaksi gagal
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransaksiGagalPage(),
+          ),
+        );
+      } else {
+        // PIN salah
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("PIN salah, silakan coba lagi"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        
+        // Reset PIN setelah menampilkan pesan error
+        setState(() {
+          enteredPin = '';
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

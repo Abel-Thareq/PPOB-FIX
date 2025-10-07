@@ -59,7 +59,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(11.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
@@ -228,7 +228,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: CustomButton(
-              text: 'Confirmasi',
+              text: 'Konfirmasi',
               onPressed: () {
                 if (selectedNominal != null) {
                   Navigator.push(
