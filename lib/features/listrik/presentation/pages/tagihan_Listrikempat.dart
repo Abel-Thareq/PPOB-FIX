@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/tagihan_Listriklima.dart';
 
-
 class TagihanListrikEmpat extends StatefulWidget {
-  const TagihanListrikEmpat({super.key});
+  final String customerName;
+  final String meterNumber;
+  final String paymentMethod;
+  final String? selectedBank;
+  final int totalPesanan;
+  final int voucherDiscount;
+  final int biayaAdmin;
+  final int totalPembayaran;
+  final String selectedVoucher;
+  
+  const TagihanListrikEmpat({
+    super.key,
+    required this.customerName,
+    required this.meterNumber,
+    required this.paymentMethod,
+    this.selectedBank,
+    required this.totalPesanan,
+    required this.voucherDiscount,
+    required this.biayaAdmin,
+    required this.totalPembayaran,
+    required this.selectedVoucher,
+  });
 
   @override
   State<TagihanListrikEmpat> createState() => _TagihanListrikEmpatState();
@@ -31,10 +51,23 @@ class _TagihanListrikEmpatState extends State<TagihanListrikEmpat> {
 
   void _onSubmitPressed() {
     if (enteredPin.length == pinLength) {
+      // Data sudah tersedia di widget.customerName, widget.paymentMethod, dll.
+      // Bisa digunakan untuk ke halaman berikutnya atau proses lainnya
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const TagihanListriklima(),
+          builder: (context) => TagihanListrikLima(
+            // Kirim data ke halaman berikutnya jika diperlukan
+            customerName: widget.customerName,
+            meterNumber: widget.meterNumber,
+            paymentMethod: widget.paymentMethod,
+            selectedBank: widget.selectedBank,
+            totalPesanan: widget.totalPesanan,
+            voucherDiscount: widget.voucherDiscount,
+            biayaAdmin: widget.biayaAdmin,
+            totalPembayaran: widget.totalPembayaran,
+            selectedVoucher: widget.selectedVoucher,
+          ),
         ),
       );
     } else {
@@ -69,7 +102,7 @@ class _TagihanListrikEmpatState extends State<TagihanListrikEmpat> {
                   padding: const EdgeInsets.all(16.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),

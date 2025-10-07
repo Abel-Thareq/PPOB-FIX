@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listriklima.dart';
 
-
 class NonTagihanListrikEmpat extends StatefulWidget {
-  const NonTagihanListrikEmpat({super.key});
+  final String customerName;
+  final String meterNumber;
+  final String paymentMethod;
+  final String? selectedBank;
+  final int totalPesanan;
+  final int voucherDiscount;
+  final int biayaAdmin;
+  final int totalPembayaran;
+  final String selectedVoucher;
+
+  const NonTagihanListrikEmpat({
+    Key? key,
+    required this.customerName,
+    required this.meterNumber,
+    required this.paymentMethod,
+    this.selectedBank,
+    required this.totalPesanan,
+    required this.voucherDiscount,
+    required this.biayaAdmin,
+    required this.totalPembayaran,
+    required this.selectedVoucher,
+  }) : super(key: key);
 
   @override
   State<NonTagihanListrikEmpat> createState() => _NonTagihanListrikEmpatState();
@@ -34,7 +54,17 @@ class _NonTagihanListrikEmpatState extends State<NonTagihanListrikEmpat> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const NonTagihanListriklima(),
+          builder: (context) => NonTagihanListriklima(
+            customerName: widget.customerName,
+            meterNumber: widget.meterNumber,
+            paymentMethod: widget.paymentMethod,
+            selectedBank: widget.selectedBank,
+            totalPesanan: widget.totalPesanan,
+            voucherDiscount: widget.voucherDiscount,
+            biayaAdmin: widget.biayaAdmin,
+            totalPembayaran: widget.totalPembayaran,
+            selectedVoucher: widget.selectedVoucher,
+          ),
         ),
       );
     } else {
@@ -69,7 +99,7 @@ class _NonTagihanListrikEmpatState extends State<NonTagihanListrikEmpat> {
                   padding: const EdgeInsets.all(16.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),

@@ -3,7 +3,12 @@ import 'package:ppob_app/core/widgets/custom_button.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listriktiga.dart';
 
 class NonTagihanListrikDua extends StatefulWidget {
-  const NonTagihanListrikDua({super.key});
+  final String meterNumber;
+
+  const NonTagihanListrikDua({
+    super.key,
+    required this.meterNumber,
+  });
 
   @override
   State<NonTagihanListrikDua> createState() => _NonTagihanListrikDuaState();
@@ -11,6 +16,22 @@ class NonTagihanListrikDua extends StatefulWidget {
 
 class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
   bool isSaved = false;
+
+  // Format nomor meter untuk ditampilkan (misalnya: 5210XXXXX)
+  String _formatMeterNumber(String meterNumber) {
+    if (meterNumber.length <= 4) {
+      return meterNumber;
+    }
+    return '${meterNumber.substring(0, 4)}${'X' * (meterNumber.length - 4)}';
+  }
+
+  // Format nama untuk ditampilkan (misalnya: PURXXXXX)
+  String _formatName(String name) {
+    if (name.length <= 3) {
+      return name;
+    }
+    return '${name.substring(0, 3)}${'X' * (name.length - 3)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +51,10 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(11.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -59,18 +80,18 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                         height: 40,
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "PURXXXXXX",
-                            style: TextStyle(
+                            _formatName("PURWANTI"), // Menggunakan fungsi formatName
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 2),
-                          Text(
+                          const SizedBox(height: 2),
+                          const Text(
                             "Non-Tagihan Listrik",
                             style: TextStyle(
                               fontSize: 14,
@@ -78,8 +99,8 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                             ),
                           ),
                           Text(
-                            "521040786209",
-                            style: TextStyle(
+                            _formatMeterNumber(widget.meterNumber), // Menggunakan meterNumber dari parameter
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
                             ),
@@ -113,12 +134,12 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: 40,
-                            height: 22,
+                            width: 50,
+                            height: 28,
                             padding: const EdgeInsets.symmetric(horizontal: 2),
                             decoration: BoxDecoration(
                               color: isSaved ? Colors.purple : Colors.transparent,
-                              borderRadius: BorderRadius.circular(11),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: isSaved
                                     ? Colors.purple
@@ -132,8 +153,8 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
                               child: Container(
-                                width: 16,
-                                height: 16,
+                                width: 22,
+                                height: 22,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
@@ -174,7 +195,7 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                               ),
                             ),
                             Text(
-                              "PURWANTI",
+                              _formatName("PURWANTI"), // Format nama
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -193,7 +214,7 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                         const SizedBox(height: 16),
 
                         // Transaction details
-                        _buildDetailRow('Nomor Pelanggan', '521040786209'),
+                        _buildDetailRow('Nomor Pelanggan', _formatMeterNumber(widget.meterNumber)),
                         _buildDetailRow('Priode', 'PENERANGAN SEMENTARA'),
                         const Divider(),
                         _buildDetailRow('Jumlah Tagihan', 'Rp20.000'),
@@ -247,7 +268,10 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const NonTagihanListrikTiga(),
+                    builder: (context) => NonTagihanListrikTiga(
+                      meterNumber: widget.meterNumber,
+                      totalAmount: 25000, // Total tagihan dalam integer
+                    ),
                   ),
                 );
               },

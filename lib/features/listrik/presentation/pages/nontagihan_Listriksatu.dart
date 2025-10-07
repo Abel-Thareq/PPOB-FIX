@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:ppob_app/core/widgets/custom_button.dart';
-import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listrikdua.dart'; // Import the TokenListrik2Page
+import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listrikdua.dart';
 
-class NontagihanListriksatu extends StatelessWidget {
+class NontagihanListriksatu extends StatefulWidget {
   const NontagihanListriksatu({super.key});
+
+  @override
+  State<NontagihanListriksatu> createState() => _NontagihanListriksatuState();
+}
+
+class _NontagihanListriksatuState extends State<NontagihanListriksatu> {
+  final TextEditingController _meterNumberController = TextEditingController();
+
+  @override
+  void dispose() {
+    _meterNumberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +40,10 @@ class NontagihanListriksatu extends StatelessWidget {
               // Back Button
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(11.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -90,6 +103,8 @@ class NontagihanListriksatu extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   TextField(
+                    controller: _meterNumberController,
+                    keyboardType: TextInputType.number, // Keyboard angka saja
                     decoration: InputDecoration(
                       hintText: 'Masukan No.Meter / ID Pelanggan',
                       border: OutlineInputBorder(
@@ -125,10 +140,21 @@ class NontagihanListriksatu extends StatelessWidget {
             child: CustomButton(
               text: 'Lanjutkan',
               onPressed: () {
+                if (_meterNumberController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Silakan masukkan No. Meter / ID Pelanggan'),
+                    ),
+                  );
+                  return;
+                }
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const NonTagihanListrikDua(),
+                    builder: (context) => NonTagihanListrikDua(
+                      meterNumber: _meterNumberController.text,
+                    ),
                   ),
                 );
               },

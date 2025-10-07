@@ -3,7 +3,12 @@ import 'package:ppob_app/core/widgets/custom_button.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/tagihan_Listriktiga.dart';
 
 class TagihanListrikDua extends StatefulWidget {
-  const TagihanListrikDua({super.key});
+  final String meterNumber;
+
+  const TagihanListrikDua({
+    super.key,
+    required this.meterNumber,
+  });
 
   @override
   State<TagihanListrikDua> createState() => _TagihanListrikDuaState();
@@ -17,6 +22,14 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
     final visiblePart = originalName.substring(0, 3);
     final maskedPart = 'X' * (originalName.length - 3);
     return '$visiblePart$maskedPart';
+  }
+
+  // Format nomor meter untuk ditampilkan (misalnya: 5210XXXXX)
+  String _formatMeterNumber(String meterNumber) {
+    if (meterNumber.length <= 4) {
+      return meterNumber;
+    }
+    return '${meterNumber.substring(0, 4)}${'X' * (meterNumber.length - 4)}';
   }
 
   @override
@@ -41,10 +54,10 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(11.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -89,7 +102,7 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                             ),
                           ),
                           Text(
-                            idPel,
+                            '${_formatMeterNumber(widget.meterNumber)} - RI / 2200 VA',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
@@ -124,12 +137,12 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: 40, // Kept smaller width
-                            height: 22, // Kept smaller height
+                            width: 50,
+                            height: 28,
                             padding: const EdgeInsets.symmetric(horizontal: 2),
                             decoration: BoxDecoration(
                               color: isSaved ? Colors.purple : Colors.transparent,
-                              borderRadius: BorderRadius.circular(11),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: isSaved
                                     ? Colors.purple
@@ -143,8 +156,8 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
                               child: Container(
-                                width: 16, // Kept smaller circle
-                                height: 16,
+                                width: 22,
+                                height: 22,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
@@ -172,7 +185,7 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                     ),
                     child: Column(
                       children: [
-                        _buildDetailRow('IDPEL', idPel),
+                        _buildDetailRow('IDPEL', _formatMeterNumber(widget.meterNumber)),
                         _buildDetailRow('Tarif/Daya', 'RI / 2200 VA'),
                         _buildDetailRow('Stand Meter', '00019339-00019392'),
                         _buildDetailRow('BL/TH', 'AGUS25'),
@@ -229,7 +242,10 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TagihanListrikTiga(),
+                    builder: (context) => TagihanListrikTiga(
+                      meterNumber: widget.meterNumber,
+                      totalAmount: 140305, // Total tagihan dalam integer
+                    ),
                   ),
                 );
               },

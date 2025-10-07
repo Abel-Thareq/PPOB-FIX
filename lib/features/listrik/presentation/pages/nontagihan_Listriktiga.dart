@@ -4,7 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:ppob_app/features/listrik/presentation/pages/nontagihan_Listrikempat.dart';
 
 class NonTagihanListrikTiga extends StatefulWidget {
-  const NonTagihanListrikTiga({super.key});
+  final String meterNumber;
+  final int totalAmount;
+  
+  const NonTagihanListrikTiga({
+    super.key,
+    required this.meterNumber,
+    required this.totalAmount,
+  });
 
   @override
   State<NonTagihanListrikTiga> createState() => _NonTagihanListrikTigaState();
@@ -19,31 +26,412 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
     ).format(amount);
   }
 
+  // Fungsi untuk memformat nomor meter (sama seperti di page 2)
+  String formatMeterNumber(String meterNumber) {
+    if (meterNumber.length <= 4) {
+      return meterNumber;
+    }
+    return '${meterNumber.substring(0, 4)}${'X' * (meterNumber.length - 4)}';
+  }
+
+  // Fungsi untuk memformat nama (sama seperti di page 2)
+  String formatName(String name) {
+    if (name.length <= 3) {
+      return name;
+    }
+    return '${name.substring(0, 3)}${'X' * (name.length - 3)}';
+  }
+
   String selectedPaymentMethod = "Saldo Modipay";
   String? selectedBank;
+  String? selectedVoucher;
+  String? selectedVoucherCode;
+  int voucherDiscount = 0;
+  bool isVoucherApplied = false;
+  TextEditingController voucherController = TextEditingController();
+  bool showSpecialVoucher = false;
 
-  final totalPesanan = 500000;
-  int biayaAdmin = 3000;
+  // Menggunakan totalAmount dari page 2 sebagai totalPesanan
+  int get totalPesanan => widget.totalAmount;
+  
+  int biayaAdmin = 5000;
 
-  int get totalPembayaran => totalPesanan + biayaAdmin;
-
-  String _maskName(String originalName) {
-    if (originalName.length <= 3) return originalName;
-    final visiblePart = originalName.substring(0, 3);
-    final maskedPart = 'X' * (originalName.length - 3);
-    return '$visiblePart$maskedPart';
-  }
+  int get totalPembayaran => totalPesanan + biayaAdmin - voucherDiscount;
 
   void updateBiayaAdmin() {
     setState(() {
       if (selectedPaymentMethod == "Transfer Bank" && selectedBank != null) {
-        biayaAdmin = 4000;
+        biayaAdmin = 6000;
       } else if (selectedPaymentMethod == "Saldo Modipay") {
-        biayaAdmin = 2000;
+        biayaAdmin = 4000;
       } else {
-        biayaAdmin = 3000;
+        biayaAdmin = 5000;
       }
     });
+  }
+
+  void _showVoucherDialog(BuildContext context) {
+    String searchQuery = '';
+    bool tempShowSpecialVoucher = false;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Voucher",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Input Kode Voucher dengan tombol Pakai
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(horizontal: 1),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.transparent),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: TextField(
+                                  controller: voucherController,
+                                  onChanged: (value) {
+                                    setStateDialog(() {
+                                      searchQuery = value;
+                                      tempShowSpecialVoucher = false;
+                                    });
+                                  },
+                                  style: const TextStyle(fontSize: 12),
+                                  decoration: const InputDecoration(
+                                    hintText: "Masukkan Kode Voucher",
+                                    border: InputBorder.none,
+                                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 60,
+                              height: 40,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF6C4EFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                onPressed: () {
+                                  if (searchQuery.toUpperCase() == 'A78SHUAK') {
+                                    setStateDialog(() {
+                                      tempShowSpecialVoucher = true;
+                                    });
+                                  }
+                                },
+                                child: const Text(
+                                  "Pakai",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Voucher Khusus (hanya muncul setelah tekan tombol Pakai)
+                        if (tempShowSpecialVoucher)
+                          _buildSpecialVoucherItem(
+                            'A78SHUAK',
+                            'Diskon Tiktok',
+                            10000,
+                            0,
+                            selectedVoucherCode == 'A78SHUAK',
+                            () {
+                              setStateDialog(() {
+                                selectedVoucherCode = 'A78SHUAK';
+                                selectedVoucher = 'Diskon Tiktok';
+                                voucherDiscount = 10000;
+                              });
+                            },
+                          ),
+
+                        if (tempShowSpecialVoucher)
+                          const SizedBox(height: 8),
+
+                        // Daftar Voucher Biasa
+                        const Text(
+                          "Voucher Tersedia",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Voucher Biasa
+                        Column(
+                          children: [
+                            _buildVoucherItem(
+                              'DISKON5K',
+                              'Diskon Rp5K',
+                              5000,
+                              50000,
+                              selectedVoucherCode == 'DISKON5K',
+                              () {
+                                setStateDialog(() {
+                                  selectedVoucherCode = 'DISKON5K';
+                                  selectedVoucher = 'Diskon Rp5K';
+                                  voucherDiscount = 5000;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 6),
+                            _buildVoucherItem(
+                              'DISKON6K',
+                              'Diskon Rp6K',
+                              6000,
+                              150000,
+                              selectedVoucherCode == 'DISKON6K',
+                              () {
+                                setStateDialog(() {
+                                  selectedVoucherCode = 'DISKON6K';
+                                  selectedVoucher = 'Diskon Rp6K';
+                                  voucherDiscount = 6000;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+                        const Divider(height: 1, color: Colors.grey),
+                        const SizedBox(height: 12),
+
+                        // Konfirmasi Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C4EFF),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              setState(() {
+                                isVoucherApplied = selectedVoucherCode != null;
+                                showSpecialVoucher = tempShowSpecialVoucher;
+                              });
+                            },
+                            child: const Text(
+                              "Konfirmasi",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSpecialVoucherItem(String code, String name, int discount, int minPurchase, bool isSelected, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(6),
+        color: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C4EFF).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Image.asset(
+              'assets/images/tiktok.png',
+              width: 18,
+              height: 18,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.local_offer_outlined, color: Color(0xFF6C4EFF), size: 16),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  code,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
+                Text(
+                  "Diskon ${formatCurrency(discount)}",
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF6C4EFF) : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF6C4EFF) : Colors.grey.shade400,
+                ),
+              ),
+              child: Text(
+                "Pakai",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVoucherItem(String code, String name, int discount, int minPurchase, bool isSelected, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(6),
+        color: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C4EFF).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Image.asset(
+              'assets/images/iconmodipay.png',
+              width: 18,
+              height: 18,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.local_offer_outlined, color: Color(0xFF6C4EFF), size: 16),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "Min. Beli ${formatCurrency(minPurchase)}",
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF6C4EFF) : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF6C4EFF) : Colors.grey.shade400,
+                ),
+              ),
+              child: Text(
+                "Pakai",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPaymentMethodSheet(BuildContext context) {
@@ -69,10 +457,9 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Center(
-                    child: AutoSizeText(
-                      "Metode Pembayaran",
+                    child: Text(
+                      "Pilih Pembayaran",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -198,14 +585,13 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                           updateBiayaAdmin();
                         });
                       },
-                      child: const AutoSizeText(
+                      child: const Text(
                         "Konfirmasi",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
-                        maxLines: 1,
                       ),
                     ),
                   ),
@@ -236,14 +622,13 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
         child: Row(
           children: [
             Expanded(
-              child: AutoSizeText(
+              child: Text(
                 title,
                 style: TextStyle(
                   fontSize: 16,
                   color: isSelected ? const Color(0xFF6C4EFF) : Colors.black,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
-                maxLines: 1,
               ),
             ),
             if (showArrow)
@@ -279,14 +664,13 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: AutoSizeText(
+              child: Text(
                 bankName,
                 style: TextStyle(
                   fontSize: 14,
                   color: isSelected ? const Color(0xFF6C4EFF) : Colors.black,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
-                maxLines: 1,
               ),
             ),
             if (isSelected)
@@ -317,23 +701,21 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                 const Expanded(
                   child: Column(
                     children: [
-                      AutoSizeText(
+                      Text(
                         "modipay",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
-                        maxLines: 1,
                       ),
                       SizedBox(height: 2),
-                      AutoSizeText(
+                      Text(
                         "SATU PINTU SEMUA PEMBAYARAN",
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 10,
                         ),
-                        maxLines: 1,
                       ),
                     ],
                   ),
@@ -379,26 +761,23 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AutoSizeText(
-                                    _maskName("PURWANDI"), // Apply masking algorithm
+                                  Text(
+                                    formatName("PURWANTI"), // Gunakan fungsi formatName
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
-                                    maxLines: 1,
                                   ),
                                   const SizedBox(height: 4),
-                                  const AutoSizeText(
+                                  const Text(
                                     "Non-Tagihan Listrik",
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.grey),
-                                    maxLines: 1,
                                   ),
-                                  const AutoSizeText(
-                                    "521041373414",
-                                    style: TextStyle(
+                                  Text(
+                                    formatMeterNumber(widget.meterNumber), // Gunakan meterNumber dari widget
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
-                                    maxLines: 1,
                                   ),
                                 ],
                               ),
@@ -409,14 +788,12 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const AutoSizeText("Total Pesanan",
-                                style: TextStyle(fontSize: 14),
-                                maxLines: 1),
-                            AutoSizeText(
+                            const Text("Total Pesanan",
+                                style: TextStyle(fontSize: 14)),
+                            Text(
                               formatCurrency(totalPesanan),
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.w500),
-                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -425,6 +802,7 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Voucher Section
                   Container(
                     padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -433,25 +811,35 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        AutoSizeText("Voucher",
-                            style: TextStyle(fontSize: 14),
-                            maxLines: 1),
-                        Row(
-                          children: [
-                            AutoSizeText(
-                              "Gunakan/masukan kode",
-                              style:
-                              TextStyle(fontSize: 14, color: Colors.grey),
-                              maxLines: 1,
-                            ),
-                            SizedBox(width: 8),
-                            Icon(Icons.chevron_right, size: 20),
-                          ],
-                        ),
-                      ],
+                    child: InkWell(
+                      onTap: () => _showVoucherDialog(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Voucher", style: TextStyle(fontSize: 14)),
+                          Row(
+                            children: [
+                              if (isVoucherApplied && selectedVoucher != null)
+                                Text(
+                                  selectedVoucher!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF6C4EFF),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              else
+                                const Text(
+                                  "Gunakan/masukan kode",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey),
+                                ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -471,16 +859,14 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const AutoSizeText("Metode Pembayaran",
-                                  style: TextStyle(fontSize: 13),
-                                  maxLines: 1),
+                              const Text("Metode Pembayaran",
+                                  style: TextStyle(fontSize: 14)),
                               Row(
                                 children: [
-                                  AutoSizeText(
+                                  Text(
                                     selectedBank ?? selectedPaymentMethod,
                                     style: const TextStyle(
-                                        fontSize: 13, color: Colors.grey),
-                                    maxLines: 1,
+                                        fontSize: 14, color: Colors.grey),
                                   ),
                                   const SizedBox(width: 8),
                                   const Icon(Icons.chevron_right, size: 20),
@@ -493,45 +879,54 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const AutoSizeText("Total Pesanan",
-                                style: TextStyle(fontSize: 14),
-                                maxLines: 1),
-                            AutoSizeText(formatCurrency(totalPesanan),
+                            const Text("Total Pesanan",
+                                style: TextStyle(fontSize: 14)),
+                            Text(formatCurrency(totalPesanan),
                                 style: const TextStyle(
-                                    fontSize: 14, color: Colors.grey),
-                                maxLines: 1),
+                                    fontSize: 14, color: Colors.grey)),
                           ],
                         ),
                         const SizedBox(height: 12),
+                        if (isVoucherApplied && voucherDiscount > 0)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Diskon Voucher",
+                                  style: TextStyle(fontSize: 14)),
+                              Text(
+                                "-${formatCurrency(voucherDiscount)}",
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.green),
+                              ),
+                            ],
+                          ),
+                        if (isVoucherApplied && voucherDiscount > 0)
+                          const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const AutoSizeText("Biaya Admin",
-                                style: TextStyle(fontSize: 14),
-                                maxLines: 1),
-                            AutoSizeText(formatCurrency(biayaAdmin),
+                            const Text("Biaya Admin",
+                                style: TextStyle(fontSize: 14)),
+                            Text(formatCurrency(biayaAdmin),
                                 style: const TextStyle(
-                                    fontSize: 14, color: Colors.grey),
-                                maxLines: 1),
+                                    fontSize: 14, color: Colors.grey)),
                           ],
                         ),
                         const Divider(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const AutoSizeText("Total Pembayaran",
+                            const Text("Total Pembayaran",
                                 style: TextStyle(
                                     fontSize: 14,
-                                    fontWeight: FontWeight.bold),
-                                maxLines: 1),
-                            AutoSizeText(
+                                    fontWeight: FontWeight.bold)),
+                            Text(
                               formatCurrency(totalPembayaran),
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF6C4EFF),
                               ),
-                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -560,12 +955,11 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: AutoSizeText(
+                      child: Text(
                         "Total Pembayaran\n${formatCurrency(totalPembayaran)}",
                         style: const TextStyle(
                             fontSize: 12, fontWeight: FontWeight.w500),
                         textAlign: TextAlign.right,
-                        maxLines: 2,
                       ),
                     ),
                   ),
@@ -593,19 +987,28 @@ class _NonTagihanListrikTigaState extends State<NonTagihanListrikTiga> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const NonTagihanListrikEmpat(),
+                            builder: (context) => NonTagihanListrikEmpat(
+                              customerName: formatName("PURWANTI"),
+                              meterNumber: formatMeterNumber(widget.meterNumber), // Kirim meterNumber yang sudah diformat
+                              paymentMethod: selectedPaymentMethod,
+                              selectedBank: selectedBank,
+                              totalPesanan: totalPesanan,
+                              voucherDiscount: voucherDiscount,
+                              biayaAdmin: biayaAdmin,
+                              totalPembayaran: totalPembayaran,
+                              selectedVoucher: selectedVoucher ?? "Tidak ada voucher",
+                            ),
                           ),
                         );
                       }
                     },
-                    child: const AutoSizeText(
+                    child: const Text(
                       "Bayar Sekarang",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
-                      maxLines: 1,
                     ),
                   ),
                 ),
