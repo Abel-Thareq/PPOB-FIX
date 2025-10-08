@@ -109,12 +109,12 @@ class _TagihanListrikEmpatState extends State<TagihanListrikEmpat> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // HEADER gambar
+          // HEADER - Diperbaiki menjadi konsisten dengan TokenListrikEmpatPage
           Stack(
             children: [
               SizedBox(
                 width: double.infinity,
-                height: 160,
+                height: 120, // Diubah dari 160 menjadi 120
                 child: Image.asset(
                   'assets/images/header.png',
                   fit: BoxFit.cover,
@@ -122,7 +122,7 @@ class _TagihanListrikEmpatState extends State<TagihanListrikEmpat> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0), // Diubah menjadi konsisten
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,

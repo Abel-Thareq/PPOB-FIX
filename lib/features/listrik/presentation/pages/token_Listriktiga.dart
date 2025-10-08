@@ -4,12 +4,14 @@ import 'package:ppob_app/features/listrik/presentation/pages/token_Listrikempat.
 
 class TokenListrik3Page extends StatefulWidget {
   final int selectedNominal;
-  final String meterNumber; // Tambahkan parameter meterNumber
+  final String meterNumber;
+  final String customerName; // TAMBAH PARAMETER CUSTOMER NAME
   
   const TokenListrik3Page({
     super.key,
     required this.selectedNominal,
-    required this.meterNumber, // Terima meterNumber dari page 2
+    required this.meterNumber,
+    required this.customerName, // TERIMA CUSTOMER NAME DARI PAGE 2
   });
 
   @override
@@ -682,6 +684,10 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
 
   @override
   Widget build(BuildContext context) {
+    // Format nama dan meter number menggunakan fungsi yang sama
+    final String formattedCustomerName = formatName(widget.customerName);
+    final String formattedMeterNumber = formatMeterNumber(widget.meterNumber);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -749,7 +755,7 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    formatName('PONPES ASSALAFIYYAH 2'), // Gunakan fungsi formatName
+                                    formattedCustomerName, // Gunakan formatted name dari parameter
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -762,7 +768,7 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
-                                    "${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA", // Gunakan meterNumber dari widget
+                                    "$formattedMeterNumber - SI / 5500 VA", // Gunakan meterNumber dari parameter
                                     style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
@@ -976,8 +982,8 @@ class _TokenListrik3PageState extends State<TokenListrik3Page> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => TokenListrikEmpatPage(
-                              customerName: formatName('PONPES ASSALAFIYYAH 2'),
-                              meterNumber: "${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA", // Kirim meterNumber yang sudah diformat
+                              customerName: widget.customerName, // KIRIM NAMA KE PAGE 4
+                              meterNumber: "$formattedMeterNumber - SI / 5500 VA",
                               paymentMethod: selectedPaymentMethod,
                               selectedBank: selectedBank,
                               totalPesanan: totalPesanan,

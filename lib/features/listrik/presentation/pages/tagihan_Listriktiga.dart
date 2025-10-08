@@ -5,11 +5,13 @@ import 'package:ppob_app/features/listrik/presentation/pages/tagihan_Listrikempa
 class TagihanListrikTiga extends StatefulWidget {
   final String meterNumber;
   final int totalAmount;
+  final String customerName; // TAMBAH PARAMETER CUSTOMER NAME
   
   const TagihanListrikTiga({
     super.key,
     required this.meterNumber,
     required this.totalAmount,
+    required this.customerName, // TERIMA CUSTOMER NAME DARI PAGE 2
   });
 
   @override
@@ -682,48 +684,40 @@ class _TagihanListrikTigaState extends State<TagihanListrikTiga> {
 
   @override
   Widget build(BuildContext context) {
+    // Format nama dan meter number menggunakan fungsi yang sama
+    final String formattedCustomerName = formatName(widget.customerName);
+    final String formattedMeterNumber = formatMeterNumber(widget.meterNumber);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding:
-            const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 16),
-            color: const Color(0xFF6C4EFF),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+          // HEADER - Diubah menjadi konsisten dengan TokenListrik3Page
+          Stack(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 120, // Diubah dari header lama menjadi 120
+                child: Image.asset(
+                  'assets/images/header.png',
+                  fit: BoxFit.cover,
                 ),
-                const Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        "modipay",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "SATU PINTU SEMUA PEMBAYARAN",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0), // Diubah menjadi konsisten
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    iconSize: 28,
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                const SizedBox(width: 40),
-              ],
-            ),
+              ),
+            ],
           ),
 
+          // CONTENT
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -761,7 +755,7 @@ class _TagihanListrikTigaState extends State<TagihanListrikTiga> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    formatName("PURWANDI"), // Gunakan fungsi formatName
+                                    formattedCustomerName, // Gunakan formatted name dari parameter
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -774,7 +768,7 @@ class _TagihanListrikTigaState extends State<TagihanListrikTiga> {
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
-                                    "${formatMeterNumber(widget.meterNumber)} - RI / 2200 VA", // Gunakan meterNumber dari widget
+                                    "$formattedMeterNumber - RI / 2200 VA", // Gunakan meterNumber dari parameter
                                     style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
@@ -937,6 +931,7 @@ class _TagihanListrikTigaState extends State<TagihanListrikTiga> {
             ),
           ),
 
+          // FOOTER BUTTON
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: const BoxDecoration(
@@ -987,8 +982,8 @@ class _TagihanListrikTigaState extends State<TagihanListrikTiga> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => TagihanListrikEmpat(
-                              customerName: formatName("PURWANDI"),
-                              meterNumber: "${formatMeterNumber(widget.meterNumber)} - RI / 2200 VA", // Kirim meterNumber yang sudah diformat
+                              customerName: widget.customerName, // KIRIM NAMA KE PAGE 4
+                              meterNumber: "$formattedMeterNumber - RI / 2200 VA",
                               paymentMethod: selectedPaymentMethod,
                               selectedBank: selectedBank,
                               totalPesanan: totalPesanan,

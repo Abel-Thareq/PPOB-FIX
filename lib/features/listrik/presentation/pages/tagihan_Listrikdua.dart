@@ -53,7 +53,7 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(11.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
@@ -244,6 +244,7 @@ class _TagihanListrikDuaState extends State<TagihanListrikDua> {
                     builder: (context) => TagihanListrikTiga(
                       meterNumber: widget.meterNumber,
                       totalAmount: 140305, // Total tagihan dalam integer
+                      customerName: originalName, // KIRIM NAMA KE PAGE 3
                     ),
                   ),
                 );

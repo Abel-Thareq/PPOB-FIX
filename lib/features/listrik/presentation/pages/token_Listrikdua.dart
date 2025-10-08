@@ -43,6 +43,11 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
       return '${name.substring(0, 3)}${'X' * (name.length - 3)}';
     }
 
+    // Nama customer yang akan dikirim ke page berikutnya
+    final String customerName = 'PONPES ASSALAFIYYAH 2';
+    final String formattedCustomerName = formatName(customerName);
+    final String formattedMeterNumber = formatMeterNumber(widget.meterNumber);
+
     return Scaffold(
       body: Column(
         children: [
@@ -92,7 +97,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            formatName('PONPES ASSALAFIYYAH 2'), // Menggunakan fungsi formatName
+                            formattedCustomerName, // Menggunakan formatted name
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -107,7 +112,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                             ),
                           ),
                           Text(
-                            '${formatMeterNumber(widget.meterNumber)} - SI / 5500 VA',
+                            '$formattedMeterNumber - SI / 5500 VA',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
@@ -237,6 +242,7 @@ class _TokenListrik2PageState extends State<TokenListrik2Page> {
                       builder: (context) => TokenListrik3Page(
                         selectedNominal: _parseNominalToInt(selectedNominal!),
                         meterNumber: widget.meterNumber, // Kirim meterNumber ke page 3
+                        customerName: customerName, // KIRIM NAMA KE PAGE 3
                       ),
                     ),
                   );

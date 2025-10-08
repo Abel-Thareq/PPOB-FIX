@@ -35,6 +35,10 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
 
   @override
   Widget build(BuildContext context) {
+    // Data nama pelanggan (bisa dari API atau data statis)
+    String customerName = "PURWANTI";
+    String formattedName = _formatName(customerName);
+
     return Scaffold(
       body: Column(
         children: [
@@ -84,7 +88,7 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _formatName("PURWANTI"), // Menggunakan fungsi formatName
+                            formattedName, // Menggunakan formattedName
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -195,7 +199,7 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                               ),
                             ),
                             Text(
-                              _formatName("PURWANTI"), // Format nama
+                              formattedName, // Format nama
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -270,6 +274,7 @@ class _NonTagihanListrikDuaState extends State<NonTagihanListrikDua> {
                   MaterialPageRoute(
                     builder: (context) => NonTagihanListrikTiga(
                       meterNumber: widget.meterNumber,
+                      customerName: customerName, // KIRIM NAMA ASLI ke page tiga
                       totalAmount: 25000, // Total tagihan dalam integer
                     ),
                   ),
