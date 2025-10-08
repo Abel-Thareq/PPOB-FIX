@@ -108,7 +108,7 @@ class _BayarPdamPageLimaVerifikasiState extends State<BayarPdamPageLimaVerifikas
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       color: Colors.white,

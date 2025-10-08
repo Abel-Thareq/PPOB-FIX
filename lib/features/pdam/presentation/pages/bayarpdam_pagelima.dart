@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:ppob_app/features/pdam/presentation/pages/pdam_page.dart';
 import 'dart:async'; // Import library untuk Timer
+import 'package:flutter/services.dart'; // Import untuk Clipboard
 
 class BayarPdamPageLima extends StatefulWidget {
   final String bankName;
@@ -49,6 +50,17 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
     return "$hours Jam $minutes Menit $seconds Detik";
   }
 
+  // Fungsi untuk copy ke clipboard
+  void _copyToClipboard() {
+    Clipboard.setData(const ClipboardData(text: "88810085377642239"));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Nomor Virtual Account berhasil disalin"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -89,27 +101,27 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
         backgroundColor: Colors.white,
         body: Column(
           children: [
-            // HEADER WITH IMAGE
+            // HEADER WITH IMAGE - UKURAN DIPERKECIL
             Stack(
               children: [
                 Image.asset(
                   "assets/images/header.png",
                   width: double.infinity,
-                  height: 150,
+                  height: 120, // DIKECILKAN DARI 150 MENJADI 120
                   fit: BoxFit.cover,
                 ),
-                Positioned(
-                  top: 65, // dinamis sesuai status bar
-                  left: 13,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PdamPage()),
-                      );
-                    },
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10.0, left: 13.0),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PdamPage()),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -172,7 +184,7 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Nomor Virtual Account Box
+                    // Nomor Virtual Account Box - DITAMBAH SHADOW
                     Center(
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.8,
@@ -180,6 +192,14 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF6C4EFF),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF6C4EFF).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
@@ -198,10 +218,11 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                               ),
                             ),
                             InkWell(
-                              onTap: () {
-                                // TODO: copy to clipboard
-                              },
-                              child: Image.asset("assets/images/copy.png", height: 20),
+                              onTap: _copyToClipboard,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Image.asset("assets/images/copy.png", height: 16),
+                              ),
                             ),
                           ],
                         ),
@@ -272,15 +293,23 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                     const Divider(height: 1, color: Colors.grey),
                     const SizedBox(height: 16),
 
-                    // Payment Instructions Box
+                    // Payment Instructions Box - DIREVISI
                     Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
                         border: Border.all(color: Colors.grey.shade300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Column(
                         children: [
+                          // Header Box
                           InkWell(
                             onTap: () {
                               setState(() {
@@ -289,32 +318,51 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.vertical(
+                                  top: const Radius.circular(12),
+                                  bottom: showPaymentInstructions 
+                                      ? Radius.zero 
+                                      : const Radius.circular(12),
+                                ),
+                              ),
                               child: Row(
                                 children: [
-                                  Image.asset("assets/images/rulepayment.png", height: 20),
-                                  const SizedBox(width: 12),
-                                  const Expanded(
-                                    child: AutoSizeText(
-                                      "Lihat tata cara pembayaran",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                  // Icon tanpa background ungu
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 3),
+                                    child: Image.asset(
+                                      "assets/images/rulepayment.png", 
+                                      height: 20,
                                     ),
                                   ),
+                                  const Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        "Lihat tata cara pembayaran",
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Panah tanpa background
                                   Icon(
                                     showPaymentInstructions
                                         ? Icons.keyboard_arrow_up
                                         : Icons.keyboard_arrow_down,
-                                    color: Colors.grey,
+                                    color: Colors.grey.shade700,
+                                    size: 20,
                                   ),
                                 ],
                               ),
                             ),
                           ),
+                          
+                          // Content Box
                           if (showPaymentInstructions) ...[
                             const Divider(height: 1, color: Colors.grey),
                             Padding(
@@ -322,38 +370,87 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Pembayaran via ATM $bankShortName",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  // ATM Section
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF6C4EFF),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: const Icon(
+                                                Icons.atm,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "Pembayaran via ATM $bankShortName",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF6C4EFF),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        _buildInstructionStep("1. Masukkan kartu & PIN ATM"),
+                                        _buildInstructionStep("2. Pilih Menu Transaksi Lain → Pembayaran → Lainnya → BRIVA"),
+                                        _buildInstructionStep("3. Masukkan nomor akun virtual BRI"),
+                                        _buildInstructionStep("4. Masukkan jumlah top up"),
+                                        _buildInstructionStep("5. Pastikan jumlah sesuai tagihan"),
+                                        _buildInstructionStep("6. Simpan struk bukti pembayaran"),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    "1. Masukkan kartu & PIN ATM\n"
-                                        "2. Pilih Menu Transaksi Lain → Pembayaran → Lainnya → BRIVA\n"
-                                        "3. Masukkan nomor akun virtual BRI\n"
-                                        "4. Masukkan jumlah top up\n"
-                                        "5. Pastikan jumlah sesuai tagihan\n"
-                                        "6. Simpan struk bukti pembayaran",
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    "Pembayaran via BRIMO ($bankShortName)",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+
+                                  // Mobile Banking Section
+                                  Container(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF6C4EFF),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: const Icon(
+                                                Icons.phone_iphone,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "Pembayaran via BRIMO ($bankShortName)",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF6C4EFF),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        _buildInstructionStep("1. Login BRIMO"),
+                                        _buildInstructionStep("2. Pilih Tambah transaksi baru"),
+                                        _buildInstructionStep("3. Masukkan nomor akun virtual BRI"),
+                                        _buildInstructionStep("4. Masukkan jumlah top up"),
+                                        _buildInstructionStep("5. Pastikan jumlah sesuai tagihan"),
+                                        _buildInstructionStep("6. Simpan struk bukti pembayaran"),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    "1. Login BRIMO\n"
-                                        "2. Pilih Tambah transaksi baru\n"
-                                        "3. Masukkan nomor akun virtual BRI\n"
-                                        "4. Masukkan jumlah top up\n"
-                                        "5. Pastikan jumlah sesuai tagihan\n"
-                                        "6. Simpan struk bukti pembayaran",
                                   ),
                                 ],
                               ),
@@ -368,6 +465,29 @@ class _BayarPdamPageLimaState extends State<BayarPdamPageLima> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Widget helper untuk membuat step instruksi - DIREVISI
+  Widget _buildInstructionStep(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

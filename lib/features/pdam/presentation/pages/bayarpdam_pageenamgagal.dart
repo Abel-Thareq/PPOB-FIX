@@ -65,7 +65,7 @@ class _BayarPdamPageEnamGagalState extends State<BayarPdamPageEnamGagal> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: Padding(
-            padding: const EdgeInsets.only(left: 20.0, top: 22.0),
+            padding: const EdgeInsets.only(left: 20.0, top: 13.0),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
               onPressed: _onBackPressed,
@@ -78,7 +78,7 @@ class _BayarPdamPageEnamGagalState extends State<BayarPdamPageEnamGagal> {
           children: [
             // Header Background Image
             SizedBox(
-              height: 140,
+              height: 120,
               width: double.infinity,
               child: Image.asset(
                 'assets/images/header.png',
@@ -88,7 +88,7 @@ class _BayarPdamPageEnamGagalState extends State<BayarPdamPageEnamGagal> {
 
             // Konten utama yang dapat digulir
             SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 160, bottom: 20),
+              padding: const EdgeInsets.only(top: 140, bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [

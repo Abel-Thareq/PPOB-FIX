@@ -268,28 +268,37 @@ class _BayarPdamPageTigaState extends State<BayarPdamPageTiga>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Column(
         children: [
+          // HEADER - SAMA SEPERTI DI BayarPDAMPagedua
           Stack(
             children: [
-              Image.asset(
-                "assets/images/header.png",
+              SizedBox(
                 width: double.infinity,
-                height: 100, // Ukuran header diperkecil
-                fit: BoxFit.cover,
+                height: 120,
+                child: Image.asset(
+                  'assets/images/header.png',
+                  fit: BoxFit.cover,
+                ),
               ),
-              Positioned(
-                top: 40, // Sesuaikan posisi back button
-                left: 16,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    iconSize: 28,
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ),
               ),
             ],
           ),
-          Expanded(child: _buildContent()),
+
+          // CONTENT
+          Expanded(
+            child: _buildContent(),
+          ),
         ],
       ),
     );

@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
 import 'dart:math';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
-// Ubah dari StatelessWidget menjadi StatefulWidget untuk mengelola state
 class BayarPdamPageEnamBerhasil extends StatefulWidget {
   final Map<String, String> billingDetails;
 
@@ -17,9 +19,16 @@ class BayarPdamPageEnamBerhasil extends StatefulWidget {
 }
 
 class _BayarPdamPageEnamBerhasilState extends State<BayarPdamPageEnamBerhasil> {
-  // Fungsi untuk memformat mata uang
+  final ScreenshotController screenshotController = ScreenshotController();
+  late String noRef;
+
+  @override
+  void initState() {
+    super.initState();
+    noRef = _generateRandomString(20);
+  }
+
   String formatCurrency(String amount) {
-    // Menghapus 'Rp' dan titik
     final cleanAmount = amount.replaceAll('Rp', '').replaceAll('.', '');
     final number = int.tryParse(cleanAmount) ?? 0;
     return NumberFormat.currency(
@@ -29,7 +38,6 @@ class _BayarPdamPageEnamBerhasilState extends State<BayarPdamPageEnamBerhasil> {
     ).format(number);
   }
 
-  // Fungsi untuk menangani navigasi kembali ke halaman utama
   void _onBackPressed() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -38,19 +46,87 @@ class _BayarPdamPageEnamBerhasilState extends State<BayarPdamPageEnamBerhasil> {
     );
   }
 
-  // Fungsi untuk membuat nomor pesanan acak
   String _generateRandomString(int length) {
     final random = Random();
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
+  String getCurrentTimestamp() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat('dd MMM yyyy   HH:mm');
+    return dateFormat.format(now);
+  }
+
+  Future<void> _captureAndShare() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final Uint8List? imageBytes = await screenshotController.capture(
+        pixelRatio: 2.0,
+        delay: const Duration(milliseconds: 300),
+      );
+
+      if (mounted) Navigator.of(context).pop();
+
+      if (imageBytes != null) {
+        final xFile = XFile.fromData(
+          imageBytes,
+          name: 'bukti_pembayaran_pdam_${DateTime.now().millisecondsSinceEpoch}.png',
+          mimeType: 'image/png',
+        );
+
+        await Share.shareXFiles(
+          [xFile],
+          text: 'Bukti Pembayaran PDAM - $noRef',
+        );
+      } else {
+        _showFallbackShare();
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context).pop();
+      _showFallbackShare();
+    }
+  }
+
+  void _showFallbackShare() {
+    final shareText = '''
+💧 BUKTI PEMBAYARAN PDAM
+
+📅 ${getCurrentTimestamp()}
+✅ Transaksi Berhasil
+
+📊 DETAIL TRANSAKSI:
+No. Ref: $noRef
+Nama: ${widget.billingDetails['Nama Pelanggan'] ?? 'Pelanggan PDAM'}
+No. Pelanggan: ${widget.billingDetails['Nomor Pelanggan'] ?? ''}
+Alamat: ${widget.billingDetails['Alamat'] ?? ''}
+Periode: ${widget.billingDetails['Periode Tagihan'] ?? ''}
+
+💰 DETAIL PEMBAYARAN:
+Harga: ${widget.billingDetails['Harga']!}
+Biaya Admin: ${widget.billingDetails['Biaya Admin']!}
+Denda: ${widget.billingDetails['Denda']!}
+TOTAL: ${widget.billingDetails['Total Tagihan']!}
+
+💳 Metode: Modipay
+
+Diamankan oleh Modipay
+''';
+
+    Share.share(shareText);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Mendapatkan tanggal dan waktu saat ini
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMM yyyy HH:mm:ss').format(now);
-    final noRef = _generateRandomString(20);
     const sumberDanaNama = "AKMAL";
     const sumberDanaNomor = "081234567890";
     const idTransaksi = "971411A3FF0B8A45";
@@ -66,158 +142,207 @@ class _BayarPdamPageEnamBerhasilState extends State<BayarPdamPageEnamBerhasil> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F8FF),
-        body: Stack(
+        body: Column(
           children: [
-            // Header Background Image
-            SizedBox(
-              height: 140,
-              width: double.infinity,
-              child: Image.asset(
-                'assets/images/header.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            // Tombol kembali di atas header
-            Positioned(
-              top: 16,
-              left: 16,
-              child: SafeArea(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  color: Colors.white,
-                  iconSize: 28,
-                  onPressed: _onBackPressed,
+            // HEADER WITH IMAGE - SEPERTI DI BayarPdamPageLima
+            Stack(
+              children: [
+                Image.asset(
+                  "assets/images/header.png",
+                  width: double.infinity,
+                  height: 120,
+                  fit: BoxFit.cover,
                 ),
-              ),
+                Positioned(
+                  top: 46,
+                  left: 15,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: _onBackPressed,
+                  ),
+                ),
+              ],
             ),
 
-            // Konten utama yang dapat digulir
-            SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 160, bottom: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Icon ceklis
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50),
-                      borderRadius: BorderRadius.circular(50),
+            // CONTENT
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 10, bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Icon ceklis dan teks Transaksi Berhasil (TIDAK termasuk dalam screenshot)
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 35,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 35,
+                    const SizedBox(height: 13),
+                    const Text(
+                      "Transaksi Berhasil",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 13),
-                  const Text(
-                    "Transaksi Berhasil",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
-                  // Box detail transaksi
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _DetailRow("Tanggal", formattedDate),
-                        _DetailRow("No. Ref", noRef),
-                        const Divider(height: 24, thickness: 1),
-                        _DetailRow("Sumber Dana", sumberDanaNama, value2: sumberDanaNomor),
-                        _DetailRow("Jenis Transaksi", "Pembayaran PDAM"),
-                        _DetailRow("Nomor Pelanggan", nomorPelanggan),
-                        _DetailRow("ID Transaksi", idTransaksi),
-                        _DetailRow("Nama Pelanggan", namaPelanggan),
-                        const Divider(height: 24, thickness: 1),
-                        _DetailRow("Harga", widget.billingDetails['Harga']!),
-                        _DetailRow("Biaya Admin", widget.billingDetails['Biaya Admin']!),
-                        _DetailRow("Denda", widget.billingDetails['Denda']!),
-                        const Divider(height: 24, thickness: 1),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "Total Pembelian",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                    // Area yang akan di-screenshot (HANYA box detail transaksi)
+                    Screenshot(
+                      controller: screenshotController,
+                      child: Column(
+                        children: [
+                          // Box detail transaksi SAJA yang di-screenshot
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
                                 ),
-                              ),
-                              Text(
-                                totalTransaksi,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF6C4EFF),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header dalam box untuk screenshot
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      getCurrentTimestamp(),
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    ),
+                                    Row(
+                                      children: const [
+                                        Icon(Icons.check_circle, color: Colors.green, size: 18),
+                                        SizedBox(width: 6),
+                                        Text("Transaksi Berhasil",
+                                            style: TextStyle(color: Colors.green, fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: CustomButton(
-                            text: 'Bagikan',
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Detail Transaksi berhasil di copy"),
-                                  duration: Duration(seconds: 2),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          noRef,
+                                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              );
-                            },
-                            isOutlined: true,
+                                const SizedBox(height: 6),
+                                Text("No. Ref: $noRef",
+                                    style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                
+                                const Divider(height: 24, thickness: 1),
+                                _DetailRow("Sumber Dana", sumberDanaNama, value2: sumberDanaNomor),
+                                _DetailRow("Jenis Transaksi", "Pembayaran PDAM"),
+                                _DetailRow("Nomor Pelanggan", nomorPelanggan),
+                                _DetailRow("ID Transaksi", idTransaksi),
+                                _DetailRow("Nama Pelanggan", namaPelanggan),
+                                const Divider(height: 24, thickness: 1),
+                                _DetailRow("Harga", widget.billingDetails['Harga']!),
+                                _DetailRow("Biaya Admin", widget.billingDetails['Biaya Admin']!),
+                                _DetailRow("Denda", widget.billingDetails['Denda']!),
+                                const Divider(height: 24, thickness: 1),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        "Total Pembelian",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      Text(
+                                        totalTransaksi,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF6C4EFF),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          // Text "Diamankan oleh Modipay" termasuk dalam screenshot
+                          const Padding(
+                            padding: EdgeInsets.only(top: 16, bottom: 8),
+                            child: Text(
+                              "Diamankan oleh Modipay",
+                              style: TextStyle(color: Colors.grey, fontSize: 11),
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: CustomButton(
-                            text: 'Selesai',
-                            onPressed: _onBackPressed,
+                    ),
+
+                    // Tombol Bagikan dan Selesai (TIDAK termasuk dalam screenshot)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: CustomButton(
+                                text: 'Bagikan',
+                                onPressed: _captureAndShare,
+                                isOutlined: true,
+                              ),
+                            ),
                           ),
-                        ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: CustomButton(
+                                text: 'Selesai',
+                                onPressed: _onBackPressed,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -300,7 +425,7 @@ class CustomButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: borderColor ?? const Color(0xFF6C4EFF), // Default purple
+          foregroundColor: borderColor ?? const Color(0xFF6C4EFF),
           side: BorderSide(color: borderColor ?? const Color(0xFF6C4EFF)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -321,13 +446,3 @@ class CustomButton extends StatelessWidget {
     }
   }
 }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Halaman Utama")),
-      body: const Center(
-        child: Text("Ini adalah MainScreen"),
-      ),
-    );
-  }

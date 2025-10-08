@@ -53,7 +53,7 @@ class _BayarPDAMPageduaState extends State<BayarPDAMPagedua> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
@@ -114,25 +114,33 @@ class _BayarPDAMPageduaState extends State<BayarPDAMPagedua> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Switch Save Box menggunakan ListTile
+                        // Switch Save Box menggunakan ListTile dengan font lebih kecil
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Tambah Ke Daftar Tersimpan'),
-                            trailing: Switch(
-                              value: isSaved,
-                              onChanged: (value) {
-                                setState(() {
-                                  isSaved = value;
-                                });
-                              },
-                              activeColor: const Color(0xFF6C4EFF),
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Tambah Ke Daftar Tersimpan',
+                                style: TextStyle(
+                                  fontSize: 13, // FONT DIKECILKAN DARI DEFAULT
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              Switch(
+                                value: isSaved,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isSaved = value;
+                                  });
+                                },
+                                activeColor: const Color(0xFF6C4EFF),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 16),

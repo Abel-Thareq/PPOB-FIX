@@ -64,11 +64,12 @@ class _BayarPdamPageState extends State<BayarPdamPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                         child: Row(
                           children: [
                             IconButton(
                               icon: const Icon(Icons.arrow_back),
+                              color: Colors.white,
                               onPressed: () {
                                 setStateModal(() {
                                   selectedProvinsi = null;
@@ -177,10 +178,10 @@ class _BayarPdamPageState extends State<BayarPdamPage> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     iconSize: 28,
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -232,11 +233,13 @@ class _BayarPdamPageState extends State<BayarPdamPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // CONTAINER INPUT NOMOR PELANGGAN DENGAN BORDER
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!), // BORDER DITAMBAHKAN DI SINI
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
@@ -259,7 +262,7 @@ class _BayarPdamPageState extends State<BayarPdamPage> {
                             ],
                             decoration: const InputDecoration(
                               hintText: 'Masukkan 5 digit nomor pelanggan',
-                              border: InputBorder.none,
+                              border: InputBorder.none, // Tetap none karena border sudah di container
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 10),
@@ -301,7 +304,7 @@ class _BayarPdamPageState extends State<BayarPdamPage> {
               }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isButtonActive ? Colors.deepPurple : Colors.grey[400],
+                backgroundColor: isButtonActive ? const Color(0xFF6C4EFF) : Colors.grey[400],
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),

@@ -38,34 +38,34 @@ class BayarPdamPageEmpat extends StatelessWidget {
     String? bankIconPath = bankName != null ? _getBankIconPath(bankName!) : null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Header with back button
+          // HEADER - SAMA SEPERTI DI BayarPdamPageTiga
           Stack(
             children: [
-              Image.asset(
-                'assets/images/header.png',
+              SizedBox(
                 width: double.infinity,
-                height: 150,
-                fit: BoxFit.cover,
+                height: 120,
+                child: Image.asset(
+                  'assets/images/header.png',
+                  fit: BoxFit.cover,
+                ),
               ),
-              // Tombol back otomatis center secara vertikal
-              Positioned.fill(
-                child: SafeArea(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 13.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    iconSize: 28,
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
               ),
             ],
           ),
 
-          // Content
+          // CONTENT
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
