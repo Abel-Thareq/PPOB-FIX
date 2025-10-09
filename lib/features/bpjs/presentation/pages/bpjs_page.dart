@@ -31,6 +31,19 @@ class _BpjsPageState extends State<BpjsPage> {
     _lastPaymentNumber = widget.lastPaymentNumber;
   }
 
+  // Fungsi untuk mendapatkan path icon berdasarkan jenis BPJS
+  String _getIconPath(String jenisBpjs) {
+    switch (jenisBpjs) {
+      case 'BPJS Kesehatan':
+      case 'BPJS Denda':
+        return 'assets/images/bpjskesehatan.png';
+      case 'BPJS Ketenagakerjaan':
+        return 'assets/images/bpjsketenagakerjaan.png';
+      default:
+        return 'assets/images/bpjs.png'; // Fallback icon
+    }
+  }
+
   // Fungsi navigasi yang akan digunakan oleh tombol kembali dan tombol kembali Android
   void _navigateToMainScreen() {
     Navigator.pushAndRemoveUntil(
@@ -67,7 +80,7 @@ class _BpjsPageState extends State<BpjsPage> {
                 // Tombol Kembali
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0, left: 8.0),
+                    padding: const EdgeInsets.only(top: 10.0, left: 16.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       color: Colors.white,
@@ -102,6 +115,7 @@ class _BpjsPageState extends State<BpjsPage> {
                       _LastPaymentCard(
                         jenisBpjs: _lastPaymentType!,
                         nomorPembayaran: _lastPaymentNumber!,
+                        iconPath: _getIconPath(_lastPaymentType!), // Gunakan fungsi untuk mendapatkan icon
                       )
                     else
                     // Keadaan kosong Pembayaran
@@ -232,10 +246,12 @@ class _BpjsPageState extends State<BpjsPage> {
 class _LastPaymentCard extends StatelessWidget {
   final String jenisBpjs;
   final String nomorPembayaran;
+  final String iconPath;
 
   const _LastPaymentCard({
     required this.jenisBpjs,
     required this.nomorPembayaran,
+    required this.iconPath,
   });
 
   @override
@@ -256,7 +272,7 @@ class _LastPaymentCard extends StatelessWidget {
       child: Row(
         children: [
           Image.asset(
-            'assets/images/bpjs.png', // Ganti dengan path logo BPJS yang sesuai
+            iconPath, // Gunakan iconPath yang diterima dari parameter
             width: 30,
             height: 30,
           ),

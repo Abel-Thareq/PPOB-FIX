@@ -29,7 +29,7 @@ class _AgentCenterPageState extends State<AgentCenterPage> {
         children: [
           // 🔹 Background wave SVG
           SizedBox(
-            height: 150,
+            height: 140,
             width: double.infinity,
             child: SvgPicture.asset(
               "assets/images/backgroundtop.svg",
@@ -37,41 +37,28 @@ class _AgentCenterPageState extends State<AgentCenterPage> {
             ),
           ),
 
-          // 🔹 Tombol Back
-          Positioned(
-            left: 16,
-            top: 51,
-            child: IconButton(
-              icon: const Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-                size: 20,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-
           // 🔹 Title dan Subtitle
           Positioned(
-            top: 60,
+            top: 65,
             left: 0,
             right: 0,
             child: Column(
               children: const [
                 Text(
-                  "modipay",
+                  "PPOB Merah Putih",
                   style: TextStyle(
+                    fontFamily: 'Poppins',
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 21,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 1),
                 Text(
                   "SATU PINTU SEMUA PEMBAYARAN",
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
+                    fontFamily: 'Poppins',
+                    color: Colors.white70,
+                    fontSize: 9,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -82,13 +69,13 @@ class _AgentCenterPageState extends State<AgentCenterPage> {
           // 🔹 Card Agen Center melayang
           Positioned(
             top: 120,
-            left: 20,
-            right: 20,
+            left: 16,
+            right: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 18),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),

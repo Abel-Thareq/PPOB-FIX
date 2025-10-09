@@ -26,7 +26,7 @@ class MutasiTransaksiPage extends StatelessWidget {
         children: [
           // Bagian Header
           SizedBox(
-            height: 180,
+            height: 178,
             child: Stack(
               children: [
                 // Gambar Latar Belakang SVG
@@ -36,48 +36,33 @@ class MutasiTransaksiPage extends StatelessWidget {
                   right: 0,
                   child: SvgPicture.asset(
                     "assets/images/backgroundtop.svg",
-                    height: 150,
+                    height: 140,
                     fit: BoxFit.cover,
                   ),
                 ),
-
-                // Tombol Kembali
-                Positioned(
-                  left: 16,
-                  top: 51,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-
+                
                 // Title dan Subtitle
                 const Positioned(
-                  top: 60,
+                  top: 65,
                   left: 0,
                   right: 0,
                   child: Column(
                     children: [
                       Text(
-                        "modipay",
+                        "PPOB Merah Putih",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           color: Colors.white,
-                          fontSize: 22,
+                          fontSize: 21,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 1),
                       Text(
                         "SATU PINTU SEMUA PEMBAYARAN",
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: Colors.white,
-                          fontSize: 8,
+                          color: Colors.white70,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -95,7 +80,7 @@ class MutasiTransaksiPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),

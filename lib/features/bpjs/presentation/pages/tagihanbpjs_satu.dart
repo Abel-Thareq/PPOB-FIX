@@ -65,7 +65,7 @@ class _TagihanBpjsSatuPageState extends State<TagihanBpjsSatuPage> {
           children: [
             // Header Background Image
             SizedBox(
-              height: 140,
+              height: 120,
               width: double.infinity,
               child: Image.asset(
                 'assets/images/header.png',
@@ -75,7 +75,7 @@ class _TagihanBpjsSatuPageState extends State<TagihanBpjsSatuPage> {
 
             // Tombol kembali di atas header
             Positioned(
-              top: 16,
+              top: 10,
               left: 16,
               child: SafeArea(
                 child: IconButton(
@@ -89,7 +89,7 @@ class _TagihanBpjsSatuPageState extends State<TagihanBpjsSatuPage> {
 
             // Box "Tagihan" yang tumpang tindih
             Positioned(
-              top: 110,
+              top: 95,
               left: (screenWidth - 150) / 2, // Posisi horizontal di tengah
               right: (screenWidth - 150) / 2,
               child: Container(
@@ -121,7 +121,7 @@ class _TagihanBpjsSatuPageState extends State<TagihanBpjsSatuPage> {
 
             // Konten utama yang dapat digulir, dengan padding yang disesuaikan
             SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 170), // Tambahkan padding atas untuk menggeser ke bawah
+              padding: const EdgeInsets.only(top: 160), // Tambahkan padding atas untuk menggeser ke bawah
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center, // Pusatkan konten utama
                 children: [

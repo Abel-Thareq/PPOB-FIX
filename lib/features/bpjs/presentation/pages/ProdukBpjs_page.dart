@@ -12,6 +12,7 @@ class ProdukBpjsPage extends StatefulWidget {
 class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
   String? selectedJenisBpjs;
   String _prefixText = '';
+  String _selectedIconPath = 'assets/images/shield.png'; // Default icon
   late TextEditingController _nomorController;
   bool _isButtonEnabled = false;
 
@@ -94,7 +95,7 @@ class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
                 // Tombol Kembali
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(top: 10.0, left: 16.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       color: Colors.white,
@@ -149,9 +150,9 @@ class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Input Jenis BPJS (Card)
+                    // Input Jenis BPJS (Card) - Icon berubah sesuai pilihan
                     _buildSelectionCard(
-                      icon: 'assets/images/shield.png',
+                      icon: _selectedIconPath, // Gunakan icon yang dipilih
                       title: selectedJenisBpjs ?? 'Pilih Jenis BPJS',
                       onTap: _showJenisBpjsPicker,
                     ),
@@ -354,12 +355,13 @@ class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: Image.asset('assets/images/bpjs.png', width: 22, height: 22),
+              leading: Image.asset('assets/images/bpjskesehatan.png', width: 22, height: 22),
               title: const Text('BPJS Kesehatan', style: TextStyle(fontSize: 14)),
               onTap: () {
                 setState(() {
                   selectedJenisBpjs = 'BPJS Kesehatan';
                   _prefixText = '(88888)';
+                  _selectedIconPath = 'assets/images/bpjskesehatan.png'; // Update icon
                   _nomorController.clear();
                 });
                 Navigator.pop(context);
@@ -368,12 +370,13 @@ class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: Image.asset('assets/images/bpjs.png', width: 22, height: 22),
+              leading: Image.asset('assets/images/bpjskesehatan.png', width: 22, height: 22),
               title: const Text('BPJS Denda', style: TextStyle(fontSize: 14)),
               onTap: () {
                 setState(() {
                   selectedJenisBpjs = 'BPJS Denda';
                   _prefixText = '(88888)';
+                  _selectedIconPath = 'assets/images/bpjskesehatan.png'; // Update icon
                   _nomorController.clear();
                 });
                 Navigator.pop(context);
@@ -382,12 +385,13 @@ class _ProdukBpjsPageState extends State<ProdukBpjsPage> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: Image.asset('assets/images/bpjs.png', width: 22, height: 22),
+              leading: Image.asset('assets/images/bpjsketenagakerjaan.png', width: 22, height: 22),
               title: const Text('BPJS Ketenagakerjaan', style: TextStyle(fontSize: 14)),
               onTap: () {
                 setState(() {
                   selectedJenisBpjs = 'BPJS Ketenagakerjaan';
                   _prefixText = '(88881)';
+                  _selectedIconPath = 'assets/images/bpjsketenagakerjaan.png'; // Update icon
                   _nomorController.clear();
                 });
                 Navigator.pop(context);

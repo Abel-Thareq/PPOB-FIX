@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ppob_app/features/bpjs/presentation/pages/produkBpjs_page.dart';
 import 'package:ppob_app/features/main_screen/main_screen.dart';
+import 'dart:math';
 
-class TagihanBpjsTigaGagalPage extends StatelessWidget {
+class TagihanBpjsTigaGagalPage extends StatefulWidget {
   final int totalPesanan;
   final int biayaAdmin;
   final String jenisBpjs;
@@ -17,12 +18,39 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
     required this.nomorPembayaran,
   });
 
+  @override
+  State<TagihanBpjsTigaGagalPage> createState() => _TagihanBpjsTigaGagalPageState();
+}
+
+class _TagihanBpjsTigaGagalPageState extends State<TagihanBpjsTigaGagalPage> {
+  late String noRef; // Variabel untuk menyimpan nomor referensi
+
+  @override
+  void initState() {
+    super.initState();
+    // Generate nomor referensi random saat state diinisialisasi
+    noRef = _generateReferenceNumber();
+  }
+
   String formatCurrency(int amount) {
     return NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
       decimalDigits: 0,
     ).format(amount);
+  }
+
+  // Method untuk generate nomor referensi random 20 digit
+  String _generateReferenceNumber() {
+    final random = Random();
+    String reference = '';
+    
+    // Generate 20 digit angka random
+    for (int i = 0; i < 20; i++) {
+      reference += random.nextInt(10).toString();
+    }
+    
+    return reference;
   }
 
   // Menangani tombol kembali bawaan Android
@@ -37,9 +65,8 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalTransaksi = totalPesanan + biayaAdmin;
+    final totalTransaksi = widget.totalPesanan + widget.biayaAdmin;
     final String tanggalWaktu = DateFormat('dd MMM yyyy HH:mm:ss').format(DateTime.now());
-    const String noRef = "11829203871637617632";
     const String sumberDanaNama = "AKMAL";
     const String sumberDanaNomor = "081234567890";
     const String idTransaksi = "971411A3FF0B8A45";
@@ -54,7 +81,7 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: Padding(
-            padding: const EdgeInsets.only(left: 20.0, top: 22.0), // Padding di sini diubah
+            padding: const EdgeInsets.only(left: 16.0, top: 10.0), // Padding di sini diubah
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
               onPressed: () {
@@ -75,7 +102,7 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
           children: [
             // Header Background Image
             SizedBox(
-              height: 140,
+              height: 120,
               width: double.infinity,
               child: Image.asset(
                 'assets/images/header.png',
@@ -86,7 +113,7 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
             // Konten utama yang dapat digulir
             SingleChildScrollView(
               // Padding untuk memberi ruang agar konten tidak terhalang oleh AppBar
-              padding: const EdgeInsets.only(top: 160, bottom: 20),
+              padding: const EdgeInsets.only(top: 140, bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -125,16 +152,16 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _DetailRow("Tanggal", tanggalWaktu),
-                        _DetailRow("No. Ref", noRef),
+                        _DetailRow("No. Ref", noRef), // Menggunakan variabel noRef yang sudah digenerate
                         const Divider(height: 24, thickness: 1),
                         _DetailRow("Sumber Dana", sumberDanaNama, value2: sumberDanaNomor),
                         _DetailRow("Jenis Transaksi", "Pembayaran BPJS"),
-                        _DetailRow("Nomor Pembayaran", nomorPembayaran),
+                        _DetailRow("Nomor Pembayaran", widget.nomorPembayaran),
                         _DetailRow("ID Transaksi", idTransaksi),
                         _DetailRow("Nama Pelanggan", namaPelanggan),
                         const Divider(height: 24, thickness: 1),
-                        _DetailRow("Harga", formatCurrency(totalPesanan)),
-                        _DetailRow("Biaya Admin", formatCurrency(biayaAdmin)),
+                        _DetailRow("Harga", formatCurrency(widget.totalPesanan)),
+                        _DetailRow("Biaya Admin", formatCurrency(widget.biayaAdmin)),
                         const Divider(height: 24, thickness: 1),
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -167,7 +194,7 @@ class TagihanBpjsTigaGagalPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [

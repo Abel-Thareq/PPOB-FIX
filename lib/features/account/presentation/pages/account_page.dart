@@ -118,7 +118,6 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  /// 🔹 Header tanpa icon notifikasi & headset
   Widget _buildHeader() {
     return SizedBox(
       height: 140,
@@ -141,8 +140,9 @@ class _AccountPageState extends State<AccountPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: const [
                       Text(
-                        'modipay',
+                        'PPOB Merah Putih',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 21,
@@ -151,6 +151,7 @@ class _AccountPageState extends State<AccountPage> {
                       Text(
                         'SATU PINTU SEMUA PEMBAYARAN',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: Colors.white70,
                           fontWeight: FontWeight.bold,
                           fontSize: 9,
@@ -175,12 +176,12 @@ class _AccountPageState extends State<AccountPage> {
     const double offsetY = 0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Card(
         elevation: 6,
         shadowColor: Colors.black26,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
