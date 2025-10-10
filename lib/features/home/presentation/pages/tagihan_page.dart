@@ -84,10 +84,10 @@ class TagihanPage extends StatelessWidget {
                   ),
                   SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.all(16.r),
+                      padding: EdgeInsets.only(top: 22.0, left: 16.0),
                       child: IconButton(
                         icon: Icon(Icons.arrow_back, size: 28.r),
-                        color: Colors.black,
+                        color: Colors.white,
                         onPressed: () {
                           Navigator.pushAndRemoveUntil(
                             context,

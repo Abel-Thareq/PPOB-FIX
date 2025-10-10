@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-import 'package:ppob_app/features/kai/presentation/pages/kai_lima.dart';
+import 'package:ppob_app/features/kai/presentation/pages/kai_lima_berhasil.dart';
+import 'package:ppob_app/features/kai/presentation/pages/kai_lima_gagal.dart';
 
-class KaiEmpatPage extends StatelessWidget {
+class KaiEmpatPage extends StatefulWidget {
   final int nominalTagihan;
   final int biayaAdmin;
   final String namaPelanggan;
@@ -17,34 +16,118 @@ class KaiEmpatPage extends StatelessWidget {
     required this.kodeBayar,
   });
 
-  // Fungsi untuk memformat mata uang ke format Rupiah
-  String formatCurrency(int amount) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp',
-      decimalDigits: 0,
-    ).format(amount);
+  @override
+  State<KaiEmpatPage> createState() => _KaiEmpatPageState();
+}
+
+class _KaiEmpatPageState extends State<KaiEmpatPage> {
+  // State untuk menyimpan PIN yang dimasukkan.
+  String enteredPin = '';
+  // Panjang PIN yang dibutuhkan.
+  final int pinLength = 6;
+
+  // Fungsi saat tombol angka ditekan.
+  void _onNumberPressed(String number) {
+    if (enteredPin.length < pinLength) {
+      setState(() {
+        enteredPin += number;
+      });
+    }
+  }
+
+  // Fungsi saat tombol hapus ditekan.
+  void _onDeletePressed() {
+    if (enteredPin.isNotEmpty) {
+      setState(() {
+        enteredPin = enteredPin.substring(0, enteredPin.length - 1);
+      });
+    }
+  }
+
+  // Fungsi saat tombol konfirmasi ditekan.
+  void _onSubmitPressed() {
+    if (enteredPin.length == pinLength) {
+      // Simulasikan validasi PIN
+      // PIN "555555" dianggap berhasil
+      // PIN "111111" dianggap gagal karena jaringan
+      // PIN lainnya dianggap salah
+      if (enteredPin == '555555') {
+        // Navigasi ke halaman berhasil
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => KaiLimaBerhasil(
+              nominalTagihan: widget.nominalTagihan,
+              biayaAdmin: widget.biayaAdmin,
+              namaPelanggan: widget.namaPelanggan,
+              kodeBayar: widget.kodeBayar,
+            ),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Berhasil!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (enteredPin == '111111') {
+        // Navigasi ke halaman gagal
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => KaiLimaGagal(
+              nominalTagihan: widget.nominalTagihan,
+              biayaAdmin: widget.biayaAdmin,
+              namaPelanggan: widget.namaPelanggan,
+              kodeBayar: widget.kodeBayar,
+            ),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Transaksi Gagal! Jaringan bermasalah."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Pin yang Anda Masukkan Salah. Silahkan Coba lagi"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("PIN harus 6 digit"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(360, 690));
-
-    final double horizontalPadding = 24.w;
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Bagian Header
-          SizedBox(
-            height: 100.h,
-            child: Stack(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF5938FB),
+              Color(0xFF8B6BFF),
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            Stack(
               children: [
-                Container(
+                SizedBox(
                   width: double.infinity,
-                  height: 100.h,
-                  color: Colors.white,
+                  height: 120,
                   child: Image.asset(
                     'assets/images/header.png',
                     fit: BoxFit.cover,
@@ -52,225 +135,162 @@ class KaiEmpatPage extends StatelessWidget {
                 ),
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.all(16.r),
+                    padding: const EdgeInsets.all(16.0),
                     child: IconButton(
-                      icon: Icon(Icons.arrow_back, size: 28.r),
+                      icon: const Icon(Icons.arrow_back),
                       color: Colors.white,
+                      iconSize: 28,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 16.h),
-
-          // Konten Halaman
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bagian "Sumber Dana"
-                  Text(
-                    'Sumber Dana',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF5938FB),
-                    ),
-                  ),
-                  SizedBox(height: 1.h),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF5938FB),
-                      child: Text(
-                        'AT',
-                        style: TextStyle(color: Colors.white, fontSize: 16.sp),
-                      ),
-                    ),
-                    title: Text(
-                      'ABEL THAREQ',
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      'modipay - 08/25/533163',
-                      style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                    ),
-                  ),
-                  Divider(height: 1.h, thickness: 1),
-                  SizedBox(height: 16.h),
-
-                  // Bagian "Tujuan"
-                  Text(
-                    'Tujuan',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF5938FB),
-                    ),
-                  ),
-                  SizedBox(height: 1.h),
-                  ListTile(
-                    leading: CircleAvatar(
-                      radius: 20.r,
-                      backgroundColor: Colors.transparent,
-                      child: Image.asset(
-                        'assets/images/pgn_logo.png', // Menggunakan logo PGN
-                        width: 32.w,
-                        height: 32.h,
-                      ),
-                    ),
-                    title: Text(
-                      namaPelanggan,
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      kodeBayar,
-                      style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                    ),
-                  ),
-                  SizedBox(height: 7.h),
-
-                  // Bagian "Tambah Ke Daftar Tersimpan"
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            const SizedBox(height: 30),
+            const Text(
+              "Masukan PIN Anda",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                pinLength,
+                (index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Container(
+                    width: 40,
+                    height: 50,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey.withOpacity(0.4)),
+                      border: Border.all(
+                        color: index < enteredPin.length
+                            ? const Color(0xFF5938FB)
+                            : Colors.grey.shade300,
+                        width: 2,
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Tambah Ke Daftar Tersimpan',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Switch(
-                          value: true,
-                          onChanged: (bool value) {
-                            // Implementasi fungsionalitas switch di sini
-                          },
-                          activeColor: const Color(0xFF5938FB),
-                          inactiveThumbColor: Colors.grey,
-                          inactiveTrackColor: Colors.grey[300],
-                        ),
-                      ],
-                    ),
+                    child: index < enteredPin.length
+                        ? const Icon(Icons.circle,
+                            size: 12, color: Color(0xFF5938FB))
+                        : null,
                   ),
-                  SizedBox(height: 16.h),
-                  Divider(height: 1.h, thickness: 1),
-                  SizedBox(height: 16.h),
-
-                  // Bagian "Detail Pembayaran"
-                  Text(
-                    'Detail Pembayaran',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF5938FB),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-
-                  // Menampilkan Nominal
+                ),
+              ),
+            ),
+            const Spacer(),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Column(
+                children: [
+                  _buildKeypadRow(['1', '2', '3']),
+                  const SizedBox(height: 20),
+                  _buildKeypadRow(['4', '5', '6']),
+                  const SizedBox(height: 20),
+                  _buildKeypadRow(['7', '8', '9']),
+                  const SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text(
-                        'Nominal',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-                      ),
-                      Text(
-                        formatCurrency(nominalTagihan),
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                      ),
+                      _buildDeleteButton(),
+                      _buildNumberButton('0'),
+                      _buildSubmitButton(),
                     ],
                   ),
-                  SizedBox(height: 8.h),
-
-                  // Menampilkan Biaya Admin
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Biaya Admin',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-                      ),
-                      Text(
-                        formatCurrency(biayaAdmin),
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  Divider(height: 1.h, thickness: 1),
-                  SizedBox(height: 16.h),
-
-                  // Menampilkan Total (nominal + biaya admin)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total',
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        formatCurrency(nominalTagihan + biayaAdmin),
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
                 ],
               ),
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Tombol Konfirmasi
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20.h),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => KaiLimaPage(
-                        nominalTagihan: nominalTagihan,
-                        biayaAdmin: biayaAdmin,
-                        namaPelanggan: namaPelanggan,
-                        kodeBayar: kodeBayar,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5938FB),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Konfirmasi',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+  Widget _buildKeypadRow(List<String> numbers) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: numbers.map((n) => _buildNumberButton(n)).toList(),
+    );
+  }
+
+  Widget _buildNumberButton(String number) {
+    return InkWell(
+      onTap: () => _onNumberPressed(number),
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+        ),
+        child: Center(
+          child: Text(
+            number,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return InkWell(
+      onTap: _onDeletePressed,
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.backspace_outlined,
+            size: 28,
+            color: Color(0xFF5938FB),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return InkWell(
+      onTap: _onSubmitPressed,
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: enteredPin.length == pinLength
+              ? const Color(0xFF5938FB)
+              : Colors.grey,
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.check,
+            size: 28,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

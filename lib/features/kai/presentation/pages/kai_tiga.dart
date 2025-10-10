@@ -48,7 +48,7 @@ class _KaiTigaPageState extends State<KaiTigaPage> {
         children: [
           // Header Background Image
           SizedBox(
-            height: 140.h,
+            height: 100.h,
             width: double.infinity,
             child: Image.asset(
               'assets/images/header.png',
@@ -58,8 +58,8 @@ class _KaiTigaPageState extends State<KaiTigaPage> {
 
           // Tombol kembali di atas header
           Positioned(
-            top: 16.h,
-            left: 16.w,
+            top: 9.h,
+            left: 17.w,
             child: SafeArea(
               child: IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -74,21 +74,21 @@ class _KaiTigaPageState extends State<KaiTigaPage> {
 
           // Box "Tagihan" yang tumpang tindih
           Positioned(
-            top: 110.h,
+            top: 79.h,
             left: (screenWidth - 150.w) / 2, // Posisi horizontal di tengah
             right: (screenWidth - 150.w) / 2,
             child: Container(
               width: 150.w,
-              height: 50.h,
+              height: 43.h,
               alignment: Alignment.center,
               padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6.r,
+                    blurRadius: 10.r,
                     offset: const Offset(0, 3),
                   ),
                 ],
@@ -96,7 +96,7 @@ class _KaiTigaPageState extends State<KaiTigaPage> {
               child: const Text(
                 "Tagihan",
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF6C4EFF),
                 ),
@@ -106,7 +106,7 @@ class _KaiTigaPageState extends State<KaiTigaPage> {
 
           // Konten utama yang dapat digulir
           SingleChildScrollView(
-            padding: EdgeInsets.only(top: 170.h),
+            padding: EdgeInsets.only(top: 140.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -322,7 +322,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF6A1B9A),
+        backgroundColor: const Color(0xFF5938FB),
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         padding: EdgeInsets.symmetric(vertical: 16.h),

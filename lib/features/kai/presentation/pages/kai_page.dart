@@ -33,10 +33,10 @@ class KaiPage extends StatelessWidget {
                 // Tombol Kembali
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(top: 10.0, left: 16.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      color: Colors.black,
+                      color: Colors.white,
                       iconSize: 28,
                       onPressed: () {
                         Navigator.pop(context);

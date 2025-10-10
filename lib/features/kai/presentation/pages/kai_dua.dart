@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ppob_app/features/main_screen/main_screen.dart';
+import 'package:ppob_app/features/kai/presentation/pages/kai_page.dart';
 import 'package:ppob_app/features/kai/presentation/pages/kai_tiga.dart';
 
 class KaiDuaPage extends StatefulWidget {
@@ -15,9 +15,9 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
   bool _isButtonEnabled = false;
 
   // Fungsi navigasi yang akan digunakan oleh tombol kembali
-  void navigateToMainScreen(BuildContext context) {
+  void navigateToKai(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const MainScreen()),
+      MaterialPageRoute(builder: (context) => const KaiPage()),
       (Route<dynamic> route) => false,
     );
   }
@@ -44,13 +44,13 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(360, 690));
-    final double headerHeight = 120.h;
+    final double headerHeight = 100.h;
 
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
-          navigateToMainScreen(context);
+          navigateToKai(context);
         }
       },
       child: Scaffold(
@@ -80,14 +80,14 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF6A1B9A),
+                        color: const Color(0xFF5938FB),
                       ),
                     ),
                     SizedBox(height: 8.h),
                     _CustomTextField(
                       controller: _kodeBayarController,
                       hintText: "Masukkan Nomor KAI",
-                      icon: Icons.credit_card,
+                      imagePath: "assets/images/kaiicon.png", // Diubah dari icon ke imagePath
                     ),
                     // Memberikan ruang di bagian bawah
                     SizedBox(height: 40.h), 
@@ -106,14 +106,14 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
             ),
             // Tombol kembali
             Positioned(
-              top: 50.h,
-              left: 10.w,
+              top: 40.h,
+              left: 15.w,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
                 iconSize: 28.r,
                 onPressed: () {
-                  navigateToMainScreen(context);
+                  navigateToKai(context);
                 },
               ),
             ),
@@ -135,7 +135,7 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
             } : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isButtonEnabled
-                  ? const Color(0xFF6A1B9A)
+                  ? const Color(0xFF5938FB)
                   : const Color(0xFFE0E0E0),
               foregroundColor: _isButtonEnabled
                   ? Colors.white
@@ -161,12 +161,12 @@ class _KaiDuaPageState extends State<KaiDuaPage> {
 class _CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
-  final IconData icon;
+  final String imagePath; // Diubah dari IconData ke String untuk path gambar
 
   const _CustomTextField({
     required this.controller,
     required this.hintText,
-    required this.icon,
+    required this.imagePath, // Parameter diubah
   });
 
   @override
@@ -186,7 +186,13 @@ class _CustomTextField extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[400]),
+          // Mengganti Icon dengan Image.asset
+          Image.asset(
+            imagePath,
+            width: 24.w, // Sesuaikan ukuran sesuai kebutuhan
+            height: 24.h,
+            color: Colors.grey[400], // Opsional: jika ingin memberi warna
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: TextField(

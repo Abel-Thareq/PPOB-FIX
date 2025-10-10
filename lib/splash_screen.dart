@@ -40,6 +40,9 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _textOpacity;
   late Animation<Color?> _logoColorAnimation;
 
+  // Define custom purple color
+  final Color customPurple = const Color(0xFF5938FB);
+
   @override
   void initState() {
     super.initState();
@@ -50,17 +53,17 @@ class _SplashScreenState extends State<SplashScreen>
     _scaleAnimation =
         CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack);
 
-    // 2. Background color transition (putih → ungu)
+    // 2. Background color transition (putih → ungu custom)
     _colorController =
         AnimationController(vsync: this, duration: const Duration(seconds: 2));
     _colorAnimation = ColorTween(
       begin: Colors.white,
-      end: Colors.purple.shade700,
+      end: customPurple, // Menggunakan custom purple
     ).animate(CurvedAnimation(parent: _colorController, curve: Curves.easeIn));
 
-    // 3. Logo color transition (ungu → putih)
+    // 3. Logo color transition (ungu custom → putih)
     _logoColorAnimation = ColorTween(
-      begin: Colors.purple,
+      begin: customPurple, // Menggunakan custom purple
       end: Colors.white,
     ).animate(CurvedAnimation(parent: _colorController, curve: Curves.easeIn));
 
@@ -132,7 +135,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Image.asset(
                           "assets/images/iconmodipaysplash.png",
                           color: _logoColorAnimation.value,
-                          fit: BoxFit.contain, // Ini yang penting
+                          fit: BoxFit.contain,
                         ),
                       ),
                     );

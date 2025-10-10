@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ppob_app/features/kai/presentation/pages/kai_dua.dart';
 import 'dart:math';
-
 import 'package:ppob_app/features/main_screen/main_screen.dart';
-import 'package:ppob_app/features/pgn/presentation/pages/pgn_dua.dart';
 
-class KaiEnamGagal extends StatefulWidget {
+class KaiLimaGagal extends StatefulWidget {
   final int nominalTagihan;
   final int biayaAdmin;
   final String namaPelanggan;
   final String kodeBayar;
 
-  const KaiEnamGagal({
+  const KaiLimaGagal({
     super.key,
     required this.nominalTagihan,
     required this.biayaAdmin,
@@ -20,10 +19,10 @@ class KaiEnamGagal extends StatefulWidget {
   });
 
   @override
-  State<KaiEnamGagal> createState() => _KaiEnamGagalState();
+  State<KaiLimaGagal> createState() => _KaiLimaGagalState();
 }
 
-class _KaiEnamGagalState extends State<KaiEnamGagal> {
+class _KaiLimaGagalState extends State<KaiLimaGagal> {
   // Fungsi untuk memformat mata uang
   String formatCurrency(int amount) {
     final format = NumberFormat.currency(
@@ -54,7 +53,7 @@ class _KaiEnamGagalState extends State<KaiEnamGagal> {
   void _onTryAgainPressed() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => PgnDuaPage()),
+      MaterialPageRoute(builder: (context) => KaiDuaPage()),
     );
   }
 
